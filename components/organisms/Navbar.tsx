@@ -1,0 +1,48 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import Button from "@/components/atoms/Button";
+import WorkPheloWordmark from "@/components/atoms/WorkPheloWordmark";
+import MobileMenu from "@/components/molecules/MobileMenu";
+import NavTabs from "@/components/molecules/NavTabs";
+
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const progressRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+      progressRef.current?.style.setProperty("--progress", String(ratio));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header className={scrolled ? "navbar navbar--scrolled" : "navbar"}>
+      <Link href="/" aria-label="WorkPhelo home" className="navbar__brand">
+        <WorkPheloWordmark />
+      </Link>
+      <nav aria-label="Main" className="navbar__tabs">
+        <NavTabs />
+      </nav>
+      <div className="navbar__actions">
+        <Button href="/sign-in" variant="ghost">
+          Sign in
+        </Button>
+        <Button href="/post-job" variant="glass">
+          Post job
+        </Button>
+      </div>
+      <div className="navbar__menu">
+        <MobileMenu />
+      </div>
+      <span ref={progressRef} className="navbar__progress" aria-hidden="true" />
+    </header>
+  );
+}
