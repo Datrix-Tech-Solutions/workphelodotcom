@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Button from "@/components/atoms/Button";
 import MenuIcon from "@/components/atoms/MenuIcon";
 import NavLink from "@/components/atoms/NavLink";
+import AccountActions from "@/components/molecules/AccountActions";
 import { navTabs } from "@/lib/navigation";
 
 export default function MobileMenu() {
@@ -45,12 +45,7 @@ export default function MobileMenu() {
               ))}
             </ul>
             <div className="mobile-menu__actions">
-              <Button href="/sign-in" variant="ghost">
-                Sign in
-              </Button>
-              <Button href="/post-job" variant="glass">
-                Post job
-              </Button>
+              <AccountActions inline />
             </div>
           </nav>
         </div>

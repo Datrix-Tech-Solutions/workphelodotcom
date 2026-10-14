@@ -12,7 +12,7 @@
 
 @source "./components";
 @source "./data";
-@source "../app/products";
+@source "../app/old-products";
 
 @custom-variant dark (&:is(.dark *));
 

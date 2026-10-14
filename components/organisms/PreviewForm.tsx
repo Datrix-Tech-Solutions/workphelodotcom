@@ -3,15 +3,19 @@
 import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import SummarySection from "@/components/molecules/SummarySection";
-import type { Answers, FormValues } from "@/lib/apply";
-import type { JobQuestion } from "@/lib/jobs";
+import type { Answers, FormValues, Profile } from "@/lib/apply";
+import { durationLabel } from "@/lib/resume/parse";
+import type { ApplyRequirements, JobQuestion } from "@/lib/jobs";
 
 interface PreviewFormProps {
   jobId: string;
   values: FormValues;
   answers: Answers;
+  profile: Profile;
   questions: JobQuestion[];
-  onEdit: (step: number) => void;
+  showLinks: boolean;
+  requirements: ApplyRequirements;
+  onEdit: (step: "basic" | "professional" | "links" | "questions") => void;
   onBack: () => void;
 }
 
@@ -24,7 +28,10 @@ export default function PreviewForm({
   jobId,
   values,
   answers,
+  profile,
   questions,
+  showLinks,
+  requirements,
   onEdit,
   onBack,
 }: PreviewFormProps) {
@@ -43,7 +50,7 @@ export default function PreviewForm({
       const res = await fetch(`/api/apply/${encodeURIComponent(jobId)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ values, answers }),
+        body: JSON.stringify({ values, answers, profile }),
       });
       if (res.ok) {
         setSubmitted(true);
@@ -102,7 +109,7 @@ export default function PreviewForm({
 
       <SummarySection
         title="Basic Info"
-        onEdit={() => onEdit(0)}
+        onEdit={() => onEdit("basic")}
         rows={[
           { label: "Name", value: fullName },
           { label: "Email address", value: values.email },
@@ -114,13 +121,45 @@ export default function PreviewForm({
 
       <SummarySection
         title="Professional Info"
-        onEdit={() => onEdit(1)}
+        onEdit={() => onEdit("professional")}
         rows={[
           { label: "Current job title", value: values.jobTitle },
           { label: "Years of experience", value: values.experience },
           { label: "Current employer", value: values.employer },
+          {
+            label: "Work experience",
+            value: profile.experience
+              .map((role) =>
+                [
+                  [role.role, role.company].filter(Boolean).join(" at "),
+                  durationLabel(role.start, role.end),
+                ]
+                  .filter(Boolean)
+                  .join(" — "),
+              )
+              .join("; "),
+          },
+          {
+            label: "Education",
+            value: profile.education
+              .map((q) =>
+                [q.qualification, q.institution].filter(Boolean).join(", "),
+              )
+              .join("; "),
+          },
           { label: "Highest education level", value: values.education },
           { label: "Skills", value: values.skills },
+          ...(requirements.languages
+            ? [{ label: "Languages", value: profile.languages.join(", ") }]
+            : []),
+          ...(requirements.certificates
+            ? [
+                {
+                  label: "Certificates",
+                  value: profile.certificates.join(", "),
+                },
+              ]
+            : []),
           {
             label: "Expected salary",
             value: values.salary
@@ -131,16 +170,25 @@ export default function PreviewForm({
         ]}
       />
 
-      <SummarySection
-        title="Links"
-        onEdit={() => onEdit(2)}
-        rows={[{ label: "Portfolio link", value: values.portfolio }]}
-      />
+      {showLinks && (
+        <SummarySection
+          title="Links"
+          onEdit={() => onEdit("links")}
+          rows={[
+            ...(requirements.documents.portfolio
+              ? [{ label: "Portfolio link", value: values.portfolio }]
+              : []),
+            ...(requirements.documents.github
+              ? [{ label: "GitHub profile", value: values.github }]
+              : []),
+          ]}
+        />
+      )}
 
       {questions.length > 0 && (
         <SummarySection
           title="Employer Questions"
-          onEdit={() => onEdit(3)}
+          onEdit={() => onEdit("questions")}
           rows={questions.map((question) => ({
             label: question.question,
             value: (answers[question.id] ?? []).join(", "),

@@ -4,7 +4,12 @@ import FooterLegal from "@/components/molecules/FooterLegal";
 import FooterLinkGroup from "@/components/molecules/FooterLinkGroup";
 import FooterBrand from "@/components/molecules/FooterBrand";
 import SubscribeForm from "@/components/molecules/SubscribeForm";
-import { jobSeekerLinks, resourceLinks, socialLinks } from "@/lib/navigation";
+import {
+  jobSeekerLinks,
+  productLinks,
+  resourceLinks,
+  socialLinks,
+} from "@/lib/navigation";
 
 export default function Footer() {
   return (
@@ -25,6 +30,7 @@ export default function Footer() {
         <div className="footer__links">
           <FooterLinkGroup title="Job seekers" links={jobSeekerLinks} />
           <FooterLinkGroup title="Resources" links={resourceLinks} />
+          <FooterLinkGroup title="Products" links={productLinks} />
           <FooterLinkGroup title="Connect with us" links={socialLinks} />
         </div>
       </Reveal>

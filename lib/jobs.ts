@@ -29,6 +29,23 @@ export interface Job {
   requirements: string[];
   perks: string[];
   questions: JobQuestion[];
+  /** What the employer's setup asks applicants for. */
+  apply: ApplyRequirements;
+}
+
+export interface ListRequirement {
+  items: string[];
+  required: boolean;
+}
+
+export interface ApplyRequirements {
+  experience: { min?: number; max?: number; required: boolean } | null;
+  educationLevels: string[];
+  educationRequired: boolean;
+  skills: ListRequirement | null;
+  languages: ListRequirement | null;
+  certificates: ListRequirement | null;
+  documents: { portfolio: boolean; github: boolean; coverLetter: boolean };
 }
 
 /** A vacancy as the hr-service public endpoints return it. */
@@ -51,6 +68,19 @@ export interface ApiVacancy {
   salaryMax: number | null;
   salaryCurrency: string | null;
   createdAt: string;
+  details?: {
+    experience?: { minYears?: number; maxYears?: number; required: boolean };
+    education?: { levels: string[]; required: boolean };
+    skills?: ListRequirement;
+    languages?: ListRequirement;
+    certificates?: ListRequirement;
+    documents?: {
+      resume: boolean;
+      coverLetter: boolean;
+      portfolio: boolean;
+      github: boolean;
+    };
+  } | null;
   questions: {
     id: string;
     question: string;
@@ -129,6 +159,42 @@ function toList(text: string | null): string[] {
     .filter(Boolean);
 }
 
+function listRequirement(
+  value: ListRequirement | undefined,
+): ListRequirement | null {
+  return value && value.items.length > 0
+    ? { items: value.items, required: value.required }
+    : null;
+}
+
+function toApplyRequirements(
+  details: ApiVacancy["details"],
+): ApplyRequirements {
+  const experience = details?.experience;
+  return {
+    experience: experience
+      ? {
+          min: experience.minYears,
+          max: experience.maxYears,
+          required: experience.required,
+        }
+      : null,
+    educationLevels: details?.education?.levels ?? [],
+    educationRequired: details?.education?.required ?? false,
+    skills: listRequirement(details?.skills),
+    languages: listRequirement(details?.languages),
+    certificates: listRequirement(details?.certificates),
+    // Openings saved before the document options existed only ever asked for a portfolio.
+    documents: details?.documents
+      ? {
+          portfolio: details.documents.portfolio,
+          github: details.documents.github,
+          coverLetter: details.documents.coverLetter,
+        }
+      : { portfolio: true, github: false, coverLetter: false },
+  };
+}
+
 export function toJob(v: ApiVacancy): Job {
   const place = [v.city, v.location].filter(
     (part, i, all): part is string => !!part && all.indexOf(part) === i,
@@ -147,6 +213,7 @@ export function toJob(v: ApiVacancy): Job {
     requirements: toList(v.requirements),
     perks: toList(v.perksAndBenefits),
     questions: v.questions,
+    apply: toApplyRequirements(v.details),
   };
 }
 

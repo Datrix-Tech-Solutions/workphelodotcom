@@ -1,24 +1,51 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import StepProgressBar from "@/components/molecules/StepProgressBar";
 import BasicInfoForm from "@/components/organisms/BasicInfoForm";
 import EmployerQuestionsForm from "@/components/organisms/EmployerQuestionsForm";
 import PreviewForm from "@/components/organisms/PreviewForm";
 import ProfessionalInfoForm from "@/components/organisms/ProfessionalInfoForm";
 import ResumeDocumentsForm from "@/components/organisms/ResumeDocumentsForm";
-import { applySteps, type Answers, type FormValues } from "@/lib/apply";
-import type { JobQuestion } from "@/lib/jobs";
+import {
+  emptyProfile,
+  type Answers,
+  type FormValues,
+  type Profile,
+} from "@/lib/apply";
+import type { Job } from "@/lib/jobs";
 
 interface ApplyWizardProps {
-  jobId: string;
-  questions: JobQuestion[];
+  job: Pick<Job, "id" | "questions" | "apply">;
 }
 
-export default function ApplyWizard({ jobId, questions }: ApplyWizardProps) {
-  const [step, setStep] = useState(0);
+type StepKey = "basic" | "professional" | "links" | "questions" | "preview";
+
+const STEP_LABELS: Record<StepKey, string> = {
+  basic: "Basic Info",
+  professional: "Professional Info",
+  links: "Links",
+  questions: "Employer Questions",
+  preview: "Preview",
+};
+
+export default function ApplyWizard({ job }: ApplyWizardProps) {
+  const { id: jobId, questions, apply } = job;
+
+  // Steps with nothing to ask for this job are left out.
+  const steps = useMemo(() => {
+    const keys: StepKey[] = ["basic", "professional"];
+    const { portfolio, github, coverLetter } = apply.documents;
+    if (portfolio || github || coverLetter) keys.push("links");
+    if (questions.length > 0) keys.push("questions");
+    keys.push("preview");
+    return keys;
+  }, [apply.documents, questions.length]);
+
+  const [index, setIndex] = useState(0);
   const [values, setValues] = useState<FormValues>({});
   const [answers, setAnswers] = useState<Answers>({});
+  const [profile, setProfile] = useState<Profile>(emptyProfile);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 
@@ -29,61 +56,78 @@ export default function ApplyWizard({ jobId, questions }: ApplyWizardProps) {
       return;
     }
     wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [step]);
+  }, [index]);
 
-  const save = (next: FormValues) =>
-    setValues((current) => ({ ...current, ...next }));
+  const current = steps[index];
 
-  const goTo = (target: number, next?: FormValues, nextAnswers?: Answers) => {
-    if (next) save(next);
+  const move = (
+    delta: 1 | -1,
+    next?: FormValues,
+    nextAnswers?: Answers,
+    nextProfile?: Profile,
+  ) => {
+    if (next) setValues((existing) => ({ ...existing, ...next }));
     if (nextAnswers) setAnswers(nextAnswers);
-    setStep(target);
+    if (nextProfile) setProfile(nextProfile);
+    setIndex((i) => Math.min(Math.max(i + delta, 0), steps.length - 1));
   };
+
+  const editStep = (key: StepKey) => setIndex(steps.indexOf(key));
 
   return (
     <div ref={wrapperRef} className="apply-wizard">
-      <StepProgressBar steps={applySteps} currentStep={step} card />
+      <StepProgressBar
+        steps={steps.map((key) => STEP_LABELS[key])}
+        currentStep={index}
+        card
+      />
 
-      {step === 0 && (
+      {current === "basic" && (
         <BasicInfoForm
           defaultValues={values}
-          onNext={(next) => goTo(1, next)}
+          onNext={(next) => move(1, next)}
         />
       )}
 
-      {step === 1 && (
+      {current === "professional" && (
         <ProfessionalInfoForm
           defaultValues={values}
-          onNext={(next) => goTo(2, next)}
-          onBack={(next) => goTo(0, next)}
+          defaultProfile={profile}
+          requirements={apply}
+          onNext={(next, nextProfile) => move(1, next, undefined, nextProfile)}
+          onBack={(next, nextProfile) => move(-1, next, undefined, nextProfile)}
         />
       )}
 
-      {step === 2 && (
+      {current === "links" && (
         <ResumeDocumentsForm
           defaultValues={values}
-          onNext={(next) => goTo(3, next)}
-          onBack={(next) => goTo(1, next)}
+          documents={apply.documents}
+          onNext={(next) => move(1, next)}
+          onBack={(next) => move(-1, next)}
         />
       )}
 
-      {step === 3 && (
+      {current === "questions" && (
         <EmployerQuestionsForm
           questions={questions}
           defaultAnswers={answers}
-          onNext={(next) => goTo(4, undefined, next)}
-          onBack={(next) => goTo(2, undefined, next)}
+          onNext={(next) => move(1, undefined, next)}
+          onBack={(next) => move(-1, undefined, next)}
         />
       )}
 
-      {step === 4 && (
+      {current === "preview" && (
         <PreviewForm
           jobId={jobId}
           values={values}
           answers={answers}
+          profile={profile}
           questions={questions}
-          onEdit={(target) => goTo(target)}
-          onBack={() => goTo(3)}
+          showLinks={apply.documents.portfolio || apply.documents.github}
+          requirements={apply}
+          onEdit={editStep}
+          onBack={() => move(-1)}
         />
       )}
     </div>

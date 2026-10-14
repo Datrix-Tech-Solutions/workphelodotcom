@@ -16,7 +16,7 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
   return (
     <article className="job-details" aria-labelledby="job-details-title">
       <div className="job-details__topbar">
-        <Link
+        {/* <Link
           href={closeHref}
           scroll={false}
           className="job-details__close"
@@ -24,7 +24,7 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
         >
           <Icon name="close" size={16} />
           Close
-        </Link>
+        </Link> */}
       </div>
       <header className="job-details__header">
         <div className="job-details__heading">
@@ -50,7 +50,9 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
           <Button href={`/jobs/${job.id}/apply`} variant="solid">
             Apply Now
           </Button>
-          <SaveJobButton />
+          <SaveJobButton
+            job={{ id: job.id, title: job.title, company: job.company }}
+          />
         </div>
       </header>
       <Divider />

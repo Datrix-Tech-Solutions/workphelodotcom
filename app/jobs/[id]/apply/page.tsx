@@ -27,7 +27,7 @@ export default async function ApplyPage({ params }: ApplyPageProps) {
           showSearch={false}
         />
         <section className="apply">
-          <ApplyWizard jobId={job.id} questions={job.questions} />
+          <ApplyWizard job={job} />
         </section>
       </main>
       <Footer />

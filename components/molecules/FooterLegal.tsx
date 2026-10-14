@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LanguageSelect from "@/components/molecules/LanguageSelect";
 import { legalLinks } from "@/lib/navigation";
 
 export default function FooterLegal() {
@@ -16,6 +17,9 @@ export default function FooterLegal() {
           </li>
         ))}
       </ul>
+      <div className="footer-legal__end">
+        <LanguageSelect />
+      </div>
     </div>
   );
 }

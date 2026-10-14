@@ -48,6 +48,11 @@ export async function POST(
   }
   const values = payload.values ?? {};
   const answers = payload.answers ?? {};
+  const qualifications = (payload.profile?.education ?? [])
+    .map((q) =>
+      [str(q.qualification), str(q.institution)].filter(Boolean).join(" — "),
+    )
+    .filter(Boolean);
 
   const tenant = `tenantId=${encodeURIComponent(ids.tenantId)}`;
   const vacancyUrl = `${PUBLIC_API}/vacancies/${encodeURIComponent(ids.vacancyId)}`;
@@ -63,10 +68,34 @@ export async function POST(
 
   const experience = str(values.experience);
   const salary = str(values.salary);
-  const skills = str(values.skills)
-    .split(",")
-    .map((skill) => skill.trim())
-    .filter(Boolean);
+  const profile = payload.profile;
+  const strings = (list: unknown) =>
+    Array.isArray(list) ? list.map((item) => str(item)).filter(Boolean) : [];
+  const skills = [
+    ...new Set(
+      str(values.skills)
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean),
+    ),
+  ];
+  const workHistory = (profile?.experience ?? [])
+    .filter((role) => str(role.role))
+    .map((role) => ({
+      role: str(role.role),
+      company: str(role.company),
+      start: /^\d{4}-\d{2}$/.test(str(role.start))
+        ? str(role.start)
+        : undefined,
+      end: /^\d{4}-\d{2}$/.test(str(role.end)) ? str(role.end) : undefined,
+    }));
+  const educationHistory = (profile?.education ?? [])
+    .filter((entry) => str(entry.qualification) || str(entry.institution))
+    .map((entry) => ({
+      level: str(entry.level),
+      qualification: str(entry.qualification),
+      institution: str(entry.institution),
+    }));
 
   const body = {
     firstName: str(values.firstName),
@@ -79,12 +108,18 @@ export async function POST(
     yearsOfExperience: experience === "" ? undefined : Number(experience),
     currentEmployer: str(values.employer) || undefined,
     highestEducationLevel: str(values.education),
+    education: qualifications.join("\n").slice(0, 3900) || undefined,
     skills,
     expectedSalary: salary === "" ? undefined : Number(salary),
     expectedSalaryCurrency:
       salary === "" ? undefined : str(values.currency) || undefined,
     noticePeriod: str(values.notice),
     portfolioUrl: str(values.portfolio) || undefined,
+    githubUrl: str(values.github) || undefined,
+    languages: strings(profile?.languages),
+    certificates: strings(profile?.certificates),
+    educationHistory,
+    workHistory,
     answers: vacancy.questions.flatMap((question): AnswerBody[] => {
       const given = (answers[question.id] ?? [])
         .map((a) => str(a))

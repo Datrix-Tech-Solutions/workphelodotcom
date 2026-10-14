@@ -1,3 +1,5 @@
+import type { ParsedEducation, ParsedExperience } from "@/lib/resume/parse";
+
 export const applySteps = [
   "Basic Info",
   "Professional Info",
@@ -11,19 +13,27 @@ export type FormValues = Record<string, string>;
 /** Selected or typed answers, keyed by question id. Text answers hold one entry. */
 export type Answers = Record<string, string[]>;
 
+/** Qualifications and work history, usually read from the applicant's resume. */
+export interface Profile {
+  education: ParsedEducation[];
+  experience: ParsedExperience[];
+  /** Items ticked from the employer's lists. */
+  languages: string[];
+  certificates: string[];
+}
+
+export const emptyProfile: Profile = {
+  education: [],
+  experience: [],
+  languages: [],
+  certificates: [],
+};
+
 export interface ApplyPayload {
   values: FormValues;
   answers: Answers;
+  profile: Profile;
 }
-
-export const educationLevels = [
-  "High school",
-  "Diploma / Certificate",
-  "Bachelor's degree",
-  "Master's degree",
-  "Doctorate (PhD)",
-  "Other",
-];
 
 export const noticePeriods = [
   "Immediately",

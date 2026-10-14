@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Button from "@/components/atoms/Button";
 import WorkPheloWordmark from "@/components/atoms/WorkPheloWordmark";
+import AccountActions from "@/components/molecules/AccountActions";
 import MobileMenu from "@/components/molecules/MobileMenu";
 import NavTabs from "@/components/molecules/NavTabs";
 
@@ -32,12 +32,7 @@ export default function Navbar() {
         <NavTabs />
       </nav>
       <div className="navbar__actions">
-        <Button href="/sign-in" variant="ghost">
-          Sign in
-        </Button>
-        <Button href="/post-job" variant="glass">
-          Post job
-        </Button>
+        <AccountActions />
       </div>
       <div className="navbar__menu">
         <MobileMenu />
