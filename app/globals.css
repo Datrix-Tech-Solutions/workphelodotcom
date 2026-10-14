@@ -275,6 +275,84 @@ main {
   border-radius: var(--radius-field);
 }
 
+.search-bar__field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding-left: 0.75rem;
+  border-left: 1px solid rgb(255 255 255 / 0.25);
+}
+
+.search-bar__field--grow {
+  flex: 1;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.search-bar__field .input {
+  width: 100%;
+  min-width: 0;
+}
+
+#job-location {
+  width: 14rem;
+}
+
+.search-bar .search-bar__select {
+  width: 15rem;
+  padding: 0.5rem 2rem 0.5rem 0.25rem;
+  border: 0;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.search-bar .search-bar__select:focus {
+  box-shadow: none;
+}
+
+.search-bar .search-bar__select option,
+.search-bar .search-bar__select optgroup {
+  color: var(--color-text);
+}
+
+.job-listings__filters {
+  margin: -0.5rem 0 1rem;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 760px) {
+  .search-bar {
+    flex-wrap: wrap;
+    padding: 0.75rem;
+  }
+
+  .search-bar__field {
+    flex: 1 1 8rem;
+    padding: 0.25rem 0.5rem;
+    border-left: 0;
+    border-top: 1px solid rgb(255 255 255 / 0.2);
+  }
+
+  .search-bar__field--grow {
+    flex-basis: 100%;
+    border-top: 0;
+  }
+
+  #job-location,
+  .search-bar .search-bar__select {
+    width: 100%;
+  }
+
+  .search-bar .button {
+    flex: 1 1 100%;
+  }
+}
+
 .search-bar:focus-within {
   border-color: rgb(255 255 255 / 0.6);
 }
@@ -324,6 +402,22 @@ main {
 
 .job-card:hover .job-card__title {
   color: var(--color-deep-blue);
+}
+
+.job-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0.25rem;
+}
+
+.job-card__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
 }
 
 .job-card__title {
@@ -676,6 +770,7 @@ main {
   background-color: var(--color-deep-blue);
   color: var(--color-white);
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .company-avatar--md {
@@ -688,7 +783,8 @@ main {
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 0.25rem;
-  font-size: 0.6875rem;
+  font-size: 0.5rem;
+  letter-spacing: 0.02em;
 }
 
 .job-details__topbar {
@@ -1683,6 +1779,128 @@ button:focus-visible {
   }
 
   .hero__content > * {
+    animation: none;
+  }
+}
+
+/* Coming soon / 404 ------------------------------------------------------- */
+.coming-soon__content {
+  align-items: center;
+  text-align: center;
+}
+
+.coming-soon__title {
+  margin: 0;
+  color: var(--color-white);
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.coming-soon__subtext {
+  max-width: 34rem;
+  margin: 0;
+  color: rgb(255 255 255 / 0.85);
+  font-size: clamp(1rem, 1.6vw, 1.125rem);
+  line-height: 1.6;
+}
+
+/* Cube loader ------------------------------------------------------------- */
+.cube-loader {
+  --edge: 2.75em;
+  --dist: 3.5em;
+  --t: 3.15s;
+  --cube-top: #101c28;
+  --cube-top-light: #1b2e6e;
+  --cube-left: #2d59c8;
+  --cube-right: #10aaff;
+  position: relative;
+  width: 14rem;
+  height: 11rem;
+  margin-bottom: 1.5rem;
+  font-size: 11px;
+}
+
+.cube-loader__grid,
+.cube-loader__grid * {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+}
+
+.cube-loader__grid {
+  width: 8.75em;
+  height: 6.25em;
+  /* The faces are inset by -7.5em, so shift the grid back to centre it. */
+  transform: rotateX(-35deg) rotateY(-45deg) translate(6.125em, 6.125em);
+}
+
+.cube-loader__cube {
+  --delay: calc((var(--j) + 3 - var(--k)) * 0.0466 * var(--t));
+  transform: translate3d(
+    calc((var(--j) - 1.5) * var(--dist)),
+    0,
+    calc((var(--k) - 1.5) * var(--dist))
+  );
+}
+
+.cube-loader__lifter {
+  transform-origin: 0 calc(var(--edge) / 2);
+  transform: scaleY(0);
+  animation: cube-lift calc(var(--t) / 4) cubic-bezier(0.5, 0.1, 0.5, 0.9)
+    var(--delay) alternate infinite;
+}
+
+.cube-loader__face {
+  margin: -7.5em;
+  width: var(--edge);
+  height: var(--edge);
+}
+
+.cube-loader__face:nth-child(1) {
+  transform: rotateX(90deg) translateZ(calc(var(--edge) / 2));
+  background: var(--cube-top);
+  animation: cube-top-glow calc(var(--t) / 4) cubic-bezier(0.4, 0.2, 0.4, 0.6)
+    var(--delay) alternate infinite;
+}
+
+.cube-loader__face:nth-child(2) {
+  transform: rotateY(90deg) translateZ(calc(var(--edge) / 2));
+  background: var(--cube-left);
+}
+
+.cube-loader__face:nth-child(3) {
+  transform: translateZ(calc(var(--edge) / 2));
+  background: var(--cube-right);
+}
+
+@keyframes cube-lift {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(0.533);
+  }
+}
+
+@keyframes cube-top-glow {
+  from {
+    background: var(--cube-top-light);
+  }
+  to {
+    background: var(--cube-top);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube-loader__lifter {
+    animation: none;
+    transform: scaleY(0.533);
+  }
+
+  .cube-loader__face:nth-child(1) {
     animation: none;
   }
 }

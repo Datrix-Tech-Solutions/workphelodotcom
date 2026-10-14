@@ -6,6 +6,8 @@ import SearchBar from "@/components/molecules/SearchBar";
 interface HeroProps {
   size?: "full" | "compact";
   query?: string;
+  location?: string;
+  type?: string;
   title?: string;
   subtext?: string;
   showSearch?: boolean;
@@ -14,6 +16,8 @@ interface HeroProps {
 export default function Hero({
   size = "full",
   query,
+  location,
+  type,
   title,
   showSearch = true,
   subtext = "Skip the generic recruiter filters. Explore premium roles, apply with fully-parsed resumes, and track your application status in real-time.",
@@ -48,7 +52,9 @@ export default function Hero({
           </h1>
           <p className="hero__subtext">{subtext}</p>
         </div>
-        {showSearch && <SearchBar defaultValue={query} />}
+        {showSearch && (
+          <SearchBar defaultValue={query} location={location} type={type} />
+        )}
       </div>
     </section>
   );

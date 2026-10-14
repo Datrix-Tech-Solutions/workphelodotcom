@@ -1,12 +1,14 @@
 import JobGrid from "@/components/molecules/JobGrid";
 import Pagination from "@/components/molecules/Pagination";
 import JobDetails from "@/components/organisms/JobDetails";
-import { jobHref, type Job } from "@/lib/jobs";
+import { jobHref, TYPE_FILTERS, type Job } from "@/lib/jobs";
 
 interface JobListingsProps {
   jobs: Job[];
   total: number;
   query: string;
+  location: string;
+  type: string;
   page: number;
   totalPages: number;
   selectedJob?: Job;
@@ -18,20 +20,31 @@ export default function JobListings({
   jobs,
   total,
   query,
+  location,
+  type,
   page,
   totalPages,
   selectedJob,
   closeHref,
   unavailable,
 }: JobListingsProps) {
-  const buildHref = (job: Job) => jobHref(job.id, { query, page });
-  const heading = query ? `Results for "${query}"` : "All jobs";
+  const buildHref = (job: Job) =>
+    jobHref(job.id, { query, location, type, page });
+  const filtered = !!(query || location || type);
+  const heading = query
+    ? `Results for "${query}"`
+    : filtered
+      ? "Results"
+      : "All jobs";
+  const activeFilters = [location, type ? TYPE_FILTERS[type]?.label : ""]
+    .filter(Boolean)
+    .join(" · ");
 
   const empty = (
     <p className="job-listings__empty">
       {unavailable
         ? "Jobs are unavailable right now. Please try again shortly."
-        : "No jobs match your search. Try a different keyword."}
+        : "No jobs match your search. Try different keywords or filters."}
     </p>
   );
 
@@ -42,6 +55,9 @@ export default function JobListings({
           {heading}
           <span className="job-listings__count">{total}</span>
         </h2>
+        {activeFilters && (
+          <p className="job-listings__filters">{activeFilters}</p>
+        )}
         {jobs.length > 0 ? (
           <>
             <JobGrid jobs={jobs} buildHref={buildHref} columns={5} />
@@ -50,6 +66,8 @@ export default function JobListings({
               totalPages={totalPages}
               basePath="/jobs"
               query={query}
+              location={location}
+              type={type}
             />
           </>
         ) : (
@@ -95,6 +113,8 @@ export default function JobListings({
             totalPages={totalPages}
             basePath="/jobs"
             query={query}
+            location={location}
+            type={type}
           />
         </div>
         <div className="panel job-split__details">

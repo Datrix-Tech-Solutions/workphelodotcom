@@ -150,12 +150,33 @@ export function toJob(v: ApiVacancy): Job {
   };
 }
 
+/** Values of the `type` search param, mapped to the API's filter fields. */
+export const TYPE_FILTERS: Record<
+  string,
+  { label: string; field: "jobType" | "workMode"; value: string }
+> = {
+  FULL_TIME: { label: "Full-time", field: "jobType", value: "FULL_TIME" },
+  PART_TIME: { label: "Part-time", field: "jobType", value: "PART_TIME" },
+  CONTRACT: { label: "Contract", field: "jobType", value: "CONTRACT" },
+  INTERN: { label: "Internship", field: "jobType", value: "INTERN" },
+  REMOTE: { label: "Remote", field: "workMode", value: "REMOTE" },
+  HYBRID: { label: "Hybrid", field: "workMode", value: "HYBRID" },
+  ONSITE: { label: "On-site", field: "workMode", value: "ONSITE" },
+};
+
 export function jobHref(
   jobId: string,
-  { query, page }: { query?: string; page?: number } = {},
+  {
+    query,
+    location,
+    type,
+    page,
+  }: { query?: string; location?: string; type?: string; page?: number } = {},
 ): string {
   const params = new URLSearchParams();
   if (query) params.set("q", query);
+  if (location) params.set("location", location);
+  if (type) params.set("type", type);
   if (page && page > 1) params.set("page", String(page));
   params.set("job", jobId);
   return `/jobs?${params.toString()}`;

@@ -5,6 +5,8 @@ interface PaginationProps {
   totalPages: number;
   basePath: string;
   query?: string;
+  location?: string;
+  type?: string;
 }
 
 export default function Pagination({
@@ -12,12 +14,16 @@ export default function Pagination({
   totalPages,
   basePath,
   query,
+  location,
+  type,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const hrefFor = (target: number) => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
+    if (location) params.set("location", location);
+    if (type) params.set("type", type);
     if (target > 1) params.set("page", String(target));
     const qs = params.toString();
     return qs ? `${basePath}?${qs}` : basePath;

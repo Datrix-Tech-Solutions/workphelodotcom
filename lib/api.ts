@@ -1,5 +1,6 @@
 import {
   JOBS_PER_PAGE,
+  TYPE_FILTERS,
   parseJobId,
   toJob,
   type ApiVacancy,
@@ -29,20 +30,34 @@ export interface JobPage {
   unavailable: boolean;
 }
 
+/** The board endpoint has no location filter, only free-text `search`. */
+const LOCATION_SCAN_LIMIT = 100;
+
 export async function fetchJobs({
   query,
+  location,
+  type,
   page = 1,
   limit = JOBS_PER_PAGE,
 }: {
   query?: string;
+  location?: string;
+  type?: string;
   page?: number;
   limit?: number;
 }): Promise<JobPage> {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
-  if (query) params.set("search", query);
+  // With a keyword and a location the API can only search one of them, so it
+  // searches the keyword and the location is matched here.
+  const filterLocally = !!(query && location);
+  const params = new URLSearchParams(
+    filterLocally
+      ? { page: "1", limit: String(LOCATION_SCAN_LIMIT) }
+      : { page: String(page), limit: String(limit) },
+  );
+  const search = query || location;
+  if (search) params.set("search", search);
+  const typeFilter = type ? TYPE_FILTERS[type] : undefined;
+  if (typeFilter) params.set(typeFilter.field, typeFilter.value);
 
   try {
     const res = await fetch(`${PUBLIC_API}/board?${params}`, {
@@ -50,9 +65,17 @@ export async function fetchJobs({
     });
     if (!res.ok) return { jobs: [], total: 0, unavailable: true };
     const body = (await res.json()) as Page<ApiVacancy>;
+    const jobs = body.items.map(toJob);
+    if (!filterLocally) {
+      return { jobs, total: body.meta.total, unavailable: false };
+    }
+    const needle = location!.toLowerCase();
+    const matches = jobs.filter((j) =>
+      j.location.toLowerCase().includes(needle),
+    );
     return {
-      jobs: body.items.map(toJob),
-      total: body.meta.total,
+      jobs: matches.slice((page - 1) * limit, page * limit),
+      total: matches.length,
       unavailable: false,
     };
   } catch {

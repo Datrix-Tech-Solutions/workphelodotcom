@@ -1,14 +1,14 @@
 export const navTabs = [
   { label: "Home", href: "/" },
   { label: "Jobs", href: "/jobs" },
-  { label: "Companies", href: "/companies" },
+  { label: "Products", href: "/products" },
   { label: "Resources", href: "/resources" },
 ];
 
 export const jobSeekerLinks = [
   { label: "Find jobs", href: "/jobs" },
   { label: "Remote jobs", href: "/jobs/remote" },
-  { label: "Companies", href: "/companies" },
+  { label: "Products", href: "/products" },
 ];
 
 export const resourceLinks = [
