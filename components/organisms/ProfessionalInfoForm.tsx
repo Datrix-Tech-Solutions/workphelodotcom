@@ -7,7 +7,9 @@ import Select from "@/components/atoms/Select";
 import FormField from "@/components/molecules/FormField";
 import ResumeAutofill from "@/components/molecules/ResumeAutofill";
 import {
+  UNEMPLOYED_TITLE,
   currencies,
+  currentRole,
   noticePeriods,
   type FormValues,
   type Profile,
@@ -49,19 +51,7 @@ const rangeText = (range: NonNullable<ApplyRequirements["experience"]>) => {
   return "";
 };
 
-/** Whether the number of years sits inside the range the employer asked for. */
-function rangeNote(years: number, range: ApplyRequirements["experience"]) {
-  if (!range) return null;
-  const text = rangeText(range);
-  if (!text) return null;
-  if (range.min !== undefined && years < range.min) {
-    return { tone: "warn", message: `Below the employer's range (${text}).` };
-  }
-  if (range.max !== undefined && years > range.max) {
-    return { tone: "warn", message: `Above the employer's range (${text}).` };
-  }
-  return { tone: "ok", message: `Within the employer's range (${text}).` };
-}
+
 
 export default function ProfessionalInfoForm({
   defaultValues,
@@ -75,6 +65,9 @@ export default function ProfessionalInfoForm({
   const [years, setYears] = useState(defaultValues.experience ?? "");
   const [jobTitle, setJobTitle] = useState(defaultValues.jobTitle ?? "");
   const [employer, setEmployer] = useState(defaultValues.employer ?? "");
+  const [unemployed, setUnemployed] = useState(
+    defaultValues.unemployed === "true",
+  );
   const [qualifications, setQualifications] = useState<ParsedEducation[]>(
     defaultProfile.education,
   );
@@ -93,8 +86,10 @@ export default function ProfessionalInfoForm({
       ...(formRef.current ? readValues(formRef.current) : {}),
       education,
       experience: years,
-      jobTitle,
-      employer,
+      // Typed values are kept in state, so unticking brings them back.
+      jobTitle: unemployed ? UNEMPLOYED_TITLE : jobTitle,
+      employer: unemployed ? "" : employer,
+      unemployed: unemployed ? "true" : "",
     },
     {
       education: qualifications,
@@ -131,18 +126,14 @@ export default function ProfessionalInfoForm({
     }
     updateRoles(parsed.experience);
     updateQualifications(parsed.education);
-    // The current job is the role with no end date, otherwise the first one listed.
-    const current =
-      parsed.experience.find((role) => role.end === "") ?? parsed.experience[0];
+    // The current job is the role with no end date; none means not employed.
+    const current = currentRole(parsed.experience);
     if (current && !jobTitle) setJobTitle(current.role);
     if (current && !employer) setEmployer(current.company);
   };
 
   const yearsNumber = years === "" ? null : Number(years);
-  const note =
-    yearsNumber !== null && !Number.isNaN(yearsNumber)
-      ? rangeNote(yearsNumber, requirements.experience)
-      : null;
+  
   const wanted = requirements.educationLevels.map(educationLabel);
 
   return (
@@ -260,14 +251,15 @@ export default function ProfessionalInfoForm({
       </div>
 
       <div className="apply-form__grid">
-        <FormField id="job-title" label="Current job title" required>
+        <FormField id="job-title" label="Current job title" required={!unemployed}>
           <Input
             id="job-title"
             name="jobTitle"
-            required
+            required={!unemployed}
+            disabled={unemployed}
             className="field-control"
             autoComplete="organization-title"
-            value={jobTitle}
+            value={unemployed ? "" : jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
           />
         </FormField>
@@ -288,11 +280,6 @@ export default function ProfessionalInfoForm({
             value={years}
             onChange={(e) => setYears(e.target.value)}
           />
-          {note && (
-            <span className={`range-note range-note--${note.tone}`}>
-              {note.message}
-            </span>
-          )}
         </FormField>
       </div>
 
@@ -302,10 +289,20 @@ export default function ProfessionalInfoForm({
           name="employer"
           className="field-control"
           autoComplete="organization"
-          value={employer}
+          disabled={unemployed}
+          value={unemployed ? "" : employer}
           onChange={(e) => setEmployer(e.target.value)}
         />
       </FormField>
+
+      <label className="check-list__item">
+        <input
+          type="checkbox"
+          checked={unemployed}
+          onChange={(e) => setUnemployed(e.target.checked)}
+        />
+        I&apos;m not currently employed
+      </label>
 
       <div className="profile-list">
         <span className="form-field__label">Education</span>
@@ -363,8 +360,36 @@ export default function ProfessionalInfoForm({
                 </option>
               ))}
             </Select>
+            <Input
+              aria-label="Start date"
+              type="month"
+              className="field-control"
+              value={q.start ?? ""}
+              onChange={(e) =>
+                updateQualifications(
+                  qualifications.map((item, i) =>
+                    i === index ? { ...item, start: e.target.value } : item,
+                  ),
+                )
+              }
+            />
+            <Input
+              aria-label="End date (leave blank if current)"
+              type="month"
+              className="field-control"
+              value={q.end ?? ""}
+              onChange={(e) =>
+                updateQualifications(
+                  qualifications.map((item, i) =>
+                    i === index ? { ...item, end: e.target.value } : item,
+                  ),
+                )
+              }
+            />
             <div className="profile-list__row-footer">
-              <span />
+              <span>
+                {q.start && q.end === "" ? "Currently studying" : ""}
+              </span>
               <Button
                 variant="soft"
                 type="button"
@@ -386,7 +411,13 @@ export default function ProfessionalInfoForm({
             onClick={() =>
               updateQualifications([
                 ...qualifications,
-                { level: "BACHELORS", qualification: "", institution: "" },
+                {
+                  level: "BACHELORS",
+                  qualification: "",
+                  institution: "",
+                  start: "",
+                  end: "",
+                },
               ])
             }
           >

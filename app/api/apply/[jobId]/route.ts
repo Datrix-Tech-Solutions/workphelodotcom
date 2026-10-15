@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PUBLIC_API } from "@/lib/api";
-import { normalizePhone, type ApplyPayload } from "@/lib/apply";
+import { normalizePhone, periodLabel, type ApplyPayload } from "@/lib/apply";
 import { parseJobId } from "@/lib/jobs";
 
 interface ApiQuestion {
@@ -50,7 +50,12 @@ export async function POST(
   const answers = payload.answers ?? {};
   const qualifications = (payload.profile?.education ?? [])
     .map((q) =>
-      [str(q.qualification), str(q.institution)].filter(Boolean).join(" — "),
+      [
+        [str(q.qualification), str(q.institution)].filter(Boolean).join(" — "),
+        periodLabel(str(q.start), str(q.end)),
+      ]
+        .filter(Boolean)
+        .join(" — "),
     )
     .filter(Boolean);
 

@@ -45,6 +45,11 @@ again whenever a new migration file is added.
 | Table | Purpose |
 |---|---|
 | `saved_jobs` | Jobs a candidate has saved (row-level security: own rows only) |
+| `candidate_details` | Education, career and certificates (JSON lists) and pointers to the uploaded resume / cover letter |
+
+Resumes and cover letters are stored in the private `candidate-documents`
+storage bucket, in a folder per user; the same migration creates the bucket and
+its access policies.
 
 A candidate's basic details (name, phone, country, city, role, socials) are
 stored on their auth account as user metadata, so they need no table.

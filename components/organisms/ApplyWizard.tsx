@@ -17,6 +17,10 @@ import type { Job } from "@/lib/jobs";
 
 interface ApplyWizardProps {
   job: Pick<Job, "id" | "questions" | "apply">;
+  /** Saved profile details to start from, when the applicant has them. */
+  initialProfile?: Profile;
+  /** Basic Info answers to start from, e.g. from the applicant's account. */
+  initialValues?: FormValues;
 }
 
 type StepKey = "basic" | "professional" | "links" | "questions" | "preview";
@@ -29,7 +33,11 @@ const STEP_LABELS: Record<StepKey, string> = {
   preview: "Preview",
 };
 
-export default function ApplyWizard({ job }: ApplyWizardProps) {
+export default function ApplyWizard({
+  job,
+  initialProfile = emptyProfile,
+  initialValues = {},
+}: ApplyWizardProps) {
   const { id: jobId, questions, apply } = job;
 
   // Steps with nothing to ask for this job are left out.
@@ -43,9 +51,9 @@ export default function ApplyWizard({ job }: ApplyWizardProps) {
   }, [apply.documents, questions.length]);
 
   const [index, setIndex] = useState(0);
-  const [values, setValues] = useState<FormValues>({});
+  const [values, setValues] = useState<FormValues>(initialValues);
   const [answers, setAnswers] = useState<Answers>({});
-  const [profile, setProfile] = useState<Profile>(emptyProfile);
+  const [profile, setProfile] = useState<Profile>(initialProfile);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 

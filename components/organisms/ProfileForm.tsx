@@ -48,7 +48,7 @@ export default function ProfileForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (loading) return;
+    if (!editing || loading) return;
     setLoading(true);
     setError("");
     setSaved(false);
@@ -195,10 +195,11 @@ export default function ProfileForm({
       <div className="profile-form__actions">
         {editing ? (
           <>
-            <Button type="submit" variant="solid" disabled={loading}>
+            <Button key="save" type="submit" variant="solid" disabled={loading}>
               {loading ? "Saving…" : "Save changes"}
             </Button>
             <Button
+              key="cancel"
               type="button"
               variant="outline"
               disabled={loading}
@@ -209,6 +210,7 @@ export default function ProfileForm({
           </>
         ) : (
           <Button
+            key="edit"
             type="button"
             variant="solid"
             onClick={() => {

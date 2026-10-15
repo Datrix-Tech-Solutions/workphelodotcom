@@ -11,11 +11,9 @@ export interface PricingTier {
 export interface FeatureGroup {
   id: string;
   title: string;
-  // `from` is the index of the first tier (in `pricingTiers`) that includes it.
   items: { label: string; from: number }[];
 }
 
-// Prices are not decided yet; replace `price` / `priceNote` when they are.
 export const pricingTiers: PricingTier[] = [
   {
     id: "free",

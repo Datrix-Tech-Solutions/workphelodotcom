@@ -5,9 +5,11 @@ import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
 import SavedJobsList from "@/components/organisms/SavedJobsList";
+import CompleteProfile from "@/components/organisms/CompleteProfile";
 import ProfileForm from "@/components/organisms/ProfileForm";
 import { fetchJobs } from "@/lib/api";
 import { getSession } from "@/lib/auth";
+import { getCandidateDetails } from "@/lib/candidateDetails";
 import { jobHref } from "@/lib/jobs";
 import { listSavedJobs } from "@/lib/savedJobs";
 
@@ -24,7 +26,10 @@ export default async function ProfilePage() {
   const { name, email, profile } = session.user;
   const role = profile?.role ?? "";
 
-  const savedJobs = await listSavedJobs();
+  const [savedJobs, details] = await Promise.all([
+    listSavedJobs(),
+    getCandidateDetails(),
+  ]);
 
   // Jobs matching the saved role; if none match (or no role yet), the latest.
   let recommended = role
@@ -106,14 +111,7 @@ export default async function ProfilePage() {
               )}
             </section>
 
-            <section
-              className="profile-card"
-              aria-labelledby="complete-profile"
-            >
-              <h2 id="complete-profile" className="profile-card__title">
-                Complete your profile
-              </h2>
-            </section>
+            <CompleteProfile initial={details} />
           </div>
         </section>
       </main>

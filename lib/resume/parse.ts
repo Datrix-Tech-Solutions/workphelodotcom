@@ -5,6 +5,10 @@ export interface ParsedEducation {
   /** The qualification line as written on the resume, e.g. "BSc Computer Science". */
   qualification: string;
   institution: string;
+  /** `YYYY-MM`, or "" / missing when unknown. */
+  start?: string;
+  /** `YYYY-MM`, or "" while still studying. */
+  end?: string;
 }
 
 export interface ParsedExperience {
@@ -215,7 +219,7 @@ const LEVEL_PATTERNS: Array<[EducationCode, RegExp]> = [
 const INSTITUTION =
   /\b(?:university|college|institute|polytechnic|academy|school|campus)\b/i;
 
-function levelOf(text: string): EducationCode | null {
+export function levelOf(text: string): EducationCode | null {
   for (const [code, pattern] of LEVEL_PATTERNS) {
     if (pattern.test(text)) return code;
   }
@@ -228,6 +232,13 @@ function parseEducation(lines: string[]): ParsedEducation[] {
   lines.forEach((line, index) => {
     const level = levelOf(line);
     if (!level) return;
+
+    const range = line.match(RANGE);
+    const start = range ? toYearMonth(range[1], 1) : "";
+    const end =
+      range && !new RegExp(`^(?:${OPEN_END})$`, "i").test(range[2].trim())
+        ? toYearMonth(range[2], 12)
+        : "";
 
     const own = stripNoise(line.replace(RANGE, "")).replace(
       /^(?:studied|graduated with|completed|obtained|awarded)\s+/i,
@@ -258,7 +269,7 @@ function parseEducation(lines: string[]): ParsedEducation[] {
       (e) => e.level === level && e.qualification === qualification,
     );
     if (!duplicate) {
-      entries.push({ level, qualification, institution });
+      entries.push({ level, qualification, institution, start, end });
     }
   });
 

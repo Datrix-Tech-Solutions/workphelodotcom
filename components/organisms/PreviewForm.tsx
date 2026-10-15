@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import SummarySection from "@/components/molecules/SummarySection";
-import type { Answers, FormValues, Profile } from "@/lib/apply";
+import {
+  periodLabel,
+  type Answers,
+  type FormValues,
+  type Profile,
+} from "@/lib/apply";
 import { durationLabel } from "@/lib/resume/parse";
 import type { ApplyRequirements, JobQuestion } from "@/lib/jobs";
 
@@ -143,7 +148,12 @@ export default function PreviewForm({
             label: "Education",
             value: profile.education
               .map((q) =>
-                [q.qualification, q.institution].filter(Boolean).join(", "),
+                [
+                  [q.qualification, q.institution].filter(Boolean).join(", "),
+                  periodLabel(q.start, q.end),
+                ]
+                  .filter(Boolean)
+                  .join(" — "),
               )
               .join("; "),
           },
