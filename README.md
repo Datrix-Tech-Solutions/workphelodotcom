@@ -45,6 +45,7 @@ again whenever a new migration file is added.
 | Table | Purpose |
 |---|---|
 | `saved_jobs` | Jobs a candidate has saved (row-level security: own rows only) |
+| `job_applications` | Jobs a signed-in candidate applied to (written when an application is submitted) |
 | `candidate_details` | Education, career and certificates (JSON lists) and pointers to the uploaded resume / cover letter |
 
 Resumes and cover letters are stored in the private `candidate-documents`

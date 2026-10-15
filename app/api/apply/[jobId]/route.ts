@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PUBLIC_API } from "@/lib/api";
+import { recordApplication } from "@/lib/applications";
 import { normalizePhone, periodLabel, type ApplyPayload } from "@/lib/apply";
 import { parseJobId } from "@/lib/jobs";
 
@@ -69,7 +70,11 @@ export async function POST(
   if (!vacancyRes) return fail(502, "Applications are unavailable right now.");
   if (!vacancyRes.ok)
     return fail(404, "This job is no longer accepting applications.");
-  const vacancy = (await vacancyRes.json()) as { questions: ApiQuestion[] };
+  const vacancy = (await vacancyRes.json()) as {
+    questions: ApiQuestion[];
+    title?: string | null;
+    companyName?: string | null;
+  };
 
   const experience = str(values.experience);
   const salary = str(values.salary);
@@ -177,6 +182,13 @@ export async function POST(
       result?.missing,
     );
   }
+
+  // Remember it against the signed-in candidate's account (if there is one).
+  await recordApplication({
+    id: jobId,
+    title: vacancy.title ?? "",
+    company: vacancy.companyName ?? "",
+  });
 
   return NextResponse.json({ ok: true });
 }

@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import CompactJobCard from "@/components/molecules/CompactJobCard";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
 import SavedJobsList from "@/components/organisms/SavedJobsList";
+import CompanyAvatar from "@/components/atoms/CompanyAvatar";
 import CompleteProfile from "@/components/organisms/CompleteProfile";
 import ProfileForm from "@/components/organisms/ProfileForm";
 import { fetchJobs } from "@/lib/api";
+import { listApplications } from "@/lib/applications";
 import { getSession } from "@/lib/auth";
 import { getCandidateDetails } from "@/lib/candidateDetails";
 import { jobHref } from "@/lib/jobs";
@@ -19,6 +22,13 @@ export const metadata: Metadata = {
 
 const RECOMMENDED = 4;
 
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 export default async function ProfilePage() {
   const session = await getSession();
   if (session?.role !== "candidate") redirect("/sign-in?next=/profile");
@@ -26,9 +36,10 @@ export default async function ProfilePage() {
   const { name, email, profile } = session.user;
   const role = profile?.role ?? "";
 
-  const [savedJobs, details] = await Promise.all([
+  const [savedJobs, details, applications] = await Promise.all([
     listSavedJobs(),
     getCandidateDetails(),
+    listApplications(),
   ]);
 
   // Jobs matching the saved role; if none match (or no role yet), the latest.
@@ -74,9 +85,32 @@ export default async function ProfilePage() {
                 <h2 id="recent-applications" className="profile-card__title">
                   Recent applications
                 </h2>
-                <p className="profile-card__empty">
-                  You haven&apos;t applied to any jobs yet.
-                </p>
+                {applications.length === 0 ? (
+                  <p className="profile-card__empty">
+                    You haven&apos;t applied to any jobs yet.
+                  </p>
+                ) : (
+                  <div className="profile-card__jobs">
+                    {applications.map((app) => (
+                      <Link
+                        key={app.id}
+                        href={jobHref(app.id)}
+                        className="compact-job compact-job__link"
+                      >
+                        <CompanyAvatar name={app.company || app.title} />
+                        <span className="compact-job__text">
+                          <span className="compact-job__title">
+                            {app.title}
+                          </span>
+                          <span className="compact-job__company">
+                            {app.company ? `${app.company} · ` : ""}
+                            Applied {formatDate(app.appliedAt)}
+                          </span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </section>
 
               <section className="profile-card" aria-labelledby="saved-jobs">
