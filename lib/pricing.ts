@@ -262,6 +262,17 @@ export function healthInsuranceCover(monthlyTotal: number): number {
   );
 }
 
+/**
+ * What the first billing period costs for one user on the plan with every
+ * feature: the set-up payment is part of it and counts towards the discount.
+ */
+export function allFeaturesFirstTotal(billing: Billing): number {
+  const oneTime = allFeaturesOneTime();
+  const billable = allFeaturesPrice(billing) + oneTime;
+  const rate = volumeDiscountRate(allFeaturesPrice("month") + oneTime);
+  return billable - Math.round(billable * rate * 100) / 100;
+}
+
 /** The modules Premium includes; descriptions come from the products page. */
 export const premiumModuleTitles = [
   { label: "HR", productTitle: "HR Management" },

@@ -65,11 +65,14 @@ export default function PlanPriceSummary({
   const close = useCallback(() => setOpen(false), []);
   const suffix = billing === "year" ? "yr" : "mo";
   const subtotal = perUser * users;
-  const monthlyTotal = monthlyPerUser * users;
-  const discountRate = volumeDiscountRate(monthlyTotal);
-  const insuranceCover = healthInsuranceCover(monthlyTotal);
-  const discount = Math.round(subtotal * discountRate * 100) / 100;
-  const total = subtotal - discount;
+  // The one time set-up payment is part of the total, so it counts towards
+  // the volume discount and the perks too.
+  const billable = subtotal + oneTime;
+  const qualifying = monthlyPerUser * users + oneTime;
+  const discountRate = volumeDiscountRate(qualifying);
+  const insuranceCover = healthInsuranceCover(qualifying);
+  const discount = Math.round(billable * discountRate * 100) / 100;
+  const total = billable - discount;
 
   return (
     <aside className="plan-aside pricing-widget" aria-label={ariaLabel}>
@@ -100,35 +103,36 @@ export default function PlanPriceSummary({
         <p className="pricing-widget__empty">{emptyText}</p>
       )}
 
-      {discount > 0 && (
+      {(discount > 0 || oneTime > 0) && (
         <div className="pricing-widget__rows">
           <p className="pricing-widget__row">
             <span>Subtotal</span>
             <span>{formatPrice(subtotal)}</span>
           </p>
-          <p className="pricing-widget__row pricing-widget__row--discount">
-            <span>Volume discount ({discountRate * 100}%)</span>
-            <span>&minus;{formatPrice(discount)}</span>
-          </p>
+          {oneTime > 0 && (
+            <p className="pricing-widget__row">
+              <span>One time set-up payment</span>
+              <span>{formatPrice(oneTime)}</span>
+            </p>
+          )}
+          {discount > 0 && (
+            <p className="pricing-widget__row pricing-widget__row--discount">
+              <span>Volume discount ({discountRate * 100}%)</span>
+              <span>&minus;{formatPrice(discount)}</span>
+            </p>
+          )}
         </div>
       )}
 
       <div className="pricing-widget__total">
         <span className="pricing-widget__total-label">Total</span>
-        <Money amount={total} unit={`/ ${billing}`} />
+        <Money amount={total} unit={`first ${billing}`} />
       </div>
 
       {perUser > 0 && (
         <p className="pricing-widget__breakdown">
           {formatPrice(perUser)}/user/{suffix} &times; {users}{" "}
           {users === 1 ? "user" : "users"}
-        </p>
-      )}
-
-      {oneTime > 0 && (
-        <p className="pricing-widget__one-time">
-          <span>One time set-up payment</span>
-          <span>+ {formatPrice(oneTime)}</span>
         </p>
       )}
 
@@ -187,11 +191,15 @@ export default function PlanPriceSummary({
                   <dd>{formatPrice(oneTime)}</dd>
                 </div>
               )}
+              {discount > 0 && (
+                <div>
+                  <dt>Volume discount ({discountRate * 100}%)</dt>
+                  <dd>&minus;{formatPrice(discount)}</dd>
+                </div>
+              )}
               <div className="order-confirm__total">
-                <dt>Total</dt>
-                <dd>
-                  {formatPrice(total)} / {billing}
-                </dd>
+                <dt>Total (first {billing})</dt>
+                <dd>{formatPrice(total)}</dd>
               </div>
             </dl>
             <div className="order-confirm__actions">

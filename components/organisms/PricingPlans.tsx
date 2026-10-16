@@ -8,7 +8,7 @@ import CustomPlanBuilder from "@/components/organisms/CustomPlanBuilder";
 import BillingToggle from "@/components/molecules/BillingToggle";
 import {
   allFeaturesOneTime,
-  allFeaturesPrice,
+  allFeaturesFirstTotal,
   formatPrice,
   pricingHref,
   pricingTiers,
@@ -70,8 +70,8 @@ function PlanCard({
       <p className="plan-head__price">
         {tier.priceFromFeatures ? (
           <Money
-            amount={allFeaturesPrice(billing)}
-            unit={`/ user / ${billing}`}
+            amount={allFeaturesFirstTotal(billing)}
+            unit={`first ${billing}`}
             size="md"
           />
         ) : (
@@ -86,7 +86,7 @@ function PlanCard({
         }
       >
         {tier.priceFromFeatures
-          ? `+ ${formatPrice(allFeaturesOneTime())} one time set-up payment`
+          ? `For 1 user, includes ${formatPrice(allFeaturesOneTime())} one time set-up payment`
           : (tier.priceNote ?? " ")}
       </p>
       {!compact && (
