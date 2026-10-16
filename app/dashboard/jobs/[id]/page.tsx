@@ -54,7 +54,7 @@ export default async function JobApplicantsPage({
           subtext={`${submitted.length} ${submitted.length === 1 ? "applicant" : "applicants"}`}
         />
         <section className="account account--wide">
-          <div className="dashboard__summary">
+          <div className="dashboard__bar">
             <Link href="/dashboard" className="sign-in__link">
               ← All jobs
             </Link>
@@ -89,7 +89,11 @@ export default async function JobApplicantsPage({
             ) : (
               <div className="recruiter-table" role="table">
                 {submitted.map((a) => (
-                  <div className="recruiter-table__row" role="row" key={a.id}>
+                  <div
+                    className="recruiter-table__row recruiter-table__row--applicants"
+                    role="row"
+                    key={a.id}
+                  >
                     <div className="recruiter-table__main" role="cell">
                       <span className="recruiter-table__title">
                         {[a.firstName, a.lastName].filter(Boolean).join(" ") ||

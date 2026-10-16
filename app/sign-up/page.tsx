@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function SignUpPage() {
   return (
     <main>
-      <Navbar />
+      <Navbar minimal />
       <section className="hero hero--full hero--auth">
         <Image
           src="/workphelodotcomhero.png"

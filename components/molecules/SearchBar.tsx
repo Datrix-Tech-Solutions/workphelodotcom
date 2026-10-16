@@ -2,12 +2,15 @@ import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import SearchIcon from "@/components/atoms/SearchIcon";
 import Select from "@/components/atoms/Select";
+import DateFilter from "@/components/molecules/DateFilter";
 import { TYPE_FILTERS } from "@/lib/jobs";
 
 interface SearchBarProps {
   defaultValue?: string;
   location?: string;
   type?: string;
+  posted?: string;
+  showDateFilter?: boolean;
 }
 
 const jobTypes = Object.entries(TYPE_FILTERS).filter(
@@ -21,6 +24,8 @@ export default function SearchBar({
   defaultValue,
   location,
   type,
+  posted,
+  showDateFilter,
 }: SearchBarProps) {
   return (
     <form
@@ -85,6 +90,7 @@ export default function SearchBar({
           </optgroup>
         </Select>
       </div>
+      {showDateFilter && <DateFilter value={posted} />}
       <Button>Search</Button>
     </form>
   );

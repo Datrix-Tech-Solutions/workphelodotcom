@@ -2,6 +2,7 @@ import {
   JOBS_PER_PAGE,
   TYPE_FILTERS,
   parseJobId,
+  postedRange,
   toJob,
   type ApiVacancy,
   type Job,
@@ -37,18 +38,22 @@ export async function fetchJobs({
   query,
   location,
   type,
+  posted,
   page = 1,
   limit = JOBS_PER_PAGE,
 }: {
   query?: string;
   location?: string;
   type?: string;
+  /** See `postedRange`. The API has no date filter, so it is applied here. */
+  posted?: string;
   page?: number;
   limit?: number;
 }): Promise<JobPage> {
   // With a keyword and a location the API can only search one of them, so it
   // searches the keyword and the location is matched here.
-  const filterLocally = !!(query && location);
+  const range = postedRange(posted);
+  const filterLocally = !!(query && location) || !!range;
   const params = new URLSearchParams(
     filterLocally
       ? { page: "1", limit: String(LOCATION_SCAN_LIMIT) }
@@ -69,10 +74,13 @@ export async function fetchJobs({
     if (!filterLocally) {
       return { jobs, total: body.meta.total, unavailable: false };
     }
-    const needle = location!.toLowerCase();
-    const matches = jobs.filter((j) =>
-      j.location.toLowerCase().includes(needle),
-    );
+    const needle = query && location ? location.toLowerCase() : "";
+    const matches = jobs.filter((j) => {
+      if (needle && !j.location.toLowerCase().includes(needle)) return false;
+      if (!range) return true;
+      const at = Date.parse(j.createdAt);
+      return at >= range.from && at <= range.to;
+    });
     return {
       jobs: matches.slice((page - 1) * limit, page * limit),
       total: matches.length,

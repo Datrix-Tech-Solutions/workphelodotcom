@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Button from "@/components/atoms/Button";
+import Icon from "@/components/atoms/Icon";
 import JobStatusButton from "@/components/molecules/JobStatusButton";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
@@ -30,6 +31,14 @@ export default async function DashboardPage() {
   const jobs = result.ok ? result.data : [];
   const open = jobs.filter((j) => j.status === "OPEN").length;
   const applicants = jobs.reduce((sum, j) => sum + j.applicantCount, 0);
+  const drafts = jobs.filter((j) => j.status === "DRAFT").length;
+  const closed = jobs.filter((j) => j.status === "CLOSED").length;
+  const stats = [
+    { label: "Open jobs", value: open, icon: "briefcase" as const },
+    { label: "Applicants", value: applicants, icon: "users" as const },
+    { label: "Drafts", value: drafts, icon: "file" as const },
+    { label: "Closed", value: closed, icon: "clipboard-check" as const },
+  ];
 
   return (
     <>
@@ -41,33 +50,57 @@ export default async function DashboardPage() {
           title="Dashboard"
           subtext={`Welcome back, ${session.user.name}.`}
         />
-        <section className="account account--wide">
+        <section className="account account--dashboard">
           <div className="dashboard__summary">
-            <div className="dashboard__stat">
-              <span className="dashboard__stat-value">{open}</span>
-              <span className="dashboard__stat-label">Open jobs</span>
-            </div>
-            <div className="dashboard__stat">
-              <span className="dashboard__stat-value">{applicants}</span>
-              <span className="dashboard__stat-label">Applicants</span>
-            </div>
-            <Button href="/post-job" variant="solid">
-              Post a job
-            </Button>
+            {stats.map((stat) => (
+              <div className="dashboard__stat" key={stat.label}>
+                <span className="dashboard__stat-icon">
+                  <Icon name={stat.icon} size={20} />
+                </span>
+                <span className="dashboard__stat-value">{stat.value}</span>
+                <span className="dashboard__stat-label">{stat.label}</span>
+              </div>
+            ))}
           </div>
 
           <section className="profile-card" aria-labelledby="your-jobs">
-            <h2 id="your-jobs" className="profile-card__title">
-              Your jobs
-            </h2>
+            <header className="dashboard__toolbar">
+              <div>
+                <h2 id="your-jobs" className="profile-card__title">
+                  Your jobs
+                </h2>
+                <p className="dashboard__toolbar-sub">
+                  {jobs.length} {jobs.length === 1 ? "job" : "jobs"} posted
+                </p>
+              </div>
+              <Button href="/post-job" variant="solid">
+                Post a job
+              </Button>
+            </header>
             {!result.ok ? (
               <p className="profile-card__empty">{result.error}</p>
             ) : jobs.length === 0 ? (
-              <p className="profile-card__empty">
-                You haven&apos;t posted a job yet.
-              </p>
+              <div className="dashboard__empty">
+                <p className="profile-card__empty">
+                  You haven&apos;t posted a job yet.
+                </p>
+                <Button href="/post-job" variant="solid">
+                  Post your first job
+                </Button>
+              </div>
             ) : (
               <div className="recruiter-table" role="table">
+                <div
+                  className="recruiter-table__row recruiter-table__row--head"
+                  role="row"
+                >
+                  <span role="columnheader">Job</span>
+                  <span role="columnheader">Status</span>
+                  <span role="columnheader">Applicants</span>
+                  <span role="columnheader">
+                    <span className="sr-only">Actions</span>
+                  </span>
+                </div>
                 {jobs.map((job) => (
                   <div className="recruiter-table__row" role="row" key={job.id}>
                     <div className="recruiter-table__main" role="cell">
@@ -83,17 +116,20 @@ export default async function DashboardPage() {
                           .join(" · ")}
                       </span>
                     </div>
-                    <span
-                      className={`recruiter-table__status recruiter-table__status--${job.status.toLowerCase()}`}
-                      role="cell"
-                    >
-                      {STATUS_LABELS[job.status]}
+                    <span role="cell">
+                      <span
+                        className={`recruiter-table__status recruiter-table__status--${job.status.toLowerCase()}`}
+                      >
+                        {STATUS_LABELS[job.status]}
+                      </span>
                     </span>
                     <span className="recruiter-table__count" role="cell">
-                      {job.applicantCount}{" "}
-                      {job.applicantCount === 1 ? "applicant" : "applicants"}
+                      <strong>{job.applicantCount}</strong>
+                      <span className="recruiter-table__count-label">
+                        {job.applicantCount === 1 ? "applicant" : "applicants"}
+                      </span>
                     </span>
-                    <span role="cell">
+                    <span className="recruiter-table__action" role="cell">
                       {job.status !== "DRAFT" && (
                         <JobStatusButton
                           id={job.id}

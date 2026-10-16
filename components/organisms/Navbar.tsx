@@ -7,7 +7,8 @@ import AccountActions from "@/components/molecules/AccountActions";
 import MobileMenu from "@/components/molecules/MobileMenu";
 import NavTabs from "@/components/molecules/NavTabs";
 
-export default function Navbar() {
+/** `minimal` shows only the wordmark (used on the sign-in and sign-up pages). */
+export default function Navbar({ minimal = false }: { minimal?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const progressRef = useRef<HTMLSpanElement>(null);
 
@@ -28,16 +29,26 @@ export default function Navbar() {
       <Link href="/" aria-label="WorkPhelo home" className="navbar__brand">
         <WorkPheloWordmark />
       </Link>
-      <nav aria-label="Main" className="navbar__tabs">
-        <NavTabs />
-      </nav>
-      <div className="navbar__actions">
-        <AccountActions />
-      </div>
-      <div className="navbar__menu">
-        <MobileMenu />
-      </div>
-      <span ref={progressRef} className="navbar__progress" aria-hidden="true" />
+      {!minimal && (
+        <>
+          <nav aria-label="Main" className="navbar__tabs">
+            <NavTabs />
+          </nav>
+          <div className="navbar__actions">
+            <AccountActions />
+          </div>
+          <div className="navbar__menu">
+            <MobileMenu />
+          </div>
+        </>
+      )}
+      {!minimal && (
+        <span
+          ref={progressRef}
+          className="navbar__progress"
+          aria-hidden="true"
+        />
+      )}
     </header>
   );
 }

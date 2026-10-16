@@ -22,12 +22,18 @@ export default function SignInForm({
   next = "/",
   notice,
   noticeError,
+  lockedRole,
+  onSwitch,
 }: {
   next?: string;
   notice?: string;
   noticeError?: string;
+  /** Fixes the account type and hides the picker. */
+  lockedRole?: Role;
+  /** Swaps to the sign-up form in place instead of linking to its page. */
+  onSwitch?: () => void;
 }) {
-  const [role, setRole] = useState<Role>("candidate");
+  const [role, setRole] = useState<Role>(lockedRole ?? "candidate");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,24 +82,26 @@ export default function SignInForm({
         onSubmit={handleSubmit}
         aria-busy={loading}
       >
-        <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
-          {ROLES.map(({ value, label }) => (
-            <label
-              key={value}
-              className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
-            >
-              <input
-                type="radio"
-                name="role"
-                value={value}
-                checked={role === value}
-                onChange={() => setRole(value)}
-                className="sign-in__role-input"
-              />
-              {label}
-            </label>
-          ))}
-        </div>
+        {!lockedRole && (
+          <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
+            {ROLES.map(({ value, label }) => (
+              <label
+                key={value}
+                className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value={value}
+                  checked={role === value}
+                  onChange={() => setRole(value)}
+                  className="sign-in__role-input"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        )}
         <label className="sign-in__field">
           <span className="sign-in__label">Email</span>
           <Input
@@ -160,9 +168,15 @@ export default function SignInForm({
       </form>
       <p className="sign-in__switch">
         Don&apos;t have an account?{" "}
-        <Link href="/sign-up" className="sign-in__link">
-          Sign up
-        </Link>
+        {onSwitch ? (
+          <button type="button" className="sign-in__link" onClick={onSwitch}>
+            Sign up
+          </button>
+        ) : (
+          <Link href="/sign-up" className="sign-in__link">
+            Sign up
+          </Link>
+        )}
       </p>
     </WhitePanel>
   );

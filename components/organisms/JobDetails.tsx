@@ -16,17 +16,6 @@ interface JobDetailsProps {
 export default function JobDetails({ job, closeHref }: JobDetailsProps) {
   return (
     <article className="job-details" aria-labelledby="job-details-title">
-      <div className="job-details__topbar">
-        {/* <Link
-          href={closeHref}
-          scroll={false}
-          className="job-details__close"
-          aria-label="Close job details"
-        >
-          <Icon name="close" size={16} />
-          Close
-        </Link> */}
-      </div>
       <header className="job-details__header">
         <div className="job-details__heading">
           <p className="job-details__employer">
@@ -55,6 +44,21 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
           <SaveJobButton
             job={{ id: job.id, title: job.title, company: job.company }}
           />
+          <Link
+            href={closeHref}
+            scroll={false}
+            className="job-details__close"
+            aria-label="Close job details"
+          >
+            <span className="job-details__back-icon">
+              <Icon name="arrow-left" size={16} />
+            </span>
+            <span className="job-details__close-icon">
+              <Icon name="close" size={16} />
+            </span>
+            <span className="job-details__back-label">Back to jobs</span>
+            <span className="job-details__close-label">Close</span>
+          </Link>
         </div>
       </header>
       <Divider />

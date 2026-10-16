@@ -1,111 +1,173 @@
-"use client";
-
-import { useState } from "react";
-import Button from "@/components/atoms/Button";
+import Link from "next/link";
 import Icon from "@/components/atoms/Icon";
-import { featureGroups, pricingTiers } from "@/lib/pricing";
+import Money from "@/components/atoms/Money";
+import Button from "@/components/atoms/Button";
+import FreePlan from "@/components/organisms/FreePlan";
+import PremiumPlan from "@/components/organisms/PremiumPlan";
+import CustomPlanBuilder from "@/components/organisms/CustomPlanBuilder";
+import BillingToggle from "@/components/molecules/BillingToggle";
+import {
+  allFeaturesOneTime,
+  allFeaturesPrice,
+  formatPrice,
+  pricingHref,
+  pricingTiers,
+  type Billing,
+  type PricingTier,
+} from "@/lib/pricing";
 
-export default function PricingPlans() {
-  // Groups open together across every plan so the columns stay comparable.
-  const [open, setOpen] = useState<Set<string>>(
-    () => new Set([featureGroups[0].id]),
-  );
+interface PricingPlansProps {
+  selectedId?: string;
+  billing: Billing;
+  signedIn: boolean;
+}
 
-  const toggle = (id: string) =>
-    setOpen((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-
+function PlanCard({
+  tier,
+  selected,
+  compact,
+  billing,
+  signedIn,
+}: {
+  tier: PricingTier;
+  selected: boolean;
+  compact: boolean;
+  billing: Billing;
+  signedIn: boolean;
+}) {
+  // Signed-in users already have an account, so the free sign-up is no use.
+  const unavailable = signedIn && tier.id === "free";
+  const classes = ["plan-head"];
+  if (tier.featured) classes.push("plan-head--featured");
+  if (selected) classes.push("plan-head--selected");
+  if (unavailable) classes.push("plan-head--disabled");
   return (
-    <section className="pricing" aria-label="Plans and features">
-      <div className="pricing__scroll">
+    <div
+      className={classes.join(" ")}
+      aria-disabled={unavailable ? true : undefined}
+    >
+      <div className="plan-head__top">
+        <span className="plan-head__icon">
+          <Icon name={tier.icon} size={18} />
+        </span>
+        <h2 className="plan-head__name">
+          {unavailable ? (
+            <span className="plan-head__link">{tier.name}</span>
+          ) : (
+            <Link
+              href={pricingHref(tier.id, billing)}
+              scroll={false}
+              className="plan-head__link"
+              aria-current={selected ? "true" : undefined}
+            >
+              {tier.name}
+            </Link>
+          )}
+        </h2>
+        {tier.featured && <span className="plan-head__badge">Recommended</span>}
+      </div>
+      <p className="plan-head__tagline">{tier.tagline}</p>
+      <p className="plan-head__price">
+        {tier.priceFromFeatures ? (
+          <Money
+            amount={allFeaturesPrice(billing)}
+            unit={`/ user / ${billing}`}
+            size="md"
+          />
+        ) : (
+          tier.price
+        )}
+      </p>
+      <p
+        className={
+          tier.priceFromFeatures
+            ? "plan-head__note plan-head__note--small"
+            : "plan-head__note"
+        }
+      >
+        {tier.priceFromFeatures
+          ? `+ ${formatPrice(allFeaturesOneTime())} one time set-up payment`
+          : (tier.priceNote ?? " ")}
+      </p>
+      {!compact && (
+        <div className="plan-head__cta">
+          {unavailable ? (
+            <Button type="button" variant="solid" disabled>
+              {tier.cta}
+            </Button>
+          ) : (
+            <Button href={pricingHref(tier.id, billing)} variant="solid">
+              {tier.cta}
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PricingPlans({
+  selectedId,
+  billing,
+  signedIn,
+}: PricingPlansProps) {
+  const selected = pricingTiers.find((t) => t.id === selectedId);
+
+  if (!selected) {
+    return (
+      <section className="pricing" aria-label="Plans">
+        <BillingToggle billing={billing} />
         <div className="pricing__grid">
           {pricingTiers.map((tier) => (
-            <div
+            <PlanCard
               key={tier.id}
-              className={
-                tier.featured
-                  ? "plan-head plan-head--featured"
-                  : "plan-head"
-              }
-            >
-              <h2 className="plan-head__name">{tier.name}</h2>
-              <p className="plan-head__tagline">{tier.tagline}</p>
-              <p className="plan-head__price">{tier.price}</p>
-              <p className="plan-head__note">{tier.priceNote ?? " "}</p>
-              <div className="plan-head__cta">
-                <Button href="/sign-in" variant="solid">
-                  {tier.cta}
-                </Button>
-              </div>
-            </div>
+              tier={tier}
+              selected={false}
+              compact={false}
+              billing={billing}
+              signedIn={signedIn}
+            />
           ))}
+        </div>
+      </section>
+    );
+  }
 
-          {featureGroups.map((group, groupIndex) => {
-            const isOpen = open.has(group.id);
-            const isLast = groupIndex === featureGroups.length - 1;
-            return pricingTiers.map((tier, tierIndex) => {
-              const items = group.items.filter(
-                (item) => item.from <= tierIndex,
-              );
-              const panelId = `${group.id}-${tier.id}`;
-              const classes = ["plan-cell"];
-              if (tier.featured) classes.push("plan-cell--featured");
-              if (isLast) classes.push("plan-cell--last");
-              return (
-                <div key={panelId} className={classes.join(" ")}>
-                  <button
-                    type="button"
-                    className="plan-cell__toggle"
-                    aria-expanded={isOpen}
-                    aria-controls={panelId}
-                    onClick={() => toggle(group.id)}
-                  >
-                    <span>{group.title}</span>
-                    <span
-                      className={
-                        isOpen
-                          ? "plan-cell__chevron plan-cell__chevron--open"
-                          : "plan-cell__chevron"
-                      }
-                    >
-                      <Icon name="chevron-down" size={18} />
-                    </span>
-                  </button>
-                  <div
-                    id={panelId}
-                    className={
-                      isOpen
-                        ? "plan-cell__panel plan-cell__panel--open"
-                        : "plan-cell__panel"
-                    }
-                  >
-                    <div className="plan-cell__panel-inner">
-                      {items.length > 0 ? (
-                        <ul className="plan-cell__list">
-                          {items.map((item) => (
-                            <li key={item.label} className="plan-cell__item">
-                              <span className="plan-cell__check">
-                                <Icon name="check" size={16} strokeWidth={3} />
-                              </span>
-                              {item.label}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="plan-cell__empty">
-                          Not included in this plan
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            });
-          })}
+  return (
+    <section className="pricing" aria-label="Plans">
+      <BillingToggle billing={billing} plan={selected.id} />
+      <div className="pricing__split">
+        <div className="pricing__list">
+          {pricingTiers.map((tier) => (
+            <PlanCard
+              key={tier.id}
+              tier={tier}
+              selected={tier.id === selected.id}
+              compact
+              billing={billing}
+              signedIn={signedIn}
+            />
+          ))}
+        </div>
+        <div className="plan-panel">
+          {selected.id === "custom" ? (
+            <CustomPlanBuilder billing={billing} signedIn={signedIn} />
+          ) : selected.id === "premium" ? (
+            <PremiumPlan billing={billing} signedIn={signedIn} />
+          ) : selected.id === "free" ? (
+            <FreePlan />
+          ) : (
+            <>
+              <article
+                className="plan-details"
+                aria-label={`${selected.name} details`}
+              />
+              <aside
+                className="plan-aside"
+                aria-label={`${selected.name} summary`}
+              />
+            </>
+          )}
         </div>
       </div>
     </section>

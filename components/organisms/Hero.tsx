@@ -9,6 +9,8 @@ interface HeroProps {
   query?: string;
   location?: string;
   type?: string;
+  posted?: string;
+  showDateFilter?: boolean;
   title?: string;
   titleAccent?: string;
   subtext?: ReactNode;
@@ -21,6 +23,8 @@ export default function Hero({
   query,
   location,
   type,
+  posted,
+  showDateFilter,
   title,
   titleAccent,
   showSearch = true,
@@ -74,7 +78,13 @@ export default function Hero({
           )}
         </div>
         {showSearch && (
-          <SearchBar defaultValue={query} location={location} type={type} />
+          <SearchBar
+            defaultValue={query}
+            location={location}
+            type={type}
+            posted={posted}
+            showDateFilter={showDateFilter}
+          />
         )}
       </div>
     </section>

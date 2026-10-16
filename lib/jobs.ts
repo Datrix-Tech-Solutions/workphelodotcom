@@ -26,6 +26,8 @@ export interface Job {
   workMode: "Remote" | "Hybrid" | "On-site" | null;
   type: string;
   posted: string;
+  /** ISO timestamp the vacancy was created; used by the date filter. */
+  createdAt: string;
   description: string;
   responsibilities: string[];
   requirements: string[];
@@ -212,6 +214,7 @@ export function toJob(v: ApiVacancy): Job {
     workMode: v.workMode ? WORK_MODES[v.workMode] : null,
     type: v.jobType ? JOB_TYPES[v.jobType] : "",
     posted: formatPosted(v.createdAt),
+    createdAt: v.createdAt,
     description: v.description ?? "",
     responsibilities: toList(v.responsibilities),
     requirements: toList(v.requirements),
@@ -235,19 +238,85 @@ export const TYPE_FILTERS: Record<
   ONSITE: { label: "On-site", field: "workMode", value: "ONSITE" },
 };
 
+/** Choices for the `posted` search param; "year" and "date" carry a value. */
+export const POSTED_OPTIONS = [
+  { value: "24h", label: "Last 24 hours" },
+  { value: "7d", label: "Last 7 days" },
+  { value: "30d", label: "Last 30 days" },
+  { value: "3m", label: "Last 3 months" },
+  { value: "year", label: "Pick a year" },
+  { value: "date", label: "Specific date" },
+] as const;
+
+const DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Parses `posted` (`24h`, `7d`, `30d`, `3m`, `year:2025`, `date:2026-10-01`)
+ * into a time range, or null when it is empty or invalid.
+ */
+export function postedRange(
+  posted?: string,
+): { from: number; to: number; label: string } | null {
+  if (!posted) return null;
+  const now = Date.now();
+  const rolling: Record<string, [number, string]> = {
+    "24h": [DAY, "Last 24 hours"],
+    "7d": [7 * DAY, "Last 7 days"],
+    "30d": [30 * DAY, "Last 30 days"],
+  };
+  if (posted in rolling) {
+    const [span, label] = rolling[posted];
+    return { from: now - span, to: now, label };
+  }
+  if (posted === "3m") {
+    const from = new Date(now);
+    from.setMonth(from.getMonth() - 3);
+    return { from: from.getTime(), to: now, label: "Last 3 months" };
+  }
+  const year = /^year:(\d{4})$/.exec(posted);
+  if (year) {
+    const y = Number(year[1]);
+    return {
+      from: new Date(y, 0, 1).getTime(),
+      to: new Date(y + 1, 0, 1).getTime() - 1,
+      label: String(y),
+    };
+  }
+  const day = /^date:(\d{4})-(\d{2})-(\d{2})$/.exec(posted);
+  if (day) {
+    const [y, m, d] = [Number(day[1]), Number(day[2]) - 1, Number(day[3])];
+    const start = new Date(y, m, d);
+    if (Number.isNaN(start.getTime())) return null;
+    return {
+      from: start.getTime(),
+      to: new Date(y, m, d + 1).getTime() - 1,
+      label: `${day[1]}-${day[2]}-${day[3]}`,
+    };
+  }
+  return null;
+}
+
 export function jobHref(
   jobId: string,
   {
     query,
     location,
     type,
+    posted,
     page,
-  }: { query?: string; location?: string; type?: string; page?: number } = {},
+  }: {
+    query?: string;
+    location?: string;
+    type?: string;
+    posted?: string;
+    page?: number;
+  } = {},
 ): string {
   const params = new URLSearchParams();
   if (query) params.set("q", query);
   if (location) params.set("location", location);
   if (type) params.set("type", type);
+  if (posted) params.set("posted", posted);
   if (page && page > 1) params.set("page", String(page));
   params.set("job", jobId);
   return `/jobs?${params.toString()}`;

@@ -21,8 +21,19 @@ const ROLES: { value: Role; label: string }[] = [
   { value: "recruiter", label: "Recruiter" },
 ];
 
-export default function SignUpForm() {
-  const [role, setRole] = useState<Role>("candidate");
+export default function SignUpForm({
+  lockedRole,
+  onSwitch,
+  next = "/",
+}: {
+  /** Fixes the account type and hides the picker. */
+  lockedRole?: Role;
+  /** Swaps to the sign-in form in place instead of linking to its page. */
+  onSwitch?: () => void;
+  /** Where to go once the account is created. */
+  next?: string;
+}) {
+  const [role, setRole] = useState<Role>(lockedRole ?? "candidate");
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [companySize, setCompanySize] = useState("");
@@ -70,7 +81,7 @@ export default function SignUpForm() {
       }
       resetSavedJobs();
       notifySessionChange();
-      router.push("/");
+      router.push(next);
       router.refresh();
     } finally {
       setLoading(false);
@@ -92,24 +103,26 @@ export default function SignUpForm() {
         onSubmit={handleSubmit}
         aria-busy={loading}
       >
-        <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
-          {ROLES.map(({ value, label }) => (
-            <label
-              key={value}
-              className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
-            >
-              <input
-                type="radio"
-                name="role"
-                value={value}
-                checked={role === value}
-                onChange={() => setRole(value)}
-                className="sign-in__role-input"
-              />
-              {label}
-            </label>
-          ))}
-        </div>
+        {!lockedRole && (
+          <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
+            {ROLES.map(({ value, label }) => (
+              <label
+                key={value}
+                className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value={value}
+                  checked={role === value}
+                  onChange={() => setRole(value)}
+                  className="sign-in__role-input"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        )}
         {role === "recruiter" && (
           <>
             <label className="sign-in__field sign-in__field--full">
@@ -280,9 +293,15 @@ export default function SignUpForm() {
       </form>
       <p className="sign-in__switch">
         Already have an account?{" "}
-        <Link href="/sign-in" className="sign-in__link">
-          Sign in
-        </Link>
+        {onSwitch ? (
+          <button type="button" className="sign-in__link" onClick={onSwitch}>
+            Sign in
+          </button>
+        ) : (
+          <Link href="/sign-in" className="sign-in__link">
+            Sign in
+          </Link>
+        )}
       </p>
     </WhitePanel>
   );

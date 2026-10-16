@@ -1,7 +1,7 @@
 import JobGrid from "@/components/molecules/JobGrid";
 import Pagination from "@/components/molecules/Pagination";
 import JobDetails from "@/components/organisms/JobDetails";
-import { jobHref, TYPE_FILTERS, type Job } from "@/lib/jobs";
+import { jobHref, postedRange, TYPE_FILTERS, type Job } from "@/lib/jobs";
 
 interface JobListingsProps {
   jobs: Job[];
@@ -9,6 +9,7 @@ interface JobListingsProps {
   query: string;
   location: string;
   type: string;
+  posted: string;
   page: number;
   totalPages: number;
   selectedJob?: Job;
@@ -22,6 +23,7 @@ export default function JobListings({
   query,
   location,
   type,
+  posted,
   page,
   totalPages,
   selectedJob,
@@ -29,14 +31,18 @@ export default function JobListings({
   unavailable,
 }: JobListingsProps) {
   const buildHref = (job: Job) =>
-    jobHref(job.id, { query, location, type, page });
-  const filtered = !!(query || location || type);
+    jobHref(job.id, { query, location, type, posted, page });
+  const filtered = !!(query || location || type || posted);
   const heading = query
     ? `Results for "${query}"`
     : filtered
       ? "Results"
       : "All jobs";
-  const activeFilters = [location, type ? TYPE_FILTERS[type]?.label : ""]
+  const activeFilters = [
+    location,
+    type ? TYPE_FILTERS[type]?.label : "",
+    postedRange(posted)?.label ?? "",
+  ]
     .filter(Boolean)
     .join(" · ");
 
@@ -68,6 +74,7 @@ export default function JobListings({
               query={query}
               location={location}
               type={type}
+              posted={posted}
             />
           </>
         ) : (
@@ -115,6 +122,7 @@ export default function JobListings({
             query={query}
             location={location}
             type={type}
+            posted={posted}
           />
         </div>
         <div className="panel job-split__details">
