@@ -12,7 +12,7 @@ const PRODUCTION_API_URL = "https://api.workphelo.com/api/v1";
 
 // HR_API_URL wins so a deployment can point at either server explicitly. Without it,
 // `next dev` uses the dev server and a production build uses production.
-const API_URL =
+export const API_URL =
   process.env.HR_API_URL ??
   (process.env.NODE_ENV === "production" ? PRODUCTION_API_URL : DEV_API_URL);
 

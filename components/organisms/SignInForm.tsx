@@ -7,7 +7,7 @@ import Button from "@/components/atoms/Button";
 import { WhitePanel } from "@/components/atoms/GlassPanel";
 import Input from "@/components/atoms/Input";
 import PasswordField from "@/components/molecules/PasswordField";
-import { signIn } from "@/app/auth/actions";
+import { resendRecruiterConfirmation, signIn } from "@/app/auth/actions";
 import { resetSavedJobs } from "@/lib/useSavedJobs";
 import { notifySessionChange } from "@/lib/useSession";
 
@@ -18,13 +18,29 @@ const ROLES: { value: Role; label: string }[] = [
   { value: "recruiter", label: "Recruiter" },
 ];
 
-export default function SignInForm({ next = "/" }: { next?: string }) {
+export default function SignInForm({
+  next = "/",
+  notice,
+  noticeError,
+}: {
+  next?: string;
+  notice?: string;
+  noticeError?: string;
+}) {
   const [role, setRole] = useState<Role>("candidate");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(noticeError ?? "");
+  const [resent, setResent] = useState(false);
   const router = useRouter();
+  const needsConfirmation =
+    role === "recruiter" && error.toLowerCase().includes("confirm your email");
+
+  async function handleResend() {
+    await resendRecruiterConfirmation(email);
+    setResent(true);
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,7 +55,8 @@ export default function SignInForm({ next = "/" }: { next?: string }) {
       }
       resetSavedJobs();
       notifySessionChange();
-      router.push(next);
+      // Recruiters have no use for the home page; take them to their dashboard.
+      router.push(role === "recruiter" && next === "/" ? "/dashboard" : next);
       router.refresh();
     } finally {
       setLoading(false);
@@ -105,11 +122,31 @@ export default function SignInForm({ next = "/" }: { next?: string }) {
         >
           Forgot password?
         </Link>
+        {notice && !error && (
+          <p className="sign-in__notice sign-in__message" role="status">
+            {notice}
+          </p>
+        )}
         {error && (
           <p className="sign-in__error sign-in__message" role="alert">
             {error}
           </p>
         )}
+        {needsConfirmation &&
+          (resent ? (
+            <p className="sign-in__notice sign-in__message" role="status">
+              If that email is waiting for confirmation, a new link is on its
+              way.
+            </p>
+          ) : (
+            <button
+              type="button"
+              className="sign-in__link"
+              onClick={handleResend}
+            >
+              Resend confirmation email
+            </button>
+          ))}
         <Button type="submit" variant="primary" disabled={loading}>
           {loading ? (
             <>

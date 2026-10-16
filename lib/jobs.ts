@@ -19,6 +19,8 @@ export interface Job {
   id: string;
   title: string;
   company: string;
+  /** True when WorkPhelo has verified the employer; shown as a check mark. */
+  companyVerified: boolean;
   salary: string;
   location: string;
   workMode: "Remote" | "Hybrid" | "On-site" | null;
@@ -53,6 +55,7 @@ export interface ApiVacancy {
   id: string;
   tenantId: string;
   companyName: string | null;
+  companyVerified?: boolean;
   title: string | null;
   location: string | null;
   city: string | null;
@@ -203,6 +206,7 @@ export function toJob(v: ApiVacancy): Job {
     id: toJobId(v.tenantId, v.id),
     title: v.title ?? "Untitled role",
     company: v.companyName ?? "Company",
+    companyVerified: v.companyVerified === true,
     salary: formatSalary(v),
     location: place.join(", ") || "Location not specified",
     workMode: v.workMode ? WORK_MODES[v.workMode] : null,

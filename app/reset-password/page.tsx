@@ -19,7 +19,7 @@ export default async function ResetPasswordPage() {
   return (
     <main>
       <Navbar />
-      <section className="hero hero--full">
+      <section className="hero hero--full hero--auth">
         <Image
           src="/workphelodotcomhero.png"
           alt=""

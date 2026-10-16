@@ -18,6 +18,8 @@ export interface AuthUser {
   name: string;
   /** Present for candidates. */
   profile?: CandidateProfile;
+  /** Present for recruiters. */
+  company?: string;
 }
 
 /** What the rest of the app sees, whichever provider issued the session. */

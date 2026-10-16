@@ -10,6 +10,7 @@ import {
   type SignUpInput,
 } from "@/lib/auth";
 import { updateCandidateProfile } from "@/lib/auth/candidate";
+import { resendRecruiterConfirmation as resendConfirmation } from "@/lib/auth/recruiter";
 
 export type { AuthResult };
 
@@ -58,4 +59,10 @@ export async function updatePassword(password: string): Promise<AuthResult> {
     return { error: "Password must be at least 8 characters." };
   }
   return authFor(session.role).updatePassword(password);
+}
+
+export async function resendRecruiterConfirmation(
+  email: string,
+): Promise<void> {
+  await resendConfirmation(email);
 }

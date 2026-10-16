@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CompanyAvatar from "@/components/atoms/CompanyAvatar";
+import VerifiedMark from "@/components/atoms/VerifiedMark";
 import Divider from "@/components/atoms/Divider";
 import Icon from "@/components/atoms/Icon";
 import Badge from "@/components/atoms/Badge";
@@ -31,6 +32,7 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
           <p className="job-details__employer">
             <CompanyAvatar name={job.company} size="sm" />
             {job.company}
+            {job.companyVerified && <VerifiedMark />}
           </p>
           <h2 id="job-details-title" className="job-details__title">
             {job.title} at {job.company}

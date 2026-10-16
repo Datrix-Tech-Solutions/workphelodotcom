@@ -42,7 +42,8 @@ export const pricingTiers: PricingTier[] = [
     id: "premium",
     name: "Premium",
     tagline: "The complete Workphelo platform",
-    price: "Coming soon",
+    // yearly
+    price: "$10/month/user",
     priceNote: "Pricing to be announced",
     cta: "Choose plan",
     featured: true,
@@ -52,19 +53,19 @@ export const pricingTiers: PricingTier[] = [
 // Which tier each feature starts at is a first pass; adjust `from` as needed.
 export const featureGroups: FeatureGroup[] = [
   {
-    id: "employee-management",
-    title: "Employee Management",
-    items: [
-      { label: "Onboarding and off-boarding", from: 0 },
-      { label: "Leave management", from: 0 },
-    ],
-  },
-  {
     id: "recruitment",
     title: "Recruitment",
     items: [
-      { label: "Hiring", from: 1 },
-      { label: "Vetting", from: 2 },
+      { label: "Hiring", from: 0 },
+      { label: "Vetting", from: 1 },
+    ],
+  },
+  {
+    id: "employee-management",
+    title: "Employee Management",
+    items: [
+      { label: "Onboarding and off-boarding", from: 1 },
+      { label: "Leave management", from: 1 },
     ],
   },
   {
@@ -117,9 +118,9 @@ export const featureGroups: FeatureGroup[] = [
       { label: "Manage budgets and cost centres", from: 2 },
     ],
   },
-  {
-    id: "operations",
-    title: "Operations",
-    items: [{ label: "Personalized company operations software", from: 3 }],
-  },
+  // {
+  //   id: "operations",
+  //   title: "Operations",
+  //   items: [{ label: "Personalized company operations software", from: 3 }],
+  // },
 ];

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import CompanyAvatar from "@/components/atoms/CompanyAvatar";
 import Badge from "@/components/atoms/Badge";
+import VerifiedMark from "@/components/atoms/VerifiedMark";
 import type { Job } from "@/lib/jobs";
 
 interface JobCardProps {
@@ -21,7 +22,10 @@ export default function JobCard({ job, href, selected }: JobCardProps) {
         <CompanyAvatar name={job.company} />
         <div className="job-card__heading">
           <h3 className="job-card__title">{job.title}</h3>
-          <p className="job-card__company">{job.company}</p>
+          <p className="job-card__company">
+            {job.company}
+            {job.companyVerified && <VerifiedMark />}
+          </p>
         </div>
       </div>
       <p className="job-card__salary">{job.salary}</p>

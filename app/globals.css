@@ -19,7 +19,7 @@
   --color-hero-overlay: rgb(15 40 100 / 0.5);
   --color-hover: rgb(255 255 255 / 0.08);
   --radius-pill: 999px;
-  --radius-field: 1rem;
+  --radius-field: 1.25rem;
   --page-gutter: clamp(1.5rem, 6vw, 6rem);
 }
 
@@ -1537,7 +1537,7 @@ a.pagination__item--active:hover {
 }
 
 .footer .wordmark__phelo {
-  color: var(--color-brand-dark);
+  color: var(--color-brand);
 }
 
 .footer-brand__description {
@@ -3525,4 +3525,133 @@ button:focus-visible {
 textarea.field-control {
   resize: vertical;
   font-family: inherit;
+}
+
+/* Auth pages: keep the background fixed to the viewport. The form scrolls inside
+   the hero, so switching to a taller form can't resize the image or particles. */
+.hero--auth {
+  height: 100vh;
+  height: 100svh;
+}
+
+.hero--auth .hero__content {
+  height: 100%;
+  min-height: 0;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.hero--auth .white-panel.sign-in {
+  margin-block: auto;
+}
+
+/* Recruiter dashboard ------------------------------------------------------- */
+.dashboard__summary + .profile-card,
+.profile-card + .dashboard__note {
+  margin-top: 1.5rem;
+}
+
+.dashboard__note {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.recruiter-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.recruiter-table__row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) auto auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.recruiter-table__row:first-child {
+  border-top: 0;
+}
+
+.recruiter-table__main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.recruiter-table__title {
+  overflow: hidden;
+  color: var(--color-brand);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recruiter-table__meta,
+.recruiter-table__count {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.recruiter-table__status {
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  background-color: var(--color-border);
+  color: var(--color-brand);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.recruiter-table__status--open {
+  background-color: rgb(22 163 74 / 0.12);
+  color: var(--color-success);
+}
+
+.recruiter-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.job-status-button {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.job-status-button__error {
+  color: #b91c1c;
+  font-size: 0.75rem;
+}
+
+button.sign-in__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+@media (max-width: 40rem) {
+  .recruiter-table__row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+.verified-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-left: 0.35rem;
+  border-radius: 50%;
+  background-color: #1d6fd8;
+  color: #fff;
+  vertical-align: middle;
 }
