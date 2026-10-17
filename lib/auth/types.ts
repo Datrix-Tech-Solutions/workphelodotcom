@@ -20,6 +20,8 @@ export interface AuthUser {
   profile?: CandidateProfile;
   /** Present for recruiters. */
   company?: string;
+  /** True when WorkPhelo has verified the recruiter's company. */
+  companyVerified?: boolean;
 }
 
 /** What the rest of the app sees, whichever provider issued the session. */

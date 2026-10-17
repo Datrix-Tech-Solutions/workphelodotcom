@@ -22,6 +22,7 @@ const GENERIC = "Something went wrong. Please try again.";
 interface LoginResponse {
   accessToken?: string;
   refreshToken?: string;
+  isVerified?: boolean;
   user?: {
     id: string;
     email: string;
@@ -83,6 +84,7 @@ export const recruiterAuth: AuthProvider = {
         email: user.email,
         name: `${user.firstName} ${user.lastName}`.trim(),
         company: user.tenantName,
+        verified: body.isVerified === true,
       }),
       recruiterCookieOptions(RECRUITER_REFRESH_MAX_AGE),
     );
@@ -134,13 +136,17 @@ export const recruiterAuth: AuthProvider = {
     const raw = store.get(RECRUITER_USER_COOKIE)?.value;
     if (!raw) return null;
     try {
-      const { id, email, name, company } = JSON.parse(raw) as {
+      const { id, email, name, company, verified } = JSON.parse(raw) as {
         id: string;
         email: string;
         name: string;
         company: string;
+        verified?: boolean;
       };
-      return { role: "recruiter", user: { id, email, name, company } };
+      return {
+        role: "recruiter",
+        user: { id, email, name, company, companyVerified: verified === true },
+      };
     } catch {
       return null;
     }

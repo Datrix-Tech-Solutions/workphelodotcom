@@ -143,13 +143,15 @@ export default async function DashboardPage() {
             )}
           </section>
 
-          <p className="dashboard__note">
-            Your company appears without a verified check mark. Companies on
-            WorkPhelo are verified.{" "}
-            <Link href="/pricing" className="sign-in__link">
-              See plans
-            </Link>
-          </p>
+          {!session.user.companyVerified && (
+            <p className="dashboard__note">
+              Your company appears without a verified check mark. Companies on
+              WorkPhelo are verified.{" "}
+              <Link href="/pricing" className="sign-in__link">
+                See plans
+              </Link>
+            </p>
+          )}
         </section>
       </main>
       <Footer />
