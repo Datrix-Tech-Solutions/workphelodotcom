@@ -106,20 +106,16 @@ export const pricingTiers: PricingTier[] = [
 export interface CustomFeature {
   id: string;
   label: string;
+  description?: string;
+  /** Shown instead of the description while another selected feature requires this one. */
+  lockedDescription?: string;
   icon: IconName;
-  /** USD per user per month. */
   monthly: number;
-  /** USD per user per month when billed yearly. The year is charged in full. */
   yearly: number;
-  /** Extra one-off USD payment when the feature is added, not per user. */
   oneTime?: number;
-  /** Normal per user per month prices, shown struck out beside a promotional price. */
   listPrice?: { monthly: number; yearly: number };
-  /** Features sharing a group pay its one-off payment once between them. */
   oneTimeGroup?: string;
-  /** Always part of the plan: selected from the start and cannot be removed. */
   required?: boolean;
-  /** Ids of features that are selected along with this one. */
   requires?: string[];
 }
 
@@ -131,6 +127,7 @@ export const customFeatures: CustomFeature[] = [
     icon: "users",
     // File storage is part of it, so it carries that price.
     required: true,
+    description: "Included in every plan",
     monthly: 1,
     yearly: 0.5,
   },
@@ -180,6 +177,7 @@ export const customFeatures: CustomFeature[] = [
     id: "assets",
     label: "Asset management",
     icon: "package",
+    lockedDescription: "Included with Fleet management",
     monthly: 0.5,
     yearly: 0.5,
     oneTime: 10,
@@ -203,6 +201,7 @@ export const customFeatures: CustomFeature[] = [
   {
     id: "campaigns",
     label: "Campaign management",
+    description: "Bulk SMS and Emails to clients",
     icon: "megaphone",
     monthly: 1,
     yearly: 0.5,

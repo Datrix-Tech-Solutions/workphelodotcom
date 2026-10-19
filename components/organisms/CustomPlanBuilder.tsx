@@ -22,8 +22,7 @@ export default function CustomPlanBuilder({
   signedIn: boolean;
 }) {
   const [selected, setSelected] = useState<Set<string>>(
-    () =>
-      new Set(customFeatures.filter((f) => f.required).map((f) => f.id)),
+    () => new Set(customFeatures.filter((f) => f.required).map((f) => f.id)),
   );
   const [users, setUsers] = useState(1);
 
@@ -82,6 +81,9 @@ export default function CustomPlanBuilder({
             const required = isRequired(feature.id);
             const lockedFor = lockedBy.get(feature.id);
             const locked = required || Boolean(lockedFor);
+            const description = lockedFor
+              ? (feature.lockedDescription ?? feature.description)
+              : feature.description;
             return (
               <button
                 key={feature.id}
@@ -95,37 +97,30 @@ export default function CustomPlanBuilder({
                 }
                 aria-pressed={isSelected}
                 aria-disabled={locked ? true : undefined}
-                title={
-                  lockedFor
-                    ? `Required by ${lockedFor}`
-                    : required
-                      ? "Included in every plan"
-                      : undefined
-                }
+                title={description}
                 onClick={() => toggle(feature.id)}
               >
                 <span className="feature-widget__icon">
-                  <Icon name={feature.icon} size={18} />
+                  <Icon name={feature.icon} size={96} strokeWidth={1.25} />
                 </span>
                 <span className="feature-widget__text">
                   <span className="feature-widget__label">{feature.label}</span>
                   <span className="feature-widget__price">
                     {featureListPrice(feature, billing) !== undefined && (
                       <>
-                        <s>{formatPrice(featureListPrice(feature, billing)!)}</s>{" "}
+                        <s>
+                          {formatPrice(featureListPrice(feature, billing)!)}
+                        </s>{" "}
                       </>
                     )}
                     {featurePrice(feature, billing) === 0
                       ? featureListPrice(feature, billing) !== undefined
                         ? `$0.00/user/${suffix}`
                         : "Free"
-                      : `${formatPrice(featurePrice(feature, billing))}/user/${suffix}`}                  </span>
-                  {locked && (
-                    <span className="feature-widget__note">
-                      {lockedFor
-                        ? `Included with ${lockedFor}`
-                        : "Included in every plan"}
-                    </span>
+                      : `${formatPrice(featurePrice(feature, billing))}/user/${suffix}`}
+                  </span>
+                  {description && (
+                    <span className="feature-widget__note">{description}</span>
                   )}
                 </span>
                 <span className="feature-widget__check" aria-hidden="true">
