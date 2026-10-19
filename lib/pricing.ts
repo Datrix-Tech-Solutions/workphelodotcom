@@ -86,7 +86,7 @@ export const pricingTiers: PricingTier[] = [
     tagline: "Built around your organisation",
     price: "Custom",
     priceNote: "Tailored to your needs",
-    cta: "Talk to us",
+    cta: "Plan Builder",
     href: "/sign-in",
     summary:
       "Everything in Premium, shaped around how your organisation works.",
@@ -113,6 +113,12 @@ export interface CustomFeature {
   yearly: number;
   /** Extra one-off USD payment when the feature is added, not per user. */
   oneTime?: number;
+  /** Normal per user per month prices, shown struck out beside a promotional price. */
+  listPrice?: { monthly: number; yearly: number };
+  /** Features sharing a group pay its one-off payment once between them. */
+  oneTimeGroup?: string;
+  /** Always part of the plan: selected from the start and cannot be removed. */
+  required?: boolean;
   /** Ids of features that are selected along with this one. */
   requires?: string[];
 }
@@ -120,23 +126,26 @@ export interface CustomFeature {
 /** The modules a Custom plan can be built from. */
 export const customFeatures: CustomFeature[] = [
   {
-    id: "recruitment",
-    label: "Recruitment",
+    id: "employee-management",
+    label: "Employee management",
     icon: "users",
-    monthly: 0.5,
+    // File storage is part of it, so it carries that price.
+    required: true,
+    monthly: 1,
     yearly: 0.5,
   },
   {
-    id: "file-storage",
-    label: "File storage",
-    icon: "folder",
-    monthly: 1,
+    id: "recruitment",
+    label: "Recruitment",
+    icon: "user-plus",
+    monthly: 0.5,
     yearly: 0.5,
   },
   {
     id: "smart-scheduling",
     label: "Smart scheduling",
     icon: "calendar",
+    listPrice: { monthly: 0.3, yearly: 0.25 },
     monthly: 0,
     yearly: 0,
   },
@@ -147,6 +156,7 @@ export const customFeatures: CustomFeature[] = [
     monthly: 0.5,
     yearly: 0.5,
     oneTime: 10,
+    oneTimeGroup: "core-operations",
   },
   {
     id: "performance",
@@ -154,6 +164,8 @@ export const customFeatures: CustomFeature[] = [
     icon: "trending-up",
     monthly: 0.5,
     yearly: 0.5,
+    oneTime: 10,
+    oneTimeGroup: "core-operations",
   },
   {
     id: "projects",
@@ -161,6 +173,8 @@ export const customFeatures: CustomFeature[] = [
     icon: "clipboard-check",
     monthly: 0.5,
     yearly: 0.5,
+    oneTime: 10,
+    oneTimeGroup: "core-operations",
   },
   {
     id: "assets",
@@ -168,6 +182,8 @@ export const customFeatures: CustomFeature[] = [
     icon: "package",
     monthly: 0.5,
     yearly: 0.5,
+    oneTime: 10,
+    oneTimeGroup: "core-operations",
   },
   {
     id: "marketing-crm",
@@ -211,6 +227,17 @@ export function featurePrice(feature: CustomFeature, billing: Billing): number {
     : feature.monthly;
 }
 
+/** The struck-out normal price per user for the billing period, if any. */
+export function featureListPrice(
+  feature: CustomFeature,
+  billing: Billing,
+): number | undefined {
+  if (!feature.listPrice) return undefined;
+  return billing === "year"
+    ? feature.listPrice.yearly * MONTHS_PER_YEAR
+    : feature.listPrice.monthly;
+}
+
 export function formatPrice(amount: number): string {
   return amount === 0 ? "Free" : `$${amount.toFixed(2)}`;
 }
@@ -230,8 +257,21 @@ export function allFeaturesPrice(billing: Billing): number {
   return customFeatures.reduce((sum, f) => sum + featurePrice(f, billing), 0);
 }
 
+/** The set-up payment for a selection: each group of features pays once. */
+export function oneTimeTotal(features: CustomFeature[]): number {
+  const payments = new Map<string, number>();
+  for (const f of features) {
+    if (!f.oneTime) continue;
+    const key = f.oneTimeGroup ?? f.id;
+    payments.set(key, Math.max(payments.get(key) ?? 0, f.oneTime));
+  }
+  let total = 0;
+  for (const amount of payments.values()) total += amount;
+  return total;
+}
+
 export function allFeaturesOneTime(): number {
-  return customFeatures.reduce((sum, f) => sum + (f.oneTime ?? 0), 0);
+  return oneTimeTotal(customFeatures);
 }
 
 /**

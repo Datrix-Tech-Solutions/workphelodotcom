@@ -2,7 +2,7 @@ export const navTabs = [
   { label: "Home", href: "/" },
   { label: "Jobs", href: "/jobs" },
   { label: "Products", href: "/products" },
-  // { label: "Old products", href: "/old-products" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Resources", href: "/resources" },
 ];
 

@@ -66,7 +66,6 @@ export default function PremiumPlan({
             icon: "layers",
             label: "Premium plan",
             price: allFeaturesPrice(billing),
-            oneTime,
           },
         ]}
         perUser={allFeaturesPrice(billing)}

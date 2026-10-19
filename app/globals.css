@@ -3205,23 +3205,28 @@ button:focus-visible {
 }
 
 .feature-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.5rem;
 }
 
 .feature-widget {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.75rem 0.875rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  aspect-ratio: 1;
+  gap: 0.375rem;
+  padding: 0.625rem;
   border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
+  border-radius: 0.625rem;
   background-color: var(--color-white);
   color: var(--color-text);
   font: inherit;
-  font-size: 0.9375rem;
+  font-size: 0.75rem;
   font-weight: 500;
+  line-height: 1.25;
   cursor: pointer;
   transition:
     border-color 0.15s,
@@ -3250,13 +3255,13 @@ button:focus-visible {
 
 .feature-widget__price {
   color: var(--color-muted);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 400;
 }
 
 .feature-widget__note {
   color: var(--color-brand-dark);
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
 }
 
@@ -3269,11 +3274,14 @@ button:focus-visible {
 }
 
 .feature-widget__check {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
   background-color: var(--color-brand-dark);
   color: var(--color-white);
@@ -3778,6 +3786,38 @@ button:focus-visible {
   margin: 0.25rem 0 0;
   color: var(--color-muted);
   font-size: 0.8125rem;
+}
+
+.plan-head__included {
+  margin-top: 1rem;
+  padding-top: 0.875rem;
+  border-top: 1px dashed var(--color-border);
+}
+
+.plan-head__summary {
+  margin: 0 0 0.625rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.plan-head__features {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+
+.plan-head__features li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plan-head__features svg {
+  flex: none;
+  color: var(--color-brand-dark);
 }
 
 .plan-head__cta {

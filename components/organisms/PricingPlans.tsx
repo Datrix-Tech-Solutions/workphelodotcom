@@ -8,9 +8,10 @@ import CustomPlanBuilder from "@/components/organisms/CustomPlanBuilder";
 import BillingToggle from "@/components/molecules/BillingToggle";
 import {
   allFeaturesOneTime,
-  allFeaturesFirstTotal,
+  allFeaturesPrice,
   formatPrice,
   pricingHref,
+  premiumModuleTitles,
   pricingTiers,
   type Billing,
   type PricingTier,
@@ -70,8 +71,8 @@ function PlanCard({
       <p className="plan-head__price">
         {tier.priceFromFeatures ? (
           <Money
-            amount={allFeaturesFirstTotal(billing)}
-            unit={`first ${billing}`}
+            amount={allFeaturesPrice(billing)}
+            unit={`/ user / ${billing}`}
             size="md"
           />
         ) : (
@@ -86,9 +87,22 @@ function PlanCard({
         }
       >
         {tier.priceFromFeatures
-          ? `For 1 user, includes ${formatPrice(allFeaturesOneTime())} one time set-up payment`
+          ? `+ ${formatPrice(allFeaturesOneTime())} one time set-up payment`
           : (tier.priceNote ?? " ")}
       </p>
+      {!compact && tier.priceFromFeatures && (
+        <div className="plan-head__included">
+          <p className="plan-head__summary">{tier.summary}</p>
+          <ul className="plan-head__features">
+            {premiumModuleTitles.map((module) => (
+              <li key={module.label}>
+                <Icon name="check" size={14} strokeWidth={3} />
+                <span>{module.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {!compact && (
         <div className="plan-head__cta">
           {unavailable ? (

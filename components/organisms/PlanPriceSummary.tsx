@@ -21,7 +21,8 @@ export interface PriceLine {
   label: string;
   /** Price per user for the billing period. */
   price: number;
-  oneTime?: number;
+  /** Shown instead of the formatted price, e.g. "$0.00" rather than "Free". */
+  priceText?: string;
 }
 
 interface PlanPriceSummaryProps {
@@ -87,14 +88,9 @@ export default function PlanPriceSummary({
               </span>
               <span className="pricing-widget__line-name">
                 {line.label}
-                {line.oneTime ? (
-                  <span className="pricing-widget__line-note">
-                    + {formatPrice(line.oneTime)} one time set-up
-                  </span>
-                ) : null}
               </span>
               <span className="pricing-widget__line-price">
-                {formatPrice(line.price)}
+                {line.priceText ?? formatPrice(line.price)}
               </span>
             </li>
           ))}
