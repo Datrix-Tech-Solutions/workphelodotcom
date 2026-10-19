@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "@/components/atoms/Image";
 import Icon from "@/components/atoms/Icon";
 import type { ProductModule } from "@/lib/modules";
@@ -7,6 +8,7 @@ export default function ModuleCard({
   title,
   description,
   image,
+  slug,
   comingSoon,
 }: ProductModule) {
   return (
@@ -25,7 +27,13 @@ export default function ModuleCard({
           <Icon name={icon} size={24} />
         </span>
         <h3 className="module-card__title">
-          {title}
+          {slug ? (
+            <Link href={`/products/${slug}`} className="module-card__link">
+              {title}
+            </Link>
+          ) : (
+            title
+          )}
           {comingSoon && (
             <span className="module-card__badge">Coming soon</span>
           )}

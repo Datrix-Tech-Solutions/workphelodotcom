@@ -2,6 +2,7 @@ import Button from "@/components/atoms/Button";
 import Reveal from "@/components/atoms/Reveal";
 import ModuleCard from "@/components/molecules/ModuleCard";
 import { productModules } from "@/lib/modules";
+import { getRandomModuleImage } from "@/lib/productImages";
 
 export default function ModulesSection() {
   return (
@@ -19,7 +20,13 @@ export default function ModulesSection() {
       <ul className="modules__grid">
         {productModules.map((module, index) => (
           <Reveal as="li" key={module.title} delay={index * 100}>
-            <ModuleCard {...module} />
+            <ModuleCard
+              {...module}
+              image={
+                (module.slug && getRandomModuleImage(module.slug)) ||
+                module.image
+              }
+            />
           </Reveal>
         ))}
       </ul>

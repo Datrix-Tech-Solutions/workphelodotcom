@@ -6,6 +6,8 @@ export interface ProductModule {
   title: string;
   description: string;
   image: string;
+  /** The product page under /products; modules without one are not linked. */
+  slug?: string;
   comingSoon?: boolean;
 }
 
@@ -13,6 +15,7 @@ export const productModules: ProductModule[] = [
   {
     icon: "users",
     title: "HR Management",
+    slug: "hrm",
     image: "/products/modules/hr-employees.png",
     description:
       "Employee records, leave and attendance, recruitment, payroll and self-service in one place.",
@@ -20,6 +23,7 @@ export const productModules: ProductModule[] = [
   {
     icon: "megaphone",
     title: "Marketing & Business Development",
+    slug: "marketing",
     image: "/products/modules/mkt-leads.png",
     description:
       "Track leads, opportunities and the sales pipeline, and keep customer follow-ups on schedule.",
@@ -27,6 +31,7 @@ export const productModules: ProductModule[] = [
   {
     icon: "calculator",
     title: "Accounting",
+    slug: "accounting",
     image: "/products/modules/acc-ledger.png",
     description:
       "General ledger, payables and receivables, banking, budgets and financial reporting across branches.",
@@ -34,6 +39,7 @@ export const productModules: ProductModule[] = [
   {
     icon: "settings",
     title: "Operations",
+    slug: "company-operations",
     image: "/products/modules/ops-process.png",
     description:
       "Industry-specific workflows for insurance, healthcare, education and manufacturing.",

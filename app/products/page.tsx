@@ -5,6 +5,9 @@ import ModulesSection from "@/components/organisms/ModulesSection";
 import ProblemSection from "@/components/organisms/ProblemSection";
 import ValuePropositionSection from "@/components/organisms/ValuePropositionSection";
 
+// Rendered per visit so each module card shows a different image every time.
+export const dynamic = "force-dynamic";
+
 const modules = [
   "HR",
   "Marketing",
