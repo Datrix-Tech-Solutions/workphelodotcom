@@ -4955,3 +4955,42 @@ button.sign-in__link {
   font-weight: 700;
 }
 
+
+/* Legal documents ---------------------------------------------------------- */
+.legal-doc {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem clamp(1rem, 4vw, 3rem) 2.5rem;
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+.legal-doc__section {
+  margin-top: 1.5rem;
+}
+
+.legal-doc h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  color: var(--color-brand);
+}
+
+.legal-doc p {
+  margin: 0 0 1rem;
+}
+
+.legal-doc ul {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+  color: var(--color-muted);
+}
+
+.legal-doc li + li {
+  margin-top: 0.35rem;
+}
+
+.legal-doc h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.05rem;
+  color: var(--color-brand);
+}

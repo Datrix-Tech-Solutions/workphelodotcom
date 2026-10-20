@@ -39,7 +39,7 @@ export const socialLinks = [
 export const legalLinks = [
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
-  { label: "Cookies", href: "/cookies" },
+  { label: "Refund Policy", href: "/refund-policy" },
   { label: "Accessibility", href: "/accessibility" },
 ];
 
