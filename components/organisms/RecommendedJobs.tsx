@@ -6,7 +6,6 @@ import { jobHref } from "@/lib/jobs";
 
 export default async function RecommendedJobs() {
   const { jobs } = await fetchJobs({ limit: 8 });
-  if (jobs.length === 0) return null;
 
   return (
     <section className="recommended-jobs" aria-labelledby="recommended-title">
@@ -18,7 +17,13 @@ export default async function RecommendedJobs() {
           Explore more
         </Button>
       </Reveal>
-      <JobGrid jobs={jobs} buildHref={(job) => jobHref(job.id)} />
+      {jobs.length === 0 ? (
+        <p className="recommended-jobs__empty">
+          No jobs have been posted yet. Check back soon.
+        </p>
+      ) : (
+        <JobGrid jobs={jobs} buildHref={(job) => jobHref(job.id)} />
+      )}
     </section>
   );
 }

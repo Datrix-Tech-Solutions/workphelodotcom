@@ -649,6 +649,11 @@ main {
   margin-bottom: 2rem;
 }
 
+.recommended-jobs__empty {
+  margin: 0;
+  color: var(--color-muted);
+}
+
 .job-listings {
   padding: 4rem var(--page-gutter);
 }
@@ -5045,6 +5050,10 @@ button.sign-in__link {
 }
 
 /* App showcase ------------------------------------------------------------ */
+.app-showcase {
+  padding-top: 3rem;
+}
+
 .hero--half,
 .hero--half .hero__content {
   min-height: 50vh;
@@ -5053,6 +5062,19 @@ button.sign-in__link {
 
 .hero--half .hero__content {
   padding-top: 3rem;
+}
+
+/* Background layer drifts slower than the content scrolling over it. The
+   layer is taller than the section so its edges never show. */
+.app-showcase__bg {
+  position: absolute;
+  inset: -40% 0;
+  transform: translate3d(0, calc(var(--parallax, 0) * -0.25px), 0);
+  will-change: transform;
+}
+
+.app-showcase__bg-image {
+  object-fit: cover;
 }
 
 /* Revealed on scroll instead of on page load. */

@@ -1,5 +1,6 @@
 import Icon, { type IconName } from "@/components/atoms/Icon";
 import Image from "@/components/atoms/Image";
+import ParallaxLayer from "@/components/atoms/ParallaxLayer";
 import Reveal from "@/components/atoms/Reveal";
 
 const steps: { icon: IconName; title: string; description: string }[] = [
@@ -27,13 +28,15 @@ export default function AppShowcase() {
   return (
     <section className="app-showcase" aria-labelledby="app-showcase-title">
       <div className="hero hero--half">
-        <Image
-          src="/workphelodotcomhero.png"
-          alt="Glowing world map"
-          fill
-          sizes="100vw"
-          className="hero__image"
-        />
+        <ParallaxLayer className="app-showcase__bg">
+          <Image
+            src="/workphelodotcomhero.png"
+            alt="Glowing world map"
+            fill
+            sizes="100vw"
+            className="app-showcase__bg-image"
+          />
+        </ParallaxLayer>
         <div className="hero__content">
           <Reveal>
             <h2 id="app-showcase-title" className="app-showcase__title">
