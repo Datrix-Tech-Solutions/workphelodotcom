@@ -9,7 +9,6 @@ import {
   allFeaturesOneTime,
   allFeaturesPrice,
   premiumModuleTitles,
-  pricingHref,
   type Billing,
 } from "@/lib/pricing";
 
@@ -20,13 +19,7 @@ const modules = premiumModuleTitles.flatMap(({ label, productTitle }) => {
     : [];
 });
 
-export default function PremiumPlan({
-  billing,
-  signedIn,
-}: {
-  billing: Billing;
-  signedIn: boolean;
-}) {
+export default function PremiumPlan({ billing }: { billing: Billing }) {
   const [users, setUsers] = useState(1);
   const oneTime = allFeaturesOneTime();
 
@@ -74,8 +67,6 @@ export default function PremiumPlan({
         emptyText=""
         ctaLabel="Choose plan"
         planName="Premium plan"
-        returnTo={pricingHref("premium", billing)}
-        signedIn={signedIn}
       />
     </>
   );

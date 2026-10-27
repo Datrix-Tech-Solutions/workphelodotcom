@@ -51,8 +51,6 @@ const rangeText = (range: NonNullable<ApplyRequirements["experience"]>) => {
   return "";
 };
 
-
-
 export default function ProfessionalInfoForm({
   defaultValues,
   defaultProfile,
@@ -133,7 +131,7 @@ export default function ProfessionalInfoForm({
   };
 
   const yearsNumber = years === "" ? null : Number(years);
-  
+
   const wanted = requirements.educationLevels.map(educationLabel);
 
   return (
@@ -251,7 +249,11 @@ export default function ProfessionalInfoForm({
       </div>
 
       <div className="apply-form__grid">
-        <FormField id="job-title" label="Current job title" required={!unemployed}>
+        <FormField
+          id="job-title"
+          label="Current job title"
+          required={!unemployed}
+        >
           <Input
             id="job-title"
             name="jobTitle"
@@ -387,9 +389,7 @@ export default function ProfessionalInfoForm({
               }
             />
             <div className="profile-list__row-footer">
-              <span>
-                {q.start && q.end === "" ? "Currently studying" : ""}
-              </span>
+              <span>{q.start && q.end === "" ? "Currently studying" : ""}</span>
               <Button
                 variant="soft"
                 type="button"

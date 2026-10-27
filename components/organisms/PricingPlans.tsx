@@ -165,9 +165,9 @@ export default function PricingPlans({
         </div>
         <div className="plan-panel">
           {selected.id === "custom" ? (
-            <CustomPlanBuilder billing={billing} signedIn={signedIn} />
+            <CustomPlanBuilder billing={billing} />
           ) : selected.id === "premium" ? (
-            <PremiumPlan billing={billing} signedIn={signedIn} />
+            <PremiumPlan billing={billing} />
           ) : selected.id === "free" ? (
             <FreePlan />
           ) : (

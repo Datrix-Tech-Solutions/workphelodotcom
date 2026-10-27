@@ -139,7 +139,9 @@ export function valuesFromAccount(account: {
  * have a start date and, among those, the most recently started. Null when
  * every role has ended (or there are none).
  */
-export function currentRole(roles: ParsedExperience[]): ParsedExperience | null {
+export function currentRole(
+  roles: ParsedExperience[],
+): ParsedExperience | null {
   const open = roles.filter((role) => role.role && role.end === "");
   const dated = open
     .filter((role) => /^\d{4}-\d{2}$/.test(role.start))

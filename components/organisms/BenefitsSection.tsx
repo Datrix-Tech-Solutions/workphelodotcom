@@ -9,8 +9,7 @@ export default function BenefitsSection() {
         <p className="benefits__label">Key Benefits</p>
         <h2 id="benefits-title" className="benefits__title">
           Reduced Cost, Improved Efficiency with Enterprise-Grade Capabilities
-          Built for the{" "}
-          <span className="benefits__accent">African Market</span>
+          Built for the <span className="benefits__accent">African Market</span>
         </h2>
         <p className="benefits__subtitle">
           By replacing multiple standalone applications with a single integrated

@@ -26,7 +26,13 @@ function Blocks({ blocks }: { blocks: TermsBlock[] }) {
   });
 }
 
-function Section({ section, number }: { section: TermsSection; number?: number }) {
+function Section({
+  section,
+  number,
+}: {
+  section: TermsSection;
+  number?: number;
+}) {
   return (
     <section className="legal-doc__section">
       <h2>{number ? `${number}. ${section.heading}` : section.heading}</h2>

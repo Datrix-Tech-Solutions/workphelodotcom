@@ -10,17 +10,10 @@ import {
   featurePrice,
   featureListPrice,
   oneTimeTotal,
-  pricingHref,
   type Billing,
 } from "@/lib/pricing";
 
-export default function CustomPlanBuilder({
-  billing,
-  signedIn,
-}: {
-  billing: Billing;
-  signedIn: boolean;
-}) {
+export default function CustomPlanBuilder({ billing }: { billing: Billing }) {
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(customFeatures.filter((f) => f.required).map((f) => f.id)),
   );
@@ -150,8 +143,6 @@ export default function CustomPlanBuilder({
         emptyText="Select features to build your plan and see the price."
         ctaLabel="Request this plan"
         planName="Custom plan"
-        returnTo={pricingHref("custom", billing)}
-        signedIn={signedIn}
       />
     </>
   );
