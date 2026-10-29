@@ -75,6 +75,8 @@ export default function PlanPriceSummary({
   const insuranceCover = healthInsuranceCover(qualifying);
   const discount = Math.round(billable * discountRate * 100) / 100;
   const total = billable - discount;
+  const period = billing === "year" ? "year" : "month";
+  const recurring = Math.round(subtotal * (1 - discountRate) * 100) / 100;
 
   return (
     <aside className="plan-aside pricing-widget" aria-label={ariaLabel}>
@@ -173,106 +175,126 @@ export default function PlanPriceSummary({
             setStep("success");
           }}
         >
-          <h2 className="order-confirm__title">Confirm your order</h2>
-          <dl className="order-confirm__rows">
-            <div>
-              <dt>Plan</dt>
-              <dd>{planName}</dd>
-            </div>
-            <div>
-              <dt>Billing</dt>
-              <dd>{billing === "year" ? "Yearly" : "Monthly"}</dd>
-            </div>
-            <div>
-              <dt>Users</dt>
-              <dd>{users}</dd>
-            </div>
-            {oneTime > 0 && (
-              <div>
-                <dt>One time set-up payment</dt>
-                <dd>{formatPrice(oneTime)}</dd>
+          <section
+            className="order-confirm__details"
+            aria-label="Order details"
+          >
+            <h2 className="order-confirm__title">Order summary</h2>
+            {lines.length > 0 && (
+              <div className="order-confirm__features">
+                <p className="order-confirm__features-title">
+                  Included features ({lines.length})
+                </p>
+                <ul className="order-confirm__features-list">
+                  {lines.map((line) => (
+                    <li key={line.id}>
+                      <Icon name="check" size={12} />
+                      {line.label}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
-            {discount > 0 && (
+            <dl className="order-confirm__rows">
               <div>
-                <dt>Volume discount ({discountRate * 100}%)</dt>
-                <dd>&minus;{formatPrice(discount)}</dd>
+                <dt>Plan</dt>
+                <dd>{planName}</dd>
               </div>
-            )}
-            <div className="order-confirm__total">
-              <dt>Total (first {billing})</dt>
-              <dd>{formatPrice(total)}</dd>
-            </div>
-          </dl>
-          {lines.length > 1 && (
-            <div className="order-confirm__features">
-              <p className="order-confirm__features-title">
-                Included features ({lines.length})
+              <div>
+                <dt>Billing cycle</dt>
+                <dd>{billing === "year" ? "Yearly" : "Monthly"}</dd>
+              </div>
+              <div>
+                <dt>Users</dt>
+                <dd>{users}</dd>
+              </div>
+              {oneTime > 0 && (
+                <div>
+                  <dt>One time set-up payment (billed once today)</dt>
+                  <dd>{formatPrice(oneTime)}</dd>
+                </div>
+              )}
+              {subtotal > 0 && (
+                <div>
+                  <dt>First {period} subscription</dt>
+                  <dd>{formatPrice(subtotal)}</dd>
+                </div>
+              )}
+              {discount > 0 && (
+                <div>
+                  <dt>Volume discount ({discountRate * 100}%)</dt>
+                  <dd>&minus;{formatPrice(discount)}</dd>
+                </div>
+              )}
+              <div className="order-confirm__total">
+                <dt>Total due today</dt>
+                <dd>{formatPrice(total)}</dd>
+              </div>
+            </dl>
+            {recurring > 0 && (
+              <p className="pricing-widget__perk order-confirm__recurring">
+                <span>
+                  {formatPrice(recurring)} billed every {period}
+                </span>
               </p>
-              <ul className="order-confirm__features-list">
-                {lines.map((line) => (
-                  <li key={line.id}>
-                    <Icon name="check" size={14} />
-                    {line.label}
-                  </li>
-                ))}
-              </ul>
+            )}
+            {insuranceCover > 0 && (
+              <p className="pricing-widget__perk">
+                <Icon name="shield-check" size={18} />
+                <span>
+                  Plus free optional health insurance up to GHC
+                  {new Intl.NumberFormat("en").format(insuranceCover)}
+                </span>
+              </p>
+            )}
+          </section>
+          <div className="order-confirm__form">
+            <div className="order-confirm__fields">
+              <label className="sign-in__field">
+                <span className="sign-in__label">Name</span>
+                <Input
+                  type="text"
+                  name="name"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="sign-in__input"
+                />
+              </label>
+              <label className="sign-in__field">
+                <span className="sign-in__label">Email</span>
+                <Input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="sign-in__input"
+                />
+              </label>
+              <label className="sign-in__field">
+                <span className="sign-in__label">Company</span>
+                <Input
+                  type="text"
+                  name="company"
+                  autoComplete="organization"
+                  required
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="sign-in__input"
+                />
+              </label>
             </div>
-          )}
-          {insuranceCover > 0 && (
-            <p className="pricing-widget__perk">
-              <Icon name="shield-check" size={18} />
-              <span>
-                Plus free optional health insurance up to GHC
-                {new Intl.NumberFormat("en").format(insuranceCover)}
-              </span>
-            </p>
-          )}
-          <div className="order-confirm__fields">
-            <label className="sign-in__field">
-              <span className="sign-in__label">Name</span>
-              <Input
-                type="text"
-                name="name"
-                autoComplete="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="sign-in__input"
-              />
-            </label>
-            <label className="sign-in__field">
-              <span className="sign-in__label">Email</span>
-              <Input
-                type="email"
-                name="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="sign-in__input"
-              />
-            </label>
-            <label className="sign-in__field">
-              <span className="sign-in__label">Company</span>
-              <Input
-                type="text"
-                name="company"
-                autoComplete="organization"
-                required
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                className="sign-in__input"
-              />
-            </label>
-          </div>
-          <div className="order-confirm__actions">
-            <Button type="button" variant="outline" onClick={close}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="solid">
-              Confirm order
-            </Button>
+            <div className="order-confirm__actions">
+              <Button type="button" variant="outline" onClick={close}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="solid">
+                Confirm order
+              </Button>
+            </div>
           </div>
         </form>
       </Dialog>
