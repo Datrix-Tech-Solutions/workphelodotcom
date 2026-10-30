@@ -1,22 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import CompanyAvatar from "@/components/atoms/CompanyAvatar";
 import VerifiedMark from "@/components/atoms/VerifiedMark";
 import Icon from "@/components/atoms/Icon";
+import CandidateAuthDialog from "@/components/organisms/CandidateAuthDialog";
 import type { SavedJob } from "@/lib/savedJobs";
 import { useSavedJobs } from "@/lib/useSavedJobs";
 
 interface CompactJobCardProps {
-  job: SavedJob & { companyVerified?: boolean };
+  job: SavedJob & { companyVerified?: boolean; advertised?: boolean };
   href: string;
 }
 
 /** A slim row: company avatar, role, company name and a save button. */
 export default function CompactJobCard({ job, href }: CompactJobCardProps) {
   const router = useRouter();
-  const pathname = usePathname();
+  const [signInOpen, setSignInOpen] = useState(false);
   const { ids, toggle } = useSavedJobs();
   const saved = ids.has(job.id);
 
@@ -27,7 +29,7 @@ export default function CompactJobCard({ job, href }: CompactJobCardProps) {
       company: job.company,
     });
     if (result === "signin") {
-      router.push(`/sign-in?next=${encodeURIComponent(pathname)}`);
+      setSignInOpen(true);
     } else {
       // Refresh server data so the saved list on the profile page updates.
       router.refresh();
@@ -46,15 +48,21 @@ export default function CompactJobCard({ job, href }: CompactJobCardProps) {
           </span>
         </span>
       </Link>
-      <button
-        type="button"
-        className={`compact-job__save${saved ? " compact-job__save--active" : ""}`}
-        aria-pressed={saved}
-        aria-label={saved ? `Unsave ${job.title}` : `Save ${job.title}`}
-        onClick={handleSave}
-      >
-        <Icon name="heart" filled={saved} />
-      </button>
+      {!job.advertised && (
+        <button
+          type="button"
+          className={`compact-job__save${saved ? " compact-job__save--active" : ""}`}
+          aria-pressed={saved}
+          aria-label={saved ? `Unsave ${job.title}` : `Save ${job.title}`}
+          onClick={handleSave}
+        >
+          <Icon name="heart" filled={saved} />
+        </button>
+      )}
+      <CandidateAuthDialog
+        open={signInOpen}
+        onClose={() => setSignInOpen(false)}
+      />
     </div>
   );
 }

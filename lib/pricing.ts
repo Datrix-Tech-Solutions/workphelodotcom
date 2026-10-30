@@ -29,7 +29,7 @@ export const pricingTiers: PricingTier[] = [
     tagline: "Get started with the basics",
     price: "Free",
     cta: "Get started",
-    href: "/sign-in",
+    href: "/recruiter/sign-in",
     summary: "Everything you need to start hiring, at no cost.",
     groups: [{ title: "Recruitment", items: ["Hiring"] }],
   },
@@ -42,7 +42,7 @@ export const pricingTiers: PricingTier[] = [
     price: "$10/month/user",
     priceFromFeatures: true,
     cta: "Choose plan",
-    href: "/sign-in",
+    href: "/recruiter/sign-in",
     featured: true,
     summary:
       "Every Workphelo module, from recruitment to accounting, in one platform.",
@@ -87,7 +87,7 @@ export const pricingTiers: PricingTier[] = [
     price: "Custom",
     priceNote: "Tailored to your needs",
     cta: "Plan Builder",
-    href: "/sign-in",
+    href: "/recruiter/sign-in",
     summary:
       "Everything in Premium, shaped around how your organisation works.",
     groups: [

@@ -38,12 +38,16 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
           </div>
         </div>
         <div className="job-details__actions">
-          <Button href={`/jobs/${job.id}/apply`} variant="solid">
-            Apply Now
-          </Button>
-          <SaveJobButton
-            job={{ id: job.id, title: job.title, company: job.company }}
-          />
+          {!job.advertised && (
+            <>
+              <Button href={`/jobs/${job.id}/apply`} variant="solid">
+                Apply Now
+              </Button>
+              <SaveJobButton
+                job={{ id: job.id, title: job.title, company: job.company }}
+              />
+            </>
+          )}
           <Link
             href={closeHref}
             scroll={false}

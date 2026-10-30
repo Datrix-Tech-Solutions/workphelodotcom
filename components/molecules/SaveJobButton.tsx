@@ -1,30 +1,36 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import CandidateAuthDialog from "@/components/organisms/CandidateAuthDialog";
 import type { SavedJob } from "@/lib/savedJobs";
 import { useSavedJobs } from "@/lib/useSavedJobs";
 
 export default function SaveJobButton({ job }: { job: SavedJob }) {
-  const router = useRouter();
-  const pathname = usePathname();
+  const [signInOpen, setSignInOpen] = useState(false);
   const { ids, toggle } = useSavedJobs();
   const saved = ids.has(job.id);
 
   async function handleClick() {
     const result = await toggle(job);
     if (result === "signin") {
-      router.push(`/sign-in?next=${encodeURIComponent(pathname)}`);
+      setSignInOpen(true);
     }
   }
 
   return (
-    <button
-      type="button"
-      className="button button--soft"
-      aria-pressed={saved}
-      onClick={handleClick}
-    >
-      {saved ? "Saved" : "Save"}
-    </button>
+    <>
+      <button
+        type="button"
+        className="button button--soft"
+        aria-pressed={saved}
+        onClick={handleClick}
+      >
+        {saved ? "Saved" : "Save"}
+      </button>
+      <CandidateAuthDialog
+        open={signInOpen}
+        onClose={() => setSignInOpen(false)}
+      />
+    </>
   );
 }

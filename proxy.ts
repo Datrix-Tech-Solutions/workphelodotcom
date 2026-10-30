@@ -15,9 +15,9 @@ import { updateSession } from "@/lib/supabase/proxy";
 
 /** Pages that only one kind of account may open. */
 const GUARDED = [
-  { prefix: "/profile", role: "candidate" },
-  { prefix: "/dashboard", role: "recruiter" },
-  { prefix: "/post-job", role: "recruiter" },
+  { prefix: "/profile", roles: ["candidate"] },
+  { prefix: "/dashboard", roles: ["recruiter", "advertiser"] },
+  { prefix: "/post-job", roles: ["recruiter", "advertiser"] },
 ] as const;
 
 export async function proxy(request: NextRequest) {
@@ -39,7 +39,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const { response, isCandidate } = await updateSession(request);
+  const { response, isCandidate, isAdvertiser } = await updateSession(request);
   if (renewed) {
     response.cookies.set(
       RECRUITER_ACCESS_COOKIE,
@@ -65,13 +65,23 @@ export async function proxy(request: NextRequest) {
   if (!guard) return response;
 
   const isRecruiter = request.cookies.has(RECRUITER_REFRESH_COOKIE);
-  const role = isCandidate ? "candidate" : isRecruiter ? "recruiter" : null;
-  if (role === guard.role) return response;
+  const role = isCandidate
+    ? (await isAdvertiser())
+      ? "advertiser"
+      : "candidate"
+    : isRecruiter
+      ? "recruiter"
+      : null;
+  if (role && (guard.roles as readonly string[]).includes(role)) {
+    return response;
+  }
 
   const url = request.nextUrl.clone();
   url.search = "";
   if (role === null) {
-    url.pathname = "/sign-in";
+    url.pathname = guard.roles.includes("recruiter" as never)
+      ? "/recruiter/sign-in"
+      : "/sign-in";
     url.searchParams.set("next", pathname);
   } else {
     url.pathname = "/";

@@ -28,7 +28,9 @@ export default async function JobApplicantsPage({
   const { id } = await params;
   const session = await getSession();
   if (session?.role !== "recruiter") {
-    redirect(`/sign-in?next=/dashboard/jobs/${encodeURIComponent(id)}`);
+    redirect(
+      `/recruiter/sign-in?next=/dashboard/jobs/${encodeURIComponent(id)}`,
+    );
   }
 
   const [job, applicants] = await Promise.all([

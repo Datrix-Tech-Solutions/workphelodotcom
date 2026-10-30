@@ -35,6 +35,8 @@ export interface Job {
   questions: JobQuestion[];
   /** What the employer's setup asks applicants for. */
   apply: ApplyRequirements;
+  /** An advert from an advertiser: it can be viewed but not applied to or saved. */
+  advertised?: boolean;
 }
 
 export interface ListRequirement {

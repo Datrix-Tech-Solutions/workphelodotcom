@@ -2,15 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { setJobOpen } from "@/app/dashboard/actions";
+import { setAdvertOpen, setJobOpen } from "@/app/dashboard/actions";
 
 /** Closes an open job or reopens a closed one. */
 export default function JobStatusButton({
   id,
   open,
+  advert = false,
 }: {
   id: string;
   open: boolean;
+  /** The job is an advert, kept in Supabase rather than the HR API. */
+  advert?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -20,7 +23,7 @@ export default function JobStatusButton({
     if (loading) return;
     setLoading(true);
     setError("");
-    const result = await setJobOpen(id, !open);
+    const result = await (advert ? setAdvertOpen : setJobOpen)(id, !open);
     setLoading(false);
     if (result.error) {
       setError(result.error);

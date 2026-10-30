@@ -34,7 +34,8 @@ export default function UserMenu({ session, inline = false }: UserMenuProps) {
 
   const name = displayName(session);
   const isRecruiter = session.role === "recruiter";
-  const home = isRecruiter
+  const hasDashboard = session.role !== "candidate";
+  const home = hasDashboard
     ? { href: "/dashboard", label: "Dashboard" }
     : { href: "/profile", label: "Profile" };
 

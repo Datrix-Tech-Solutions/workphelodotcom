@@ -8,6 +8,7 @@ import { WhitePanel } from "@/components/atoms/GlassPanel";
 import Input from "@/components/atoms/Input";
 import PasswordField from "@/components/molecules/PasswordField";
 import { signUp } from "@/app/auth/actions";
+import type { PickerRole } from "@/components/organisms/SignInForm";
 import { resetSavedJobs } from "@/lib/useSavedJobs";
 import { notifySessionChange } from "@/lib/useSession";
 import Select from "@/components/atoms/Select";
@@ -16,24 +17,27 @@ import { countries } from "@/lib/countries";
 
 type Role = "candidate" | "recruiter";
 
-const ROLES: { value: Role; label: string }[] = [
+const ROLES: { value: PickerRole; label: string }[] = [
   { value: "candidate", label: "Candidate" },
   { value: "recruiter", label: "Recruiter" },
 ];
 
 export default function SignUpForm({
   lockedRole,
+  roles = ROLES,
   onSwitch,
   next = "/",
 }: {
   /** Fixes the account type and hides the picker. */
   lockedRole?: Role;
+  /** The account types offered by the picker. */
+  roles?: { value: PickerRole; label: string }[];
   /** Swaps to the sign-in form in place instead of linking to its page. */
   onSwitch?: () => void;
   /** Where to go once the account is created. */
   next?: string;
 }) {
-  const [role, setRole] = useState<Role>(lockedRole ?? "candidate");
+  const [role, setRole] = useState<PickerRole>(lockedRole ?? roles[0].value);
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [companySize, setCompanySize] = useState("");
@@ -81,7 +85,7 @@ export default function SignUpForm({
       }
       resetSavedJobs();
       notifySessionChange();
-      router.push(next);
+      router.push(role === "advertiser" && next === "/" ? "/dashboard" : next);
       router.refresh();
     } finally {
       setLoading(false);
@@ -94,9 +98,11 @@ export default function SignUpForm({
     >
       <h1 className="sign-in__title">Create your account</h1>
       <p className="sign-in__subtext">
-        {role === "recruiter"
-          ? "Sign up to start posting jobs."
-          : "Sign up to find your next role."}
+        {role === "advertiser"
+          ? "Sign up to advertise jobs with workphelo"
+          : role === "recruiter"
+            ? "Sign up to start posting jobs."
+            : "Sign up to find your next role."}
       </p>
       <form
         className="sign-in__form"
@@ -105,7 +111,7 @@ export default function SignUpForm({
       >
         {!lockedRole && (
           <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
-            {ROLES.map(({ value, label }) => (
+            {roles.map(({ value, label }) => (
               <label
                 key={value}
                 className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
@@ -298,7 +304,10 @@ export default function SignUpForm({
             Sign in
           </button>
         ) : (
-          <Link href="/sign-in" className="sign-in__link">
+          <Link
+            href={role === "candidate" ? "/sign-in" : "/recruiter/sign-in"}
+            className="sign-in__link"
+          >
             Sign in
           </Link>
         )}

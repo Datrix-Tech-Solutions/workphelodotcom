@@ -30,7 +30,7 @@ export default function AccountActions({
 
   return (
     <>
-      {session.role === "recruiter" && (
+      {session.role !== "candidate" && (
         <Button href="/post-job" variant="glass">
           Post job
         </Button>

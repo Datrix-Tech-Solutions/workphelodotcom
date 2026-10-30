@@ -83,7 +83,10 @@ export default function ForgotPasswordForm({
         </form>
       )}
       <p className="sign-in__switch">
-        <Link href="/sign-in" className="sign-in__link">
+        <Link
+          href={role === "recruiter" ? "/recruiter/sign-in" : "/sign-in"}
+          className="sign-in__link"
+        >
           Back to sign in
         </Link>
       </p>

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { postJob } from "@/app/dashboard/actions";
+import { postAdvert, postJob } from "@/app/dashboard/actions";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
 import FormField from "@/components/molecules/FormField";
@@ -30,7 +30,7 @@ const SALARY_TYPES: { value: NewJob["salaryType"]; label: string }[] = [
 
 const toNumber = (value: string) => (value.trim() ? Number(value) : undefined);
 
-export default function PostJobForm() {
+export default function PostJobForm({ advert = false }: { advert?: boolean }) {
   const router = useRouter();
   const [values, setValues] = useState({
     title: "",
@@ -70,7 +70,7 @@ export default function PostJobForm() {
     setLoading(true);
     setError("");
     try {
-      const result = await postJob({
+      const result = await (advert ? postAdvert : postJob)({
         title: values.title,
         location: values.location,
         city: values.city.trim() || undefined,

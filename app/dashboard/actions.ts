@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
+import { createAdvert, setAdvertStatus } from "@/lib/advertiserJobs";
 import {
   closeJob,
   createJob,
@@ -67,6 +68,33 @@ export async function setJobOpen(
   if (!result.ok) return { error: result.error };
   revalidatePath("/dashboard");
   revalidatePath(`/dashboard/jobs/${id}`);
+  revalidatePath("/jobs");
+  return {};
+}
+
+/** Posts an advert straight to the advertiser's own Supabase table. */
+export async function postAdvert(job: NewJob): Promise<ActionResult> {
+  const session = await getSession();
+  if (session?.role !== "advertiser") return { error: "Please sign in again." };
+  const invalid = validate(job);
+  if (invalid) return { error: invalid };
+
+  const result = await createAdvert(job, session.user.name);
+  if (result.error) return result;
+  revalidatePath("/dashboard");
+  revalidatePath("/jobs");
+  return {};
+}
+
+export async function setAdvertOpen(
+  id: string,
+  open: boolean,
+): Promise<ActionResult> {
+  const session = await getSession();
+  if (session?.role !== "advertiser") return { error: "Please sign in again." };
+  const result = await setAdvertStatus(id, open ? "OPEN" : "CLOSED");
+  if (result.error) return result;
+  revalidatePath("/dashboard");
   revalidatePath("/jobs");
   return {};
 }

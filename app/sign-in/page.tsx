@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import HeroParallax from "@/components/atoms/HeroParallax";
 import HeroParticles from "@/components/atoms/HeroParticles";
 import Image from "@/components/atoms/Image";
+import AuthPageContent from "@/components/molecules/AuthPageContent";
 import Navbar from "@/components/organisms/Navbar";
-import SignInForm from "@/components/organisms/SignInForm";
+import CandidateSignInForm from "@/components/organisms/CandidateSignInForm";
 
 export const metadata: Metadata = {
   title: "Sign in | Workphelo",
@@ -12,9 +13,9 @@ export const metadata: Metadata = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; confirm?: string }>;
+  searchParams: Promise<{ next?: string }>;
 }) {
-  const { next, confirm } = await searchParams;
+  const { next } = await searchParams;
   // Only same-site relative paths, so this can't be used as an open redirect.
   const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/";
 
@@ -32,21 +33,9 @@ export default async function SignInPage({
         />
         <HeroParticles />
         <HeroParallax />
-        <div className="hero__content sign-in__content">
-          <SignInForm
-            next={safeNext}
-            notice={
-              confirm === "success"
-                ? "Email confirmed. Sign in as a recruiter to start posting jobs."
-                : undefined
-            }
-            noticeError={
-              confirm === "failed"
-                ? "That confirmation link is invalid or has expired. Sign in to have a new one sent."
-                : undefined
-            }
-          />
-        </div>
+        <AuthPageContent>
+          <CandidateSignInForm next={safeNext} />
+        </AuthPageContent>
       </section>
     </main>
   );

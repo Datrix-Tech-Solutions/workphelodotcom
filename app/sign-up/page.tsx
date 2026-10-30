@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import HeroParallax from "@/components/atoms/HeroParallax";
 import HeroParticles from "@/components/atoms/HeroParticles";
 import Image from "@/components/atoms/Image";
+import AuthPageContent from "@/components/molecules/AuthPageContent";
 import Navbar from "@/components/organisms/Navbar";
-import SignUpForm from "@/components/organisms/SignUpForm";
+import CandidateSignUpForm from "@/components/organisms/CandidateSignUpForm";
 
 export const metadata: Metadata = {
   title: "Sign up | Workphelo",
@@ -24,9 +25,9 @@ export default function SignUpPage() {
         />
         <HeroParticles />
         <HeroParallax />
-        <div className="hero__content sign-in__content">
-          <SignUpForm />
-        </div>
+        <AuthPageContent>
+          <CandidateSignUpForm />
+        </AuthPageContent>
       </section>
     </main>
   );

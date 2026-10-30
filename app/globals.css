@@ -3184,6 +3184,11 @@ button:focus-visible {
   margin-inline: auto;
 }
 
+/* Hug narrow forms so the empty sides count as the backdrop and close it. */
+.dialog__panel:has(> .sign-in:not(.sign-in--wide)) {
+  max-width: 26rem;
+}
+
 .dialog__close {
   position: absolute;
   top: 0.75rem;
@@ -4466,6 +4471,10 @@ textarea.field-control {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.recruiter-table__row--advert {
+  grid-template-columns: minmax(0, 2fr) 6rem 8rem;
 }
 
 .recruiter-table__row--head + .recruiter-table__row {

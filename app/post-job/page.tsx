@@ -12,7 +12,9 @@ export const metadata: Metadata = {
 
 export default async function PostJobPage() {
   const session = await getSession();
-  if (session?.role !== "recruiter") redirect("/sign-in?next=/post-job");
+  if (!session || session.role === "candidate") {
+    redirect("/recruiter/sign-in?next=/post-job");
+  }
 
   return (
     <>
@@ -25,7 +27,7 @@ export default async function PostJobPage() {
           subtext="Your job goes live as soon as you post it."
         />
         <section className="account">
-          <PostJobForm />
+          <PostJobForm advert={session.role === "advertiser"} />
         </section>
       </main>
       <Footer />

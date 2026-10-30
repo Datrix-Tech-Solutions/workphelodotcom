@@ -104,7 +104,7 @@ export const candidateAuth: AuthProvider = {
 };
 
 /** This site's origin, for building links Supabase puts in emails. */
-async function siteOrigin(): Promise<string | undefined> {
+export async function siteOrigin(): Promise<string | undefined> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
   if (!host) return undefined;

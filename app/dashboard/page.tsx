@@ -6,6 +6,7 @@ import Icon from "@/components/atoms/Icon";
 import JobStatusButton from "@/components/molecules/JobStatusButton";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
+import AdvertiserDashboard from "@/components/organisms/AdvertiserDashboard";
 import Navbar from "@/components/organisms/Navbar";
 import { getSession } from "@/lib/auth";
 import { listMyJobs } from "@/lib/recruiterApi";
@@ -25,7 +26,12 @@ const STATUS_LABELS = { OPEN: "Open", CLOSED: "Closed", DRAFT: "Draft" };
 
 export default async function DashboardPage() {
   const session = await getSession();
-  if (session?.role !== "recruiter") redirect("/sign-in?next=/dashboard");
+  if (!session || session.role === "candidate") {
+    redirect("/recruiter/sign-in?next=/dashboard");
+  }
+  if (session.role === "advertiser") {
+    return <AdvertiserDashboard name={session.user.name} />;
+  }
 
   const result = await listMyJobs();
   const jobs = result.ok ? result.data : [];

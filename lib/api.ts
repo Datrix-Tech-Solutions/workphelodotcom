@@ -1,4 +1,9 @@
 import {
+  ADVERT_TENANT,
+  fetchAdvertJob,
+  fetchAdvertJobs,
+} from "@/lib/advertiserJobs";
+import {
   JOBS_PER_PAGE,
   TYPE_FILTERS,
   parseJobId,
@@ -34,7 +39,59 @@ export interface JobPage {
 /** The board endpoint has no location filter, only free-text `search`. */
 const LOCATION_SCAN_LIMIT = 100;
 
-export async function fetchJobs({
+/**
+ * The board: the HR API's jobs plus open adverts from Supabase. Adverts are
+ * few, so they are filtered here and all join page 1, merged by date; later
+ * pages are the API's alone.
+ */
+export async function fetchJobs(
+  params: Parameters<typeof fetchApiJobs>[0],
+): Promise<JobPage> {
+  const [api, adverts] = await Promise.all([
+    fetchApiJobs(params),
+    fetchAdvertJobs(),
+  ]);
+  const page = params.page ?? 1;
+  const matching = adverts.filter((job) => matchesFilters(job, params));
+  if (page !== 1 || matching.length === 0) {
+    return { ...api, total: api.total + matching.length };
+  }
+  const jobs = [...api.jobs, ...matching].sort(
+    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
+  );
+  return { ...api, jobs, total: api.total + matching.length };
+}
+
+/** Applies the board's filters to an advert, which the API never sees. */
+function matchesFilters(
+  job: Job,
+  {
+    query,
+    location,
+    type,
+    posted,
+  }: { query?: string; location?: string; type?: string; posted?: string },
+): boolean {
+  const has = (haystack: string, needle?: string) =>
+    !needle || haystack.toLowerCase().includes(needle.toLowerCase());
+  if (!has(`${job.title} ${job.company} ${job.description}`, query)) {
+    return false;
+  }
+  if (!has(job.location, location)) return false;
+  const filter = type ? TYPE_FILTERS[type] : undefined;
+  if (filter) {
+    const actual = filter.field === "jobType" ? job.type : job.workMode;
+    if (actual !== filter.label) return false;
+  }
+  const range = postedRange(posted);
+  if (range) {
+    const at = Date.parse(job.createdAt);
+    if (at < range.from || at > range.to) return false;
+  }
+  return true;
+}
+
+async function fetchApiJobs({
   query,
   location,
   type,
@@ -95,6 +152,7 @@ export async function fetchJobs({
 export async function fetchJob(jobId: string): Promise<Job | null> {
   const ids = parseJobId(jobId);
   if (!ids) return null;
+  if (ids.tenantId === ADVERT_TENANT) return fetchAdvertJob(ids.vacancyId);
 
   try {
     const res = await fetch(

@@ -3,6 +3,7 @@ import HeroParallax from "@/components/atoms/HeroParallax";
 import HeroParticles from "@/components/atoms/HeroParticles";
 import Image from "@/components/atoms/Image";
 import ForgotPasswordForm from "@/components/organisms/ForgotPasswordForm";
+import AuthPageContent from "@/components/molecules/AuthPageContent";
 import Navbar from "@/components/organisms/Navbar";
 
 export const metadata: Metadata = {
@@ -30,12 +31,12 @@ export default async function ForgotPasswordPage({
         />
         <HeroParticles />
         <HeroParallax />
-        <div className="hero__content sign-in__content">
+        <AuthPageContent>
           <ForgotPasswordForm
             role={role === "recruiter" ? "recruiter" : "candidate"}
             expired={expired === "1"}
           />
-        </div>
+        </AuthPageContent>
       </section>
     </main>
   );

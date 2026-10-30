@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const url = new URL("/sign-in", origin);
+  const url = new URL("/recruiter/sign-in", origin);
   url.searchParams.set("confirm", confirmed ? "success" : "failed");
   return NextResponse.redirect(url);
 }

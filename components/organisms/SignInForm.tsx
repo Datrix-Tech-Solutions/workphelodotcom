@@ -13,9 +13,18 @@ import { notifySessionChange } from "@/lib/useSession";
 
 type Role = "candidate" | "recruiter";
 
-const ROLES: { value: Role; label: string }[] = [
+/** Advertisers sign in like recruiters but have no account type yet. */
+export type PickerRole = Role | "advertiser";
+
+const ROLES: { value: PickerRole; label: string }[] = [
   { value: "candidate", label: "Candidate" },
   { value: "recruiter", label: "Recruiter" },
+];
+
+/** The picker options for the Post job pages. */
+export const POSTER_ROLES: { value: PickerRole; label: string }[] = [
+  { value: "recruiter", label: "Recruiter" },
+  { value: "advertiser", label: "Advertiser" },
 ];
 
 export default function SignInForm({
@@ -23,6 +32,7 @@ export default function SignInForm({
   notice,
   noticeError,
   lockedRole,
+  roles = ROLES,
   onSwitch,
 }: {
   next?: string;
@@ -30,10 +40,12 @@ export default function SignInForm({
   noticeError?: string;
   /** Fixes the account type and hides the picker. */
   lockedRole?: Role;
+  /** The account types offered by the picker. */
+  roles?: { value: PickerRole; label: string }[];
   /** Swaps to the sign-up form in place instead of linking to its page. */
   onSwitch?: () => void;
 }) {
-  const [role, setRole] = useState<Role>(lockedRole ?? "candidate");
+  const [role, setRole] = useState<PickerRole>(lockedRole ?? roles[0].value);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,7 +74,7 @@ export default function SignInForm({
       resetSavedJobs();
       notifySessionChange();
       // Recruiters have no use for the home page; take them to their dashboard.
-      router.push(role === "recruiter" && next === "/" ? "/dashboard" : next);
+      router.push(role !== "candidate" && next === "/" ? "/dashboard" : next);
       router.refresh();
     } finally {
       setLoading(false);
@@ -73,9 +85,11 @@ export default function SignInForm({
     <WhitePanel className="sign-in">
       <h1 className="sign-in__title">Welcome back</h1>
       <p className="sign-in__subtext">
-        {role === "recruiter"
-          ? "Sign in to post jobs."
-          : "Sign in to continue to view Jobs."}
+        {role === "advertiser"
+          ? "Sign in to advertise jobs with workphelo"
+          : role === "recruiter"
+            ? "Sign in to post jobs."
+            : "Sign in to continue to view Jobs."}
       </p>
       <form
         className="sign-in__form"
@@ -84,7 +98,7 @@ export default function SignInForm({
       >
         {!lockedRole && (
           <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
-            {ROLES.map(({ value, label }) => (
+            {roles.map(({ value, label }) => (
               <label
                 key={value}
                 className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
@@ -125,7 +139,7 @@ export default function SignInForm({
           onChange={(e) => setPassword(e.target.value)}
         />
         <Link
-          href={`/forgot-password?role=${role}`}
+          href={`/forgot-password?role=${role === "candidate" ? role : "recruiter"}`}
           className="sign-in__forgot"
         >
           Forgot password?
@@ -173,7 +187,10 @@ export default function SignInForm({
             Sign up
           </button>
         ) : (
-          <Link href="/sign-up" className="sign-in__link">
+          <Link
+            href={role === "candidate" ? "/sign-up" : "/recruiter/sign-up"}
+            className="sign-in__link"
+          >
             Sign up
           </Link>
         )}

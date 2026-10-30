@@ -1,4 +1,4 @@
-export type Role = "candidate" | "recruiter";
+export type Role = "candidate" | "recruiter" | "advertiser";
 
 /** The basic details a candidate keeps on their account. */
 export interface CandidateProfile {
@@ -60,7 +60,14 @@ export interface RecruiterSignUp {
   password: string;
 }
 
-export type SignUpInput = CandidateSignUp | RecruiterSignUp;
+export interface AdvertiserSignUp {
+  role: "advertiser";
+  name: string;
+  email: string;
+  password: string;
+}
+
+export type SignUpInput = CandidateSignUp | RecruiterSignUp | AdvertiserSignUp;
 
 export interface AuthProvider {
   signIn(email: string, password: string): Promise<AuthResult>;

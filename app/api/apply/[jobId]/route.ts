@@ -39,7 +39,7 @@ export async function POST(
 ) {
   const { jobId } = await params;
   const ids = parseJobId(jobId);
-  if (!ids) return fail(404, "Job not found");
+  if (!ids || ids.tenantId === "advert") return fail(404, "Job not found");
 
   let payload: ApplyPayload;
   try {

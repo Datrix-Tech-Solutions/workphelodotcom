@@ -24,7 +24,7 @@ export default async function ApplyPage({ params }: ApplyPageProps) {
     getCandidateDetails(),
     getSession(),
   ]);
-  if (!job) notFound();
+  if (!job || job.advertised) notFound();
 
   const profile = profileFromDetails(details);
   const years = totalYears(profile.experience);
