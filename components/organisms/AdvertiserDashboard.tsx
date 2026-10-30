@@ -1,19 +1,10 @@
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
-import JobStatusButton from "@/components/molecules/JobStatusButton";
+import AdvertTable from "@/components/molecules/AdvertTable";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
 import { listMyAdverts } from "@/lib/advertiserJobs";
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
-const STATUS_LABELS = { OPEN: "Open", CLOSED: "Closed" };
 
 /** The advertiser's dashboard: the jobs they advertise, from Supabase. */
 export default async function AdvertiserDashboard({ name }: { name: string }) {
@@ -26,6 +17,7 @@ export default async function AdvertiserDashboard({ name }: { name: string }) {
       label: "Closed",
       value: jobs.length - open,
       icon: "clipboard-check" as const,
+      muted: true,
     },
   ];
 
@@ -42,7 +34,10 @@ export default async function AdvertiserDashboard({ name }: { name: string }) {
         <section className="account account--dashboard">
           <div className="dashboard__summary">
             {stats.map((stat) => (
-              <div className="dashboard__stat" key={stat.label}>
+              <div
+                className={`dashboard__stat${"muted" in stat ? " dashboard__stat--muted" : ""}`}
+                key={stat.label}
+              >
                 <span className="dashboard__stat-icon">
                   <Icon name={stat.icon} size={20} />
                 </span>
@@ -78,50 +73,7 @@ export default async function AdvertiserDashboard({ name }: { name: string }) {
                 </Button>
               </div>
             ) : (
-              <div className="recruiter-table" role="table">
-                <div
-                  className="recruiter-table__row recruiter-table__row--advert recruiter-table__row--head"
-                  role="row"
-                >
-                  <span role="columnheader">Job</span>
-                  <span role="columnheader">Status</span>
-                  <span role="columnheader">
-                    <span className="sr-only">Actions</span>
-                  </span>
-                </div>
-                {jobs.map((job) => (
-                  <div
-                    className="recruiter-table__row recruiter-table__row--advert"
-                    role="row"
-                    key={job.id}
-                  >
-                    <div className="recruiter-table__main" role="cell">
-                      <span className="recruiter-table__title">
-                        {job.title}
-                      </span>
-                      <span className="recruiter-table__meta">
-                        {[job.location, `Posted ${formatDate(job.createdAt)}`]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    </div>
-                    <span role="cell">
-                      <span
-                        className={`recruiter-table__status recruiter-table__status--${job.status.toLowerCase()}`}
-                      >
-                        {STATUS_LABELS[job.status]}
-                      </span>
-                    </span>
-                    <span className="recruiter-table__action" role="cell">
-                      <JobStatusButton
-                        id={job.id}
-                        open={job.status === "OPEN"}
-                        advert
-                      />
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <AdvertTable jobs={jobs} />
             )}
           </section>
         </section>

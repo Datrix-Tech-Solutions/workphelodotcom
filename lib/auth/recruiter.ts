@@ -29,6 +29,7 @@ interface LoginResponse {
     firstName: string;
     lastName: string;
     tenantName: string;
+    tenantSlug?: string;
   };
 }
 
@@ -85,6 +86,7 @@ export const recruiterAuth: AuthProvider = {
         name: `${user.firstName} ${user.lastName}`.trim(),
         company: user.tenantName,
         verified: body.isVerified === true,
+        slug: user.tenantSlug,
       }),
       recruiterCookieOptions(RECRUITER_REFRESH_MAX_AGE),
     );
@@ -136,22 +138,48 @@ export const recruiterAuth: AuthProvider = {
     const raw = store.get(RECRUITER_USER_COOKIE)?.value;
     if (!raw) return null;
     try {
-      const { id, email, name, company, verified } = JSON.parse(raw) as {
+      const { id, email, name, company, verified, slug } = JSON.parse(raw) as {
         id: string;
         email: string;
         name: string;
         company: string;
         verified?: boolean;
+        slug?: string;
       };
       return {
         role: "recruiter",
-        user: { id, email, name, company, companyVerified: verified === true },
+        user: {
+          id,
+          email,
+          name,
+          company,
+          companyVerified: verified === true,
+          // Sessions started before the slug was kept still have it in the token.
+          tenantSlug:
+            slug ?? slugFromToken(store.get(RECRUITER_ACCESS_COOKIE)?.value),
+        },
       };
     } catch {
       return null;
     }
   },
 };
+
+/** Reads the company slug from an access token. Display only: the API checks the token itself. */
+function slugFromToken(token?: string): string | undefined {
+  try {
+    const payload = token?.split(".")[1];
+    if (!payload) return undefined;
+    const claims = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    ) as { tenantSlug?: unknown };
+    return typeof claims.tenantSlug === "string"
+      ? claims.tenantSlug
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Emails a fresh confirmation link. The API answers the same whoever asks. */
 export async function resendRecruiterConfirmation(

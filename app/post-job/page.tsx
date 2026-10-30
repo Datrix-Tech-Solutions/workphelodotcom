@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
+import RecruiterPostChoice from "@/components/organisms/RecruiterPostChoice";
 import PostJobForm from "@/components/organisms/PostJobForm";
 import { getSession } from "@/lib/auth";
 
@@ -26,8 +27,12 @@ export default async function PostJobPage() {
           title="Post a job"
           subtext="Your job goes live as soon as you post it."
         />
-        <section className="account">
-          <PostJobForm advert={session.role === "advertiser"} />
+        <section className="apply">
+          {session.role === "advertiser" ? (
+            <PostJobForm advert />
+          ) : (
+            <RecruiterPostChoice />
+          )}
         </section>
       </main>
       <Footer />

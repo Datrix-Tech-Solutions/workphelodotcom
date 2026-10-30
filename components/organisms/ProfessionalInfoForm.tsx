@@ -74,10 +74,6 @@ export default function ProfessionalInfoForm({
   );
   const [languages, setLanguages] = useState(defaultProfile.languages);
   const [certificates, setCertificates] = useState(defaultProfile.certificates);
-  const [errors, setErrors] = useState<{
-    languages?: string;
-    certificates?: string;
-  }>({});
 
   const collect = (): [FormValues, Profile] => [
     {
@@ -141,16 +137,9 @@ export default function ProfessionalInfoForm({
       aria-labelledby="professional-info-title"
       onSubmit={(e) => {
         e.preventDefault();
+        // Languages and certificates are never blocking: an applicant with none
+        // just leaves them unticked.
         const [values, profile] = collect();
-        const next: typeof errors = {};
-        if (requirements.languages?.required && languages.length === 0) {
-          next.languages = "Select at least one language.";
-        }
-        if (requirements.certificates?.required && certificates.length === 0) {
-          next.certificates = "Select at least one certificate.";
-        }
-        setErrors(next);
-        if (Object.keys(next).length > 0) return;
         onNext(values, profile);
       }}
     >
@@ -248,7 +237,18 @@ export default function ProfessionalInfoForm({
         </div>
       </div>
 
-      <div className="apply-form__grid">
+      <div className="apply-form__grid apply-form__grid--three">
+        <FormField id="employer" label="Current employer">
+          <Input
+            id="employer"
+            name="employer"
+            className="field-control"
+            autoComplete="organization"
+            disabled={unemployed}
+            value={unemployed ? "" : employer}
+            onChange={(e) => setEmployer(e.target.value)}
+          />
+        </FormField>
         <FormField
           id="job-title"
           label="Current job title"
@@ -285,18 +285,6 @@ export default function ProfessionalInfoForm({
         </FormField>
       </div>
 
-      <FormField id="employer" label="Current employer">
-        <Input
-          id="employer"
-          name="employer"
-          className="field-control"
-          autoComplete="organization"
-          disabled={unemployed}
-          value={unemployed ? "" : employer}
-          onChange={(e) => setEmployer(e.target.value)}
-        />
-      </FormField>
-
       <label className="check-list__item">
         <input
           type="checkbox"
@@ -309,11 +297,14 @@ export default function ProfessionalInfoForm({
       <div className="profile-list">
         <span className="form-field__label">Education</span>
         {qualifications.map((q, index) => (
-          <div key={index} className="profile-list__row">
+          <div
+            key={index}
+            className="profile-list__row profile-list__row--education"
+          >
             <Input
               aria-label="Qualification"
               placeholder="Qualification"
-              className="field-control"
+              className="field-control profile-list__span-2"
               value={q.qualification}
               onChange={(e) =>
                 updateQualifications(
@@ -328,7 +319,7 @@ export default function ProfessionalInfoForm({
             <Input
               aria-label="Institution"
               placeholder="Institution"
-              className="field-control"
+              className="field-control profile-list__span-2"
               value={q.institution}
               onChange={(e) =>
                 updateQualifications(
@@ -342,6 +333,7 @@ export default function ProfessionalInfoForm({
             />
             <Select
               aria-label="Level"
+              className="profile-list__span-2"
               value={q.level}
               onChange={(e) =>
                 updateQualifications(
@@ -476,13 +468,8 @@ export default function ProfessionalInfoForm({
           legend="Languages"
           items={requirements.languages.items}
           selected={languages}
-          onChange={(next) => {
-            setLanguages(next);
-            setErrors((e) => ({ ...e, languages: undefined }));
-          }}
-          required={requirements.languages.required}
-          error={errors.languages}
-          hint="Tick the languages you speak."
+          onChange={setLanguages}
+          hint="Tick the languages you speak, or leave blank if none."
         />
       )}
 
@@ -491,29 +478,12 @@ export default function ProfessionalInfoForm({
           legend="Certificates"
           items={requirements.certificates.items}
           selected={certificates}
-          onChange={(next) => {
-            setCertificates(next);
-            setErrors((e) => ({ ...e, certificates: undefined }));
-          }}
-          required={requirements.certificates.required}
-          error={errors.certificates}
-          hint="Tick the certificates you hold."
+          onChange={setCertificates}
+          hint="Tick the certificates you hold, or leave blank if none."
         />
       )}
 
-      <div className="apply-form__grid">
-        <FormField id="salary" label="Expected salary (per year)">
-          <Input
-            id="salary"
-            name="salary"
-            type="number"
-            min={0}
-            inputMode="numeric"
-            className="field-control"
-            placeholder="e.g. 60000"
-            defaultValue={defaultValues.salary}
-          />
-        </FormField>
+      <div className="apply-form__grid apply-form__grid--pay">
         <FormField id="currency" label="Currency">
           <Select
             id="currency"
@@ -527,9 +497,18 @@ export default function ProfessionalInfoForm({
             ))}
           </Select>
         </FormField>
-      </div>
-
-      <div className="apply-form__grid">
+        <FormField id="salary" label="Expected salary">
+          <Input
+            id="salary"
+            name="salary"
+            type="number"
+            min={0}
+            inputMode="numeric"
+            className="field-control"
+            placeholder="e.g. 60000"
+            defaultValue={defaultValues.salary}
+          />
+        </FormField>
         <FormField id="notice" label="Notice period" required>
           <Select
             id="notice"

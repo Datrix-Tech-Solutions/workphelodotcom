@@ -22,6 +22,8 @@ export interface AuthUser {
   company?: string;
   /** True when WorkPhelo has verified the recruiter's company. */
   companyVerified?: boolean;
+  /** The company's workspace name in the WorkPhelo app, e.g. for its login link. */
+  tenantSlug?: string;
 }
 
 /** What the rest of the app sees, whichever provider issued the session. */

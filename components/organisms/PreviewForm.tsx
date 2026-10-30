@@ -121,6 +121,7 @@ export default function PreviewForm({
           { label: "Phone number", value: values.phone },
           { label: "Country", value: values.country },
           { label: "City", value: values.location },
+          { label: "Address", value: values.address },
         ]}
       />
 

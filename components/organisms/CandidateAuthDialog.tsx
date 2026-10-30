@@ -10,9 +10,12 @@ import CandidateSignUpForm from "@/components/organisms/CandidateSignUpForm";
 export default function CandidateAuthDialog({
   open,
   onClose,
+  next,
 }: {
   open: boolean;
   onClose: () => void;
+  /** Where to go once signed in or signed up; defaults to staying on this page. */
+  next?: string;
 }) {
   const pathname = usePathname();
   const [view, setView] = useState<"sign-in" | "sign-up">("sign-in");
@@ -30,12 +33,13 @@ export default function CandidateAuthDialog({
     >
       {view === "sign-in" ? (
         <CandidateSignInForm
+          next={next}
           onSuccess={onClose}
           onSwitch={() => setView("sign-up")}
         />
       ) : (
         <CandidateSignUpForm
-          next={pathname}
+          next={next ?? pathname}
           onSwitch={() => setView("sign-in")}
         />
       )}

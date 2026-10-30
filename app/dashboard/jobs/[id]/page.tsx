@@ -7,6 +7,7 @@ import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
 import { getSession } from "@/lib/auth";
 import { toJobId } from "@/lib/jobs";
+import { workpheloAppLink } from "@/lib/workpheloApp";
 import { getMyJob, listApplicants } from "@/lib/recruiterApi";
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default async function JobApplicantsPage({
     redirect("/dashboard");
   }
 
+  const appLink = workpheloAppLink(session.user);
   const items = applicants.ok ? applicants.data.items : [];
   const submitted = items.filter((a) => a.submittedAt);
 
@@ -79,9 +81,25 @@ export default async function JobApplicantsPage({
           </div>
 
           <section className="profile-card" aria-labelledby="applicants">
-            <h2 id="applicants" className="profile-card__title">
-              Applicants
-            </h2>
+            <header className="dashboard__toolbar">
+              <h2 id="applicants" className="profile-card__title">
+                Applicants
+              </h2>
+              {appLink.external ? (
+                <a
+                  href={appLink.href}
+                  className="button button--solid"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on Workphelo
+                </a>
+              ) : (
+                <Link href={appLink.href} className="button button--solid">
+                  View on Workphelo
+                </Link>
+              )}
+            </header>
             {!applicants.ok ? (
               <p className="profile-card__empty">{applicants.error}</p>
             ) : submitted.length === 0 ? (
@@ -108,7 +126,7 @@ export default async function JobApplicantsPage({
                     <span className="recruiter-table__meta" role="cell">
                       {[
                         a.currentJobTitle,
-                        a.yearsOfExperience !== null
+                        a.yearsOfExperience != null
                           ? `${a.yearsOfExperience} yrs`
                           : null,
                       ]

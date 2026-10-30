@@ -43,8 +43,9 @@ export default function CandidateSignInForm({
       }
       resetSavedJobs();
       notifySessionChange();
-      if (onSuccess) onSuccess();
-      else router.push(next);
+      onSuccess?.();
+      // In a pop-up the page stays put unless somewhere else was asked for.
+      if (!onSuccess || next !== "/") router.push(next);
       router.refresh();
     } finally {
       setLoading(false);
@@ -82,7 +83,10 @@ export default function CandidateSignInForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Link href="/forgot-password?role=candidate" className="sign-in__forgot">
+        <Link
+          href="/forgot-password?role=candidate"
+          className="sign-in__forgot"
+        >
           Forgot password?
         </Link>
         {error && (

@@ -1013,6 +1013,21 @@ main {
   gap: 1.25rem;
 }
 
+.phone-field {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+/* Currency, expected salary and notice period on one line. */
+.apply-form__grid--pay {
+  grid-template-columns: 7rem repeat(2, minmax(0, 1fr));
+}
+
+.apply-form__grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .apply-form__actions {
   display: flex;
   justify-content: space-between;
@@ -2039,6 +2054,21 @@ button:focus-visible {
   background-color: var(--color-surface);
 }
 
+/* Education: qualification and institution, then level, start and end on one line. */
+.profile-list__row--education {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.profile-list__span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 600px) {
+  .profile-list__row--education {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .profile-list__row-footer {
   grid-column: 1 / -1;
   display: flex;
@@ -2678,7 +2708,7 @@ button:focus-visible {
 
 .dashboard__summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: 1rem;
 }
 
@@ -2700,24 +2730,35 @@ button:focus-visible {
 }
 
 .dashboard__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 1rem;
+  row-gap: 0.125rem;
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-field);
   background-color: var(--color-white);
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+
+.dashboard__stat:hover {
+  box-shadow: 0 6px 16px rgb(15 23 42 / 0.08);
+  transform: translateY(-2px);
 }
 
 .dashboard__stat-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  margin-bottom: 0.5rem;
-  border-radius: 0.625rem;
+  grid-row: 1 / 3;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.875rem;
   background-color: rgb(3 41 78 / 0.08);
   color: var(--color-brand);
 }
@@ -2732,14 +2773,31 @@ button:focus-visible {
   color: var(--color-orange);
 }
 
-.dashboard__stat-value {
+.dashboard__stat:nth-child(3) .dashboard__stat-icon {
+  background-color: rgb(3 41 78 / 0.08);
   color: var(--color-brand);
-  font-size: 2rem;
+}
+
+.dashboard__stat:nth-child(4) .dashboard__stat-icon {
+  background-color: rgb(100 116 139 / 0.14);
+  color: var(--color-muted);
+}
+
+.dashboard__stat.dashboard__stat--muted .dashboard__stat-icon {
+  background-color: rgb(100 116 139 / 0.14);
+  color: var(--color-muted);
+}
+
+.dashboard__stat-value {
+  align-self: end;
+  color: var(--color-brand);
+  font-size: 1.75rem;
   font-weight: 700;
   line-height: 1;
 }
 
 .dashboard__stat-label {
+  align-self: start;
   color: var(--color-muted);
   font-size: 0.875rem;
 }
@@ -4067,6 +4125,33 @@ button:focus-visible {
   gap: 1rem;
 }
 
+/* Pay: currency first, then the amount(s), all on one row. */
+.salary-row {
+  display: grid;
+  grid-template-columns: 7rem;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 1rem;
+}
+
+@media (max-width: 30rem) {
+  .salary-row {
+    grid-template-columns: 6rem;
+    gap: 0.5rem;
+  }
+}
+
+.profile-form__row--three {
+  /* The last field is a short number, so it gets a fixed, smaller column. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 9rem;
+}
+
+@media (max-width: 40rem) {
+  .profile-form__row--three {
+    grid-template-columns: 1fr;
+  }
+}
+
 .profile-form__socials {
   display: flex;
   flex-direction: column;
@@ -4425,6 +4510,8 @@ textarea.field-control {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .dashboard__toolbar-sub {
@@ -4436,11 +4523,13 @@ textarea.field-control {
 .dashboard__empty {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 1rem;
-  padding: 2rem;
+  padding: 3rem 2rem;
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-field);
+  background-color: var(--color-surface);
+  text-align: center;
 }
 
 .recruiter-table__row {
@@ -4448,8 +4537,9 @@ textarea.field-control {
   grid-template-columns: minmax(0, 2fr) 6rem 8rem 8rem;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 0.75rem;
+  padding: 1.125rem 0.75rem;
   border-top: 1px solid var(--color-border);
+  border-radius: 0.5rem;
   transition: background-color 0.15s;
 }
 
@@ -4504,6 +4594,10 @@ textarea.field-control {
   gap: 0.125rem;
 }
 
+a.recruiter-table__title:hover {
+  text-decoration: underline;
+}
+
 .recruiter-table__title {
   overflow: hidden;
   color: var(--color-brand);
@@ -4519,7 +4613,9 @@ textarea.field-control {
 }
 
 .recruiter-table__status {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
   background-color: var(--color-border);
@@ -4527,6 +4623,19 @@ textarea.field-control {
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.recruiter-table__status::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.recruiter-table__status--closed {
+  background-color: rgb(100 116 139 / 0.14);
+  color: var(--color-muted);
 }
 
 .recruiter-table__status--open {
@@ -5469,4 +5578,235 @@ button.sign-in__link {
   .feature-split {
     grid-template-columns: 1fr;
   }
+}
+
+/* Recruiter job-opening wizard ---------------------------------------------- */
+.opening-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.opening-section__description {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+.opening-wizard__actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background-color: var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.toggle--on {
+  background-color: var(--color-brand);
+}
+
+.toggle__thumb {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  transition: transform 0.15s;
+}
+
+.toggle--on .toggle__thumb {
+  transform: translateX(1.1rem);
+}
+
+.include-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.include-field__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.include-field__label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.include-field__switches {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.include-field__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: var(--color-white);
+}
+
+.tag-input__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background-color: var(--color-surface);
+  font-size: 0.8125rem;
+}
+
+.tag-input__tag button {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.tag-input__field {
+  flex: 1;
+  min-width: 8rem;
+  padding: 0.25rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+}
+
+.opening-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.opening-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.opening-question {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.opening-question__main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .opening-question__main {
+    grid-template-columns: 1fr 14rem;
+  }
+}
+
+.opening-question__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.opening-question__remove {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.opening-question__remove:hover {
+  color: #dc2626;
+}
+
+.opening-document {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.opening-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.opening-preview__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.opening-preview__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.opening-preview__value {
+  font-size: 0.875rem;
+  white-space: pre-line;
+  color: var(--color-text);
+}
+
+/* Recruiter: job opening or advert ------------------------------------------ */
+.post-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-choice__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.post-choice__hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
 }

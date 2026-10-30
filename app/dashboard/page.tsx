@@ -9,6 +9,8 @@ import Hero from "@/components/organisms/Hero";
 import AdvertiserDashboard from "@/components/organisms/AdvertiserDashboard";
 import Navbar from "@/components/organisms/Navbar";
 import { getSession } from "@/lib/auth";
+import AdvertTable from "@/components/molecules/AdvertTable";
+import { listMyAdverts } from "@/lib/advertiserJobs";
 import { listMyJobs } from "@/lib/recruiterApi";
 
 export const metadata: Metadata = {
@@ -33,7 +35,10 @@ export default async function DashboardPage() {
     return <AdvertiserDashboard name={session.user.name} />;
   }
 
-  const result = await listMyJobs();
+  const [result, adverts] = await Promise.all([
+    listMyJobs(),
+    listMyAdverts({ kind: "recruiter", id: session.user.id }),
+  ]);
   const jobs = result.ok ? result.data : [];
   const open = jobs.filter((j) => j.status === "OPEN").length;
   const applicants = jobs.reduce((sum, j) => sum + j.applicantCount, 0);
@@ -117,7 +122,10 @@ export default async function DashboardPage() {
                         {job.title || "Untitled job"}
                       </Link>
                       <span className="recruiter-table__meta">
-                        {[job.location, `Posted ${formatDate(job.createdAt)}`]
+                        {[
+                          job.location,
+                          `${job.status === "DRAFT" ? "Created" : "Posted"} ${formatDate(job.createdAt)}`,
+                        ]
                           .filter(Boolean)
                           .join(" · ")}
                       </span>
@@ -136,7 +144,9 @@ export default async function DashboardPage() {
                       </span>
                     </span>
                     <span className="recruiter-table__action" role="cell">
-                      {job.status !== "DRAFT" && (
+                      {job.status === "DRAFT" ? (
+                        <JobStatusButton id={job.id} open={false} draft />
+                      ) : (
                         <JobStatusButton
                           id={job.id}
                           open={job.status === "OPEN"}
@@ -148,6 +158,22 @@ export default async function DashboardPage() {
               </div>
             )}
           </section>
+
+          {adverts.ok && adverts.data.length > 0 && (
+            <section className="profile-card" aria-labelledby="your-adverts">
+              <header className="dashboard__toolbar">
+                <div>
+                  <h2 id="your-adverts" className="profile-card__title">
+                    Your adverts
+                  </h2>
+                  <p className="dashboard__toolbar-sub">
+                    Listed on the job board with no Apply or Save button.
+                  </p>
+                </div>
+              </header>
+              <AdvertTable jobs={adverts.data} />
+            </section>
+          )}
 
           {!session.user.companyVerified && (
             <p className="dashboard__note">

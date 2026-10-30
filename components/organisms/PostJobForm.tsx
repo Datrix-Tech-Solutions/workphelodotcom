@@ -6,6 +6,7 @@ import { postAdvert, postJob } from "@/app/dashboard/actions";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
 import FormField from "@/components/molecules/FormField";
+import { currencies } from "@/lib/apply";
 import type { NewJob } from "@/lib/recruiterApi";
 
 const JOB_TYPES: { value: NewJob["jobType"]; label: string }[] = [
@@ -234,7 +235,16 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
           </Select>
         </FormField>
         {(showAmount || showRange) && (
-          <div className="profile-form__row">
+          <div className="salary-row">
+            <FormField id="job-currency" label="Currency">
+              <Select id="job-currency" {...bind("salaryCurrency")}>
+                {currencies.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
             {showAmount && (
               <FormField id="job-salary" label="Amount" required>
                 <input
@@ -274,15 +284,6 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
                 </FormField>
               </>
             )}
-            <FormField id="job-currency" label="Currency">
-              <input
-                id="job-currency"
-                type="text"
-                maxLength={3}
-                className="field-control"
-                {...bind("salaryCurrency")}
-              />
-            </FormField>
           </div>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { createAdminClient, isAdminConfigured } from "@/lib/supabase/admin";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { toJob, type ApiVacancy, type Job } from "@/lib/jobs";
 import type { NewJob } from "@/lib/recruiterApi";
@@ -103,16 +104,48 @@ export async function fetchAdvertJob(id: string): Promise<Job | null> {
   }
 }
 
-/** The signed-in advertiser's own adverts. */
-export async function listMyAdverts(): Promise<
-  { ok: true; data: MyAdvert[] } | { ok: false; error: string }
-> {
-  if (!isSupabaseConfigured()) return { ok: false, error: "Not available." };
-  const supabase = await createClient();
-  const { data, error } = await supabase
+/**
+ * Who an advert belongs to. Advertisers use their own Supabase login, so row-level
+ * security keeps them to their own rows. Recruiters have no Supabase login: the server
+ * writes for them with the service key, so every query is scoped to their HR user id.
+ */
+export type AdvertOwner =
+  { kind: "advertiser" } | { kind: "recruiter"; id: string };
+
+const UNAVAILABLE = "Not available right now.";
+
+function isAvailable(owner: AdvertOwner) {
+  return owner.kind === "recruiter"
+    ? isAdminConfigured()
+    : isSupabaseConfigured();
+}
+
+async function clientFor(owner: AdvertOwner) {
+  return owner.kind === "recruiter"
+    ? createAdminClient()
+    : await createClient();
+}
+
+/** The signed-in owner's own adverts. */
+export async function listMyAdverts(
+  owner: AdvertOwner = { kind: "advertiser" },
+): Promise<{ ok: true; data: MyAdvert[] } | { ok: false; error: string }> {
+  if (!isAvailable(owner)) return { ok: false, error: UNAVAILABLE };
+  const supabase = await clientFor(owner);
+  let query = supabase
     .from("advertiser_jobs")
     .select("id, title, location, status, created_at")
     .order("created_at", { ascending: false });
+  if (owner.kind === "recruiter") {
+    query = query.eq("recruiter_id", owner.id);
+  } else {
+    // Open adverts are public, so row-level security alone would also return
+    // everyone else's; an advertiser's list is held to their own user id here.
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return { ok: false, error: "Please sign in again." };
+    query = query.eq("user_id", auth.user.id);
+  }
+  const { data, error } = await query;
   if (error) return { ok: false, error: "Couldn't load your jobs." };
   return {
     ok: true,
@@ -129,10 +162,15 @@ export async function listMyAdverts(): Promise<
 export async function createAdvert(
   job: NewJob,
   advertiserName: string,
+  owner: AdvertOwner = { kind: "advertiser" },
 ): Promise<{ error?: string }> {
-  if (!isSupabaseConfigured()) return { error: "Not available right now." };
-  const supabase = await createClient();
+  if (!isAvailable(owner)) return { error: UNAVAILABLE };
+  const supabase = await clientFor(owner);
   const { error } = await supabase.from("advertiser_jobs").insert({
+    // A recruiter's advert has no Supabase user, so the default user id is cleared.
+    ...(owner.kind === "recruiter"
+      ? { user_id: null, recruiter_id: owner.id }
+      : {}),
     advertiser_name: advertiserName,
     title: job.title.trim(),
     location: job.location.trim(),
@@ -157,12 +195,13 @@ export async function createAdvert(
 export async function setAdvertStatus(
   id: string,
   status: AdvertStatus,
+  owner: AdvertOwner = { kind: "advertiser" },
 ): Promise<{ error?: string }> {
-  if (!isSupabaseConfigured()) return { error: "Not available right now." };
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("advertiser_jobs")
-    .update({ status })
-    .eq("id", id);
+  if (!isAvailable(owner)) return { error: UNAVAILABLE };
+  const supabase = await clientFor(owner);
+  let query = supabase.from("advertiser_jobs").update({ status }).eq("id", id);
+  // The service key skips row-level security, so a recruiter is held to their own rows here.
+  if (owner.kind === "recruiter") query = query.eq("recruiter_id", owner.id);
+  const { error } = await query;
   return error ? { error: "Couldn't update the job." } : {};
 }

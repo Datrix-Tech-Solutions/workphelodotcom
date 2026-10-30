@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { API_URL } from "@/lib/api";
 import { RECRUITER_ACCESS_COOKIE } from "@/lib/auth/constants";
+import type { OpeningPayload } from "@/lib/jobOpening";
 
 const RECRUITMENT = `${API_URL}/hr/recruitment`;
 
@@ -126,6 +127,21 @@ export function createJob(job: NewJob): Promise<ApiResult<MyJob>> {
   return call<MyJob>("/vacancies", {
     method: "POST",
     body: { ...job, status: "OPEN" },
+  });
+}
+
+/** Posts a job opening built by the recruiter wizard. */
+export function createOpening(
+  opening: OpeningPayload,
+): Promise<ApiResult<MyJob>> {
+  return call<MyJob>("/vacancies", { method: "POST", body: opening });
+}
+
+/** Takes a draft live; the API refuses it while required fields are missing. */
+export function publishJob(id: string): Promise<ApiResult<MyJob>> {
+  return call<MyJob>(`/vacancies/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: { status: "OPEN" },
   });
 }
 

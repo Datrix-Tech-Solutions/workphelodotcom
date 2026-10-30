@@ -61,9 +61,12 @@ export default function PlanPriceSummary({
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [step, setStep] = useState<"order" | "success">("order");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const close = useCallback(() => {
     setOpen(false);
     setStep("order");
+    setError("");
   }, []);
   const suffix = billing === "year" ? "yr" : "mo";
   const subtotal = perUser * users;
@@ -77,6 +80,47 @@ export default function PlanPriceSummary({
   const total = billable - discount;
   const period = billing === "year" ? "year" : "month";
   const recurring = Math.round(subtotal * (1 - discountRate) * 100) / 100;
+
+  /** Emails the order to the WorkPhelo team and a confirmation to the requester. */
+  async function confirmOrder() {
+    if (sending) return;
+    setSending(true);
+    setError("");
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          company,
+          planName,
+          billing,
+          users,
+          features: lines.map((line) => line.label),
+          oneTime,
+          discount,
+          discountRate,
+          insuranceCover,
+          total,
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        setError(
+          body?.error ?? "We couldn't send your order. Please try again.",
+        );
+        return;
+      }
+      setStep("success");
+    } catch {
+      setError("We couldn't send your order. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
     <aside className="plan-aside pricing-widget" aria-label={ariaLabel}>
@@ -172,7 +216,7 @@ export default function PlanPriceSummary({
           className="white-panel order-confirm"
           onSubmit={(e) => {
             e.preventDefault();
-            setStep("success");
+            void confirmOrder();
           }}
         >
           <section
@@ -287,12 +331,22 @@ export default function PlanPriceSummary({
                 />
               </label>
             </div>
+            {error && (
+              <p className="sign-in__error" role="alert">
+                {error}
+              </p>
+            )}
             <div className="order-confirm__actions">
-              <Button type="button" variant="outline" onClick={close}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={close}
+                disabled={sending}
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant="solid">
-                Confirm order
+              <Button type="submit" variant="solid" disabled={sending}>
+                {sending ? "Sending…" : "Confirm order"}
               </Button>
             </div>
           </div>

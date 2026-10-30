@@ -4,7 +4,7 @@ import VerifiedMark from "@/components/atoms/VerifiedMark";
 import Divider from "@/components/atoms/Divider";
 import Icon from "@/components/atoms/Icon";
 import Badge from "@/components/atoms/Badge";
-import Button from "@/components/atoms/Button";
+import ApplyButton from "@/components/molecules/ApplyButton";
 import SaveJobButton from "@/components/molecules/SaveJobButton";
 import type { Job } from "@/lib/jobs";
 
@@ -40,9 +40,7 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
         <div className="job-details__actions">
           {!job.advertised && (
             <>
-              <Button href={`/jobs/${job.id}/apply`} variant="solid">
-                Apply Now
-              </Button>
+              <ApplyButton href={`/jobs/${job.id}/apply`} />
               <SaveJobButton
                 job={{ id: job.id, title: job.title, company: job.company }}
               />

@@ -2,18 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { setAdvertOpen, setJobOpen } from "@/app/dashboard/actions";
+import {
+  publishDraft,
+  setAdvertOpen,
+  setJobOpen,
+} from "@/app/dashboard/actions";
 
 /** Closes an open job or reopens a closed one. */
 export default function JobStatusButton({
   id,
   open,
   advert = false,
+  draft = false,
 }: {
   id: string;
   open: boolean;
   /** The job is an advert, kept in Supabase rather than the HR API. */
   advert?: boolean;
+  /** The job is a draft, so the button publishes it. */
+  draft?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -23,7 +30,9 @@ export default function JobStatusButton({
     if (loading) return;
     setLoading(true);
     setError("");
-    const result = await (advert ? setAdvertOpen : setJobOpen)(id, !open);
+    const result = draft
+      ? await publishDraft(id)
+      : await (advert ? setAdvertOpen : setJobOpen)(id, !open);
     setLoading(false);
     if (result.error) {
       setError(result.error);
@@ -40,7 +49,15 @@ export default function JobStatusButton({
         onClick={toggle}
         disabled={loading}
       >
-        {loading ? "Saving…" : open ? "Close job" : "Reopen job"}
+        {loading
+          ? draft
+            ? "Publishing…"
+            : "Saving…"
+          : draft
+            ? "Publish"
+            : open
+              ? "Close job"
+              : "Reopen job"}
       </button>
       {error && (
         <span className="job-status-button__error" role="alert">
