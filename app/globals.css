@@ -191,6 +191,17 @@ main {
   background-color: rgb(255 255 255 / 0.18);
 }
 
+.button--red {
+  color: var(--color-white);
+  background-color: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.button--red:hover {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+}
+
 .input {
   flex: 1;
   min-width: 0;

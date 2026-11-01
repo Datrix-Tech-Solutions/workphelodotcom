@@ -20,7 +20,7 @@ export default function AccountActions({
           Sign in
         </Button>
         {session === null && (
-          <Button href="/post-job" variant="glass">
+          <Button href="/post-job" variant="red">
             Post job
           </Button>
         )}
@@ -31,7 +31,7 @@ export default function AccountActions({
   return (
     <>
       {session.role !== "candidate" && (
-        <Button href="/post-job" variant="glass">
+        <Button href="/post-job" variant="red">
           Post job
         </Button>
       )}

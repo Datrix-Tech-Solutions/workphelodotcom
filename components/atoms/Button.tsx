@@ -2,7 +2,7 @@ import Link from "next/link";
 
 interface ButtonProps {
   href?: string;
-  variant?: "primary" | "ghost" | "glass" | "outline" | "solid" | "soft";
+  variant?: "primary" | "ghost" | "glass" | "outline" | "solid" | "soft" | "red";
   type?: "button" | "submit";
   onClick?: () => void;
   disabled?: boolean;
