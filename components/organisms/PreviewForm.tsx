@@ -134,32 +134,22 @@ export default function PreviewForm({
           { label: "Current employer", value: values.employer },
           {
             label: "Work experience",
-            value: profile.experience
-              .map((role) =>
-                [
-                  [role.role, role.company].filter(Boolean).join(" at "),
-                  durationLabel(role.start, role.end),
-                ]
-                  .filter(Boolean)
-                  .join(" — "),
-              )
-              .join("; "),
+            entries: profile.experience.map((role) => ({
+              title: role.role,
+              subtitle: role.company,
+              period: durationLabel(role.start, role.end),
+            })),
           },
           {
             label: "Education",
-            value: profile.education
-              .map((q) =>
-                [
-                  [q.qualification, q.institution].filter(Boolean).join(", "),
-                  periodLabel(q.start, q.end),
-                ]
-                  .filter(Boolean)
-                  .join(" — "),
-              )
-              .join("; "),
+            entries: profile.education.map((q) => ({
+              title: q.qualification,
+              subtitle: q.institution,
+              period: periodLabel(q.start, q.end),
+            })),
           },
           { label: "Highest education level", value: values.education },
-          { label: "Skills", value: values.skills },
+          { label: "Skills", value: values.skills, wide: true },
           ...(requirements.languages
             ? [{ label: "Languages", value: profile.languages.join(", ") }]
             : []),

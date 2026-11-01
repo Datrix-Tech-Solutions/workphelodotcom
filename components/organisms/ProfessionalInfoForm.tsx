@@ -43,6 +43,19 @@ const readValues = (form: HTMLFormElement): FormValues =>
     new FormData(form) as unknown as Iterable<[string, string]>,
   );
 
+/** Keeps digits and one decimal point, with at most two decimal places. */
+const cleanAmount = (text: string) => {
+  const [whole, ...rest] = text.replace(/[^\d.]/g, "").split(".");
+  return rest.length > 0 ? `${whole}.${rest.join("").slice(0, 2)}` : whole;
+};
+
+/** Adds thousands separators to a cleaned amount, e.g. 60000.5 → 60,000.5. */
+const formatAmount = (amount: string) => {
+  const [whole, decimals] = amount.split(".");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return decimals === undefined ? grouped : `${grouped}.${decimals}`;
+};
+
 const rangeText = (range: NonNullable<ApplyRequirements["experience"]>) => {
   if (range.min !== undefined && range.max !== undefined)
     return `${range.min}–${range.max} years`;
@@ -63,6 +76,7 @@ export default function ProfessionalInfoForm({
   const [years, setYears] = useState(defaultValues.experience ?? "");
   const [jobTitle, setJobTitle] = useState(defaultValues.jobTitle ?? "");
   const [employer, setEmployer] = useState(defaultValues.employer ?? "");
+  const [salary, setSalary] = useState(cleanAmount(defaultValues.salary ?? ""));
   const [unemployed, setUnemployed] = useState(
     defaultValues.unemployed === "true",
   );
@@ -181,6 +195,7 @@ export default function ProfessionalInfoForm({
             />
             <Input
               aria-label="Start date"
+              title="Start date"
               type="month"
               className="field-control"
               value={role.start}
@@ -194,6 +209,7 @@ export default function ProfessionalInfoForm({
             />
             <Input
               aria-label="End date (leave blank if current)"
+              title="End date (leave blank if current)"
               type="month"
               className="field-control"
               value={role.end}
@@ -356,6 +372,7 @@ export default function ProfessionalInfoForm({
             </Select>
             <Input
               aria-label="Start date"
+              title="Start date"
               type="month"
               className="field-control"
               value={q.start ?? ""}
@@ -369,6 +386,7 @@ export default function ProfessionalInfoForm({
             />
             <Input
               aria-label="End date (leave blank if current)"
+              title="End date (leave blank if current)"
               type="month"
               className="field-control"
               value={q.end ?? ""}
@@ -497,17 +515,19 @@ export default function ProfessionalInfoForm({
             ))}
           </Select>
         </FormField>
-        <FormField id="salary" label="Expected salary">
+        <FormField id="salary" label="Expected monthly salary">
           <Input
             id="salary"
-            name="salary"
-            type="number"
-            min={0}
-            inputMode="numeric"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
             className="field-control"
-            placeholder="e.g. 60000"
-            defaultValue={defaultValues.salary}
+            placeholder="e.g. 60,000.00"
+            value={formatAmount(salary)}
+            onChange={(e) => setSalary(cleanAmount(e.target.value))}
           />
+          {/* The plain number is what gets submitted. */}
+          <input type="hidden" name="salary" value={salary} />
         </FormField>
         <FormField id="notice" label="Notice period" required>
           <Select
