@@ -1,5 +1,6 @@
 "use client";
 
+import RecruitmentModuleInfo from "@/components/molecules/RecruitmentModuleInfo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -86,10 +87,11 @@ export default function SignInForm({
       <h1 className="sign-in__title">Welcome back</h1>
       <p className="sign-in__subtext">
         {role === "advertiser"
-          ? "Sign in to advertise jobs with workphelo"
+          ? "Sign in to advertise your jobs, reach thousands of active job seekers, and manage your adverts with Workphelo."
           : role === "recruiter"
-            ? "Sign in to post jobs."
+            ? "Sign in to manage jobs, screen candidates, schedule interviews, and simplify hiring with "
             : "Sign in to continue to view Jobs."}
+        {role === "recruiter" && <RecruitmentModuleInfo />}
       </p>
       <form
         className="sign-in__form"

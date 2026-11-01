@@ -1,5 +1,6 @@
 "use client";
 
+import RecruitmentModuleInfo from "@/components/molecules/RecruitmentModuleInfo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -99,10 +100,11 @@ export default function SignUpForm({
       <h1 className="sign-in__title">Create your account</h1>
       <p className="sign-in__subtext">
         {role === "advertiser"
-          ? "Sign up to advertise jobs with workphelo"
+          ? "Sign up to advertise your jobs on workphelo and reach thousands of active job seekers. Publish adverts in minutes and track them from one simple dashboard."
           : role === "recruiter"
-            ? "Sign up to start posting jobs."
+            ? "Sign up to screen candidates, post jobs, schedule interviews and manage every step of your hiring in one place. Recruit smarter with "
             : "Sign up to find your next role."}
+        {role === "recruiter" && <RecruitmentModuleInfo />}
       </p>
       <form
         className="sign-in__form"

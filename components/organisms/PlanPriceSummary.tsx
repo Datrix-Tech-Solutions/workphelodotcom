@@ -68,7 +68,6 @@ export default function PlanPriceSummary({
     setStep("order");
     setError("");
   }, []);
-  const suffix = billing === "year" ? "yr" : "mo";
   const subtotal = perUser * users;
   // The one time set-up payment is part of the total, so it counts towards
   // the volume discount and the perks too.
@@ -167,15 +166,18 @@ export default function PlanPriceSummary({
 
       <div className="pricing-widget__total">
         <span className="pricing-widget__total-label">Total</span>
-        <Money amount={total} unit={`first ${billing}`} />
+        {perUser > 0 ? (
+          <>
+            <Money amount={recurring} unit={`/ ${period}`} />
+            <span className="pricing-widget__total-sub">
+              {formatPrice(total)} first {period} for {users}{" "}
+              {users === 1 ? "user" : "users"}
+            </span>
+          </>
+        ) : (
+          <Money amount={total} unit={`first ${billing}`} />
+        )}
       </div>
-
-      {perUser > 0 && (
-        <p className="pricing-widget__breakdown">
-          {formatPrice(perUser)}/user/{suffix} &times; {users}{" "}
-          {users === 1 ? "user" : "users"}
-        </p>
-      )}
 
       {insuranceCover > 0 && (
         <p className="pricing-widget__perk">
