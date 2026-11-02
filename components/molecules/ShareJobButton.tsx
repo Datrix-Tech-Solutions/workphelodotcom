@@ -10,7 +10,7 @@ const TARGETS = [
     color: "#25D366",
     path: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z",
     href: (url: string, text: string) =>
-      `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,
+      `https://wa.me/?text=${encodeURIComponent(`${text}\n\n${url}`)}`,
   },
   {
     name: "LinkedIn",
@@ -44,39 +44,101 @@ const TARGETS = [
     name: "Email",
     color: "#64748B",
     path: "",
-    href: (url: string, text: string) =>
-      `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(url)}`,
+    href: (url: string, text: string, subject: string) =>
+      `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`,
   },
 ];
 
-/** Opens a pop-up to share a link to the job on the apps people use, or copy it. */
+const LINK_LABEL = "View job details & apply";
+
+/** The invitation shown for editing before the job is shared. */
+function defaultMessage({
+  title,
+  company,
+  type,
+  benefits,
+}: {
+  title: string;
+  company?: string;
+  type?: string;
+  benefits?: string[];
+}) {
+  const who = company || "We are";
+  const verb = company ? "is" : "";
+  const basis = type ? ` on a ${type} basis` : "";
+  const lines = [
+    "Hello Team,",
+    "",
+    `${[who, verb].filter(Boolean).join(" ")} inviting applications for the position of ${title}${basis}.`,
+  ];
+  if (benefits && benefits.length > 0) {
+    lines.push("", `Benefits: ${benefits.join(", ")}.`);
+  }
+  lines.push(
+    "",
+    "Interested candidates can find more details and submit their applications using the link below:",
+  );
+  return lines.join("\n");
+}
+
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** Shares a job: first a message to edit, then the apps to send it with. */
 export default function ShareJobButton({
   id,
   title,
+  company,
+  type,
+  benefits,
   variant = "pill",
 }: {
   id: string;
   title: string;
+  company?: string;
+  /** "Full-time", "Contract" and so on. */
+  type?: string;
+  benefits?: string[];
   /** "pill" is a labelled button; "icon" is a compact icon-only button. */
   variant?: "pill" | "icon";
 }) {
-  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState<"closed" | "message" | "apps">("closed");
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState("");
-  const text = `${title} - job on Workphelo`;
+  const [message, setMessage] = useState("");
 
   function openDialog() {
     setUrl(`${window.location.origin}/jobs?job=${encodeURIComponent(id)}`);
+    setMessage(defaultMessage({ title, company, type, benefits }));
     setCopied(false);
-    setOpen(true);
+    setStep("message");
   }
 
+  const close = () => setStep("closed");
+  const subject = `${title}${company ? ` at ${company}` : ""} - job on Workphelo`;
+
+  /** Copies the message with the link tucked behind readable text, where the app allows it. */
   async function copy() {
+    const html = `${message
+      .split("\n")
+      .map((line) => `<p>${escapeHtml(line) || "<br>"}</p>`)
+      .join("")}<p><a href="${url}">${LINK_LABEL}</a></p>`;
     try {
-      await navigator.clipboard.writeText(url);
+      if (typeof ClipboardItem !== "undefined") {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([html], { type: "text/html" }),
+            "text/plain": new Blob([`${message}\n\n${url}`], {
+              type: "text/plain",
+            }),
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(`${message}\n\n${url}`);
+      }
       setCopied(true);
     } catch {
-      window.prompt("Copy this link to share the job", url);
+      window.prompt("Copy this message to share the job", `${message}\n\n${url}`);
     }
   }
 
@@ -102,7 +164,49 @@ export default function ShareJobButton({
           Share
         </button>
       )}
-      <Dialog open={open} onClose={() => setOpen(false)} label="Share this job">
+
+      <Dialog open={step === "message"} onClose={close} label="Write a message">
+        <div className="share-dialog">
+          <h2 className="share-dialog__title">Add a message</h2>
+          <p className="share-dialog__job">
+            Edit the invitation below before you share &ldquo;{title}&rdquo;.
+          </p>
+          <textarea
+            className="field-control share-dialog__message"
+            rows={10}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            aria-label="Message"
+          />
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="share-dialog__link"
+          >
+            <Icon name="share" size={14} />
+            {LINK_LABEL}
+          </a>
+          <div className="share-dialog__copy">
+            <button
+              type="button"
+              className="button button--outline"
+              onClick={close}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="button button--solid"
+              onClick={() => setStep("apps")}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </Dialog>
+
+      <Dialog open={step === "apps"} onClose={close} label="Share this job">
         <div className="share-dialog">
           <h2 className="share-dialog__title">Share this job</h2>
           <p className="share-dialog__job">{title}</p>
@@ -110,7 +214,7 @@ export default function ShareJobButton({
             {TARGETS.map((t) => (
               <a
                 key={t.name}
-                href={t.href(url, text)}
+                href={t.href(url, message, subject)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="share-dialog__target"
@@ -138,15 +242,19 @@ export default function ShareJobButton({
             ))}
           </div>
           <div className="share-dialog__copy">
-            <input
-              readOnly
-              value={url}
-              aria-label="Job link"
-              className="field-control"
-              onFocus={(e) => e.currentTarget.select()}
-            />
-            <button type="button" className="button button--outline" onClick={copy}>
-              {copied ? "Copied" : "Copy link"}
+            <button
+              type="button"
+              className="button button--outline"
+              onClick={() => setStep("message")}
+            >
+              Edit message
+            </button>
+            <button
+              type="button"
+              className="button button--solid"
+              onClick={copy}
+            >
+              {copied ? "Copied" : "Copy message"}
             </button>
           </div>
         </div>

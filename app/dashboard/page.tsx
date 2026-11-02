@@ -12,7 +12,7 @@ import Navbar from "@/components/organisms/Navbar";
 import { getSession } from "@/lib/auth";
 import AdvertTable from "@/components/molecules/AdvertTable";
 import { listMyAdverts } from "@/lib/advertiserJobs";
-import { toJobId } from "@/lib/jobs";
+import { jobTypeLabel, toJobId } from "@/lib/jobs";
 import { listMyJobs } from "@/lib/recruiterApi";
 
 export const metadata: Metadata = {
@@ -150,6 +150,8 @@ export default async function DashboardPage() {
                         <ShareJobButton
                           id={toJobId(job.tenantId, job.id)}
                           title={job.title || "Untitled job"}
+                          company={session.user.company || session.user.name}
+                          type={jobTypeLabel(job.jobType)}
                           variant="icon"
                         />
                       )}

@@ -784,7 +784,8 @@ main {
 }
 
 .job-split__scroll {
-  max-height: 34rem;
+  /* About ten cards (each roughly 11rem tall, with 0.75rem between) before it scrolls. */
+  max-height: 118rem;
   margin: 1.25rem -0.5rem 0;
   padding: 0 0.5rem;
   overflow-y: auto;
@@ -915,6 +916,22 @@ main {
 
 .share-dialog__target:hover {
   background-color: var(--color-surface);
+}
+
+.share-dialog__message {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.share-dialog__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  align-self: flex-start;
+  color: var(--color-brand);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .share-dialog__copy {

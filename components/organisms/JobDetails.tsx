@@ -48,7 +48,13 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
               />
             </>
           )}
-          <ShareJobButton id={job.id} title={job.title} />
+          <ShareJobButton
+            id={job.id}
+            title={job.title}
+            company={job.company}
+            type={job.type}
+            benefits={job.perks}
+          />
           <Link
             href={closeHref}
             scroll={false}

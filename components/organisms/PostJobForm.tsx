@@ -17,12 +17,15 @@ const JOB_TYPES: { value: NewJob["jobType"]; label: string }[] = [
   { value: "INTERN", label: "Internship" },
 ];
 
-const WORK_MODES: { value: NonNullable<NewJob["workMode"]>; label: string }[] =
-  [
-    { value: "ONSITE", label: "On-site" },
-    { value: "HYBRID", label: "Hybrid" },
-    { value: "REMOTE", label: "Remote" },
-  ];
+const WORK_MODES: {
+  value: NonNullable<NewJob["workMode"]> | "";
+  label: string;
+}[] = [
+  { value: "ONSITE", label: "On-site" },
+  { value: "HYBRID", label: "Hybrid" },
+  { value: "REMOTE", label: "Remote" },
+  { value: "", label: "Unspecified" },
+];
 
 const SALARY_TYPES: { value: NewJob["salaryType"]; label: string }[] = [
   { value: "NON_DISCLOSED", label: "Don't show pay" },
@@ -108,7 +111,7 @@ export default function PostJobForm({
         location: values.location,
         city: values.city.trim() || undefined,
         jobType: values.jobType as NewJob["jobType"],
-        workMode: values.workMode as NewJob["workMode"],
+        workMode: (values.workMode || undefined) as NewJob["workMode"],
         vacancies: toNumber(values.vacancies),
         closingDate: values.closingDate || undefined,
         description: values.description,

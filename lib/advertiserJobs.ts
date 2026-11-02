@@ -1,6 +1,6 @@
 import { createAdminClient, isAdminConfigured } from "@/lib/supabase/admin";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { toJob, type ApiVacancy, type Job } from "@/lib/jobs";
+import { toJob, toList, type ApiVacancy, type Job } from "@/lib/jobs";
 import type { NewJob } from "@/lib/recruiterApi";
 
 /** Adverts share the `{tenantId}_{vacancyId}` id shape; this is their tenant. */
@@ -35,6 +35,9 @@ interface AdvertRow {
 export interface MyAdvert {
   id: string;
   title: string;
+  companyName: string;
+  jobType: string;
+  perks: string[];
   location: string;
   status: AdvertStatus;
   createdAt: string;
@@ -139,7 +142,9 @@ export async function listMyAdverts(
   const supabase = await clientFor(owner);
   let query = supabase
     .from("advertiser_jobs")
-    .select("id, title, location, status, created_at")
+    .select(
+      "id, title, advertiser_name, job_type, perks_and_benefits, location, status, created_at",
+    )
     .order("created_at", { ascending: false });
   if (owner.kind === "recruiter") {
     query = query.eq("recruiter_id", owner.id);
@@ -157,6 +162,9 @@ export async function listMyAdverts(
     data: (data ?? []).map((r) => ({
       id: r.id,
       title: r.title,
+      companyName: r.advertiser_name,
+      jobType: r.job_type,
+      perks: toList(r.perks_and_benefits),
       location: r.location,
       status: r.status as AdvertStatus,
       createdAt: r.created_at,

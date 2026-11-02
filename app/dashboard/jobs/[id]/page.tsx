@@ -7,7 +7,7 @@ import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
 import { getSession } from "@/lib/auth";
-import { toJobId } from "@/lib/jobs";
+import { jobTypeLabel, toJobId } from "@/lib/jobs";
 import { workpheloAppLink } from "@/lib/workpheloApp";
 import { getMyJob, listApplicants } from "@/lib/recruiterApi";
 
@@ -68,6 +68,8 @@ export default async function JobApplicantsPage({
                 <ShareJobButton
                   id={toJobId(job.data.tenantId, job.data.id)}
                   title={job.data.title || "Untitled job"}
+                  company={session.user.company || session.user.name}
+                  type={jobTypeLabel(job.data.jobType)}
                 />
               )}
               {job.data.status === "OPEN" && (

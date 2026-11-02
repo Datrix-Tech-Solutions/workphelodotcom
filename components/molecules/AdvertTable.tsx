@@ -4,6 +4,7 @@ import DeleteAdvertButton from "@/components/molecules/DeleteAdvertButton";
 import JobStatusButton from "@/components/molecules/JobStatusButton";
 import ShareJobButton from "@/components/molecules/ShareJobButton";
 import type { MyAdvert } from "@/lib/advertiserJobs";
+import { jobTypeLabel } from "@/lib/jobs";
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", {
@@ -50,7 +51,14 @@ export default function AdvertTable({ jobs }: { jobs: MyAdvert[] }) {
             </span>
           </span>
           <span className="recruiter-table__action" role="cell">
-            <ShareJobButton id={job.id} title={job.title} variant="icon" />
+            <ShareJobButton
+              id={job.id}
+              title={job.title}
+              company={job.companyName}
+              type={jobTypeLabel(job.jobType)}
+              benefits={job.perks}
+              variant="icon"
+            />
             <Link
               href={`/dashboard/adverts/${job.id}/edit`}
               className="share-job-button share-job-button--icon share-job-button--edit"

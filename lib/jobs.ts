@@ -108,6 +108,11 @@ const JOB_TYPES: Record<string, string> = {
   INTERN: "Internship",
 };
 
+/** "Full-time" etc. for an API job type; empty when there is none. */
+export function jobTypeLabel(type: string | null | undefined): string {
+  return (type && JOB_TYPES[type]) || "";
+}
+
 const WORK_MODES = {
   ONSITE: "On-site",
   REMOTE: "Remote",
@@ -160,7 +165,7 @@ function formatPosted(iso: string): string {
 }
 
 /** The API stores these as plain text, one item per line. */
-function toList(text: string | null): string[] {
+export function toList(text: string | null): string[] {
   if (!text) return [];
   return text
     .split(/\r?\n/)
