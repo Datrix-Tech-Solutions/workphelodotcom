@@ -25,13 +25,13 @@ export default function JobCard({ job, href, selected }: JobCardProps) {
           <p className="job-card__company">
             <VerifiedName name={job.company} verified={job.companyVerified} />
           </p>
+          {job.promotedBy && (
+            <p className="job-card__promoted">
+              Promoted by <strong>{job.promotedBy}</strong>
+            </p>
+          )}
         </div>
       </div>
-      {job.promotedBy && (
-        <p className="job-card__promoted">
-          Promoted by <strong>{job.promotedBy}</strong>
-        </p>
-      )}
       <div className="job-card__tags">
         {(job.workMode === "Remote" ? "Remote" : job.type || job.workMode) && (
           <Badge>
