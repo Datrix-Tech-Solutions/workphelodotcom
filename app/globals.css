@@ -4984,6 +4984,11 @@ a.recruiter-table__title:hover {
   gap: 0.75rem;
 }
 
+.job-status-button .button--outline:hover:not(:disabled) {
+  background-color: var(--color-brand);
+  color: var(--color-white);
+}
+
 .job-status-button {
   display: inline-flex;
   flex-direction: column;
