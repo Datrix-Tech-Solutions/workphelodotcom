@@ -2051,8 +2051,10 @@ button:focus-visible {
 }
 
 .cube-loader__grid {
-  width: 8.75em;
-  height: 6.25em;
+  top: 62%;
+  /* Zero-size so the grid's origin is the exact centre of the loader. */
+  width: 0;
+  height: 0;
   /* The faces are inset by -7.5em, so shift the grid back to centre it. */
   transform: rotateX(-35deg) rotateY(-45deg) translate(6.125em, 6.125em);
 }
