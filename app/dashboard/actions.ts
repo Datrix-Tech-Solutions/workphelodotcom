@@ -115,6 +115,7 @@ async function advertActor() {
 export async function postAdvert(
   job: NewJob,
   companyName?: string,
+  industry?: string,
 ): Promise<ActionResult> {
   const actor = await advertActor();
   if (!actor) return { error: "Please sign in again." };
@@ -127,6 +128,7 @@ export async function postAdvert(
     companyName?.trim() || actor.name,
     actor.owner,
     actor.person,
+    industry || undefined,
   );
   if (result.error) return result;
   revalidatePath("/dashboard");
@@ -139,6 +141,7 @@ export async function editAdvert(
   id: string,
   job: NewJob,
   companyName?: string,
+  industry?: string,
 ): Promise<ActionResult> {
   const actor = await advertActor();
   if (!actor) return { error: "Please sign in again." };
@@ -150,6 +153,7 @@ export async function editAdvert(
     job,
     companyName?.trim() || actor.name,
     actor.owner,
+    industry || undefined,
   );
   if (result.error) return result;
   revalidatePath("/dashboard");

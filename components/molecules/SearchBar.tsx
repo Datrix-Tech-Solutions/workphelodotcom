@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import SearchIcon from "@/components/atoms/SearchIcon";
@@ -27,12 +31,40 @@ export default function SearchBar({
   posted,
   showDateFilter,
 }: SearchBarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Results follow the typing on the jobs page; elsewhere the search still waits for Enter.
+  const live = pathname === "/jobs";
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  /** Re-runs the search shortly after the last change, keeping any open job. */
+  function onChange(event: React.FormEvent<HTMLFormElement>) {
+    if (!live) return;
+    const form = event.currentTarget;
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      const params = new URLSearchParams();
+      for (const [key, value] of new FormData(form)) {
+        if (typeof value === "string" && value.trim()) {
+          params.set(key, value.trim());
+        }
+      }
+      const job = new URLSearchParams(window.location.search).get("job");
+      if (job) params.set("job", job);
+      const query = params.toString();
+      router.replace(query ? `/jobs?${query}` : "/jobs", { scroll: false });
+    }, 300);
+  }
+
   return (
     <form
       role="search"
       action="/jobs"
       method="get"
       className="glass-panel search-bar"
+      onChange={onChange}
     >
       <div className="search-bar__field search-bar__field--grow">
         <label htmlFor="job-search" className="sr-only">

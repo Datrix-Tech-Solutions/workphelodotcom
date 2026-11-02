@@ -4,6 +4,8 @@ import Hero from "@/components/organisms/Hero";
 import JobListings from "@/components/organisms/JobListings";
 import Navbar from "@/components/organisms/Navbar";
 import { fetchJob, fetchJobs } from "@/lib/api";
+import { getSession } from "@/lib/auth";
+import { matchesIndustries } from "@/lib/jobIndustry";
 import { JOBS_PER_PAGE, postedRange, TYPE_FILTERS } from "@/lib/jobs";
 
 interface JobsPageProps {
@@ -50,10 +52,22 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
   const page = Number.isNaN(requested) ? 1 : Math.max(requested, 1);
 
   const selectedId = first(params.job);
-  const [{ jobs, total, unavailable }, selectedJob] = await Promise.all([
-    fetchJobs({ query, location, type, posted, page }),
-    selectedId ? fetchJob(selectedId) : Promise.resolve(null),
-  ]);
+  const [{ jobs: found, total, unavailable }, selectedJob, session] =
+    await Promise.all([
+      fetchJobs({ query, location, type, posted, page }),
+      selectedId ? fetchJob(selectedId) : Promise.resolve(null),
+      getSession(),
+    ]);
+
+  // Jobs in the candidate's industries get a Recommended tag; the order stays by date.
+  const picked =
+    session?.role === "candidate"
+      ? (session.user.profile?.industries ?? [])
+      : [];
+  const jobs = found.map((job) => ({
+    ...job,
+    recommended: matchesIndustries(job, picked),
+  }));
 
   const totalPages = Math.max(1, Math.ceil(total / JOBS_PER_PAGE));
 

@@ -13,7 +13,7 @@ import { notifySessionChange } from "@/lib/useSession";
 interface ProfileFormProps {
   name: string;
   email: string;
-  profile: CandidateProfile;
+  profile: Omit<CandidateProfile, "industries">;
 }
 
 export default function ProfileForm({

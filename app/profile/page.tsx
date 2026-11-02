@@ -145,7 +145,10 @@ export default async function ProfilePage() {
               )}
             </section>
 
-            <CompleteProfile initial={details} />
+            <CompleteProfile
+              initial={details}
+              industries={profile?.industries ?? []}
+            />
           </div>
         </section>
       </main>

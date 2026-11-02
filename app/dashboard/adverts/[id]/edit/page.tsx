@@ -38,6 +38,7 @@ export default async function EditAdvertPage({
   const { job } = advert;
   const values: AdvertFormValues = {
     companyName: advert.companyName,
+    industry: advert.industry,
     title: job.title,
     location: job.location,
     city: job.city ?? "",

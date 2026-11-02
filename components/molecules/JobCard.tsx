@@ -33,6 +33,9 @@ export default function JobCard({ job, href, selected }: JobCardProps) {
         </div>
       </div>
       <div className="job-card__tags">
+        {job.recommended && (
+          <span className="badge badge--recommended">Recommended</span>
+        )}
         {(job.workMode === "Remote" ? "Remote" : job.type || job.workMode) && (
           <Badge>
             {job.workMode === "Remote" ? "Remote" : job.type || job.workMode}

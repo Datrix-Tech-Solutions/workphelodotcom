@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { industries } from "@/lib/company";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type {
   AuthProvider,
@@ -94,6 +95,7 @@ export const candidateAuth: AuthProvider = {
           country: clean(meta.country),
           city: clean(meta.city),
           role: clean(meta.role),
+          industries: cleanList(meta.industries),
           linkedin: clean(meta.linkedin),
           github: clean(meta.github),
           portfolio: clean(meta.portfolio),
@@ -116,6 +118,16 @@ export async function siteOrigin(): Promise<string | undefined> {
 
 const FIELD_LIMIT = 200;
 
+/** A list of known industries only, so nothing else can be stored under this field. */
+function cleanList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return [
+    ...new Set(
+      value.filter((v): v is string => typeof v === "string" && industries.includes(v)),
+    ),
+  ];
+}
+
 function clean(value: unknown): string {
   return typeof value === "string" ? value.trim().slice(0, FIELD_LIMIT) : "";
 }
@@ -128,7 +140,7 @@ export async function updateCandidateProfile(
   const name = clean(input.name);
   if (!name) return { error: "Please enter your name." };
 
-  const profile: CandidateProfile = {
+  const profile: Omit<CandidateProfile, "industries"> = {
     phone: clean(input.phone),
     country: clean(input.country),
     city: clean(input.city),
@@ -144,5 +156,19 @@ export async function updateCandidateProfile(
   });
   return error
     ? { error: "Couldn't save your changes. Please try again." }
+    : {};
+}
+
+/** Saves the industries a candidate wants jobs in on their Supabase account. */
+export async function updateCandidateIndustries(
+  value: unknown,
+): Promise<AuthResult> {
+  if (!isSupabaseConfigured()) return { error: NOT_CONFIGURED };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    data: { industries: cleanList(value) },
+  });
+  return error
+    ? { error: "Couldn't save your industries. Please try again." }
     : {};
 }

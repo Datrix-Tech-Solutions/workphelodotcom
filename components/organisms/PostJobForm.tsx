@@ -7,6 +7,7 @@ import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
 import FormField from "@/components/molecules/FormField";
 import { currencies } from "@/lib/apply";
+import { industries } from "@/lib/company";
 import { countries } from "@/lib/countries";
 import type { NewJob } from "@/lib/recruiterApi";
 
@@ -38,6 +39,7 @@ const toNumber = (value: string) => (value.trim() ? Number(value) : undefined);
 /** The form's fields as text, the shape an existing advert is loaded into. */
 export interface AdvertFormValues {
   companyName: string;
+  industry: string;
   title: string;
   location: string;
   city: string;
@@ -68,6 +70,7 @@ export default function PostJobForm({
   const [values, setValues] = useState<AdvertFormValues>(
     editing?.values ?? {
     companyName: "",
+    industry: "",
     title: "",
     location: "",
     city: "",
@@ -125,9 +128,14 @@ export default function PostJobForm({
         salaryCurrency: values.salaryCurrency.trim().toUpperCase() || undefined,
       };
       const result = editing
-        ? await editAdvert(editing.id, payload, values.companyName)
+        ? await editAdvert(
+            editing.id,
+            payload,
+            values.companyName,
+            values.industry,
+          )
         : advert
-          ? await postAdvert(payload, values.companyName)
+          ? await postAdvert(payload, values.companyName, values.industry)
           : await postJob(payload);
       if (result.error) {
         setError(result.error);
@@ -168,16 +176,30 @@ export default function PostJobForm({
           </FormField>
         )}
 
-        <FormField id="job-title" label="Job title" required>
-          <input
-            id="job-title"
-            type="text"
-            required
-            maxLength={160}
-            className="field-control"
-            {...bind("title")}
-          />
-        </FormField>
+        <div className="profile-form__row">
+          {advert && (
+            <FormField id="job-industry" label="Industry">
+              <Select id="job-industry" {...bind("industry")}>
+                <option value="">Select an industry</option>
+                {industries.map((i) => (
+                  <option key={i} value={i}>
+                    {i}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+          )}
+          <FormField id="job-title" label="Job title" required>
+            <input
+              id="job-title"
+              type="text"
+              required
+              maxLength={160}
+              className="field-control"
+              {...bind("title")}
+            />
+          </FormField>
+        </div>
 
         <div className="profile-form__row">
           <FormField id="job-country" label="Country" required>

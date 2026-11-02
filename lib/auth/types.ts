@@ -7,6 +7,8 @@ export interface CandidateProfile {
   city: string;
   /** The job role they work in or want, e.g. "Frontend Developer". */
   role: string;
+  /** Industries the candidate wants jobs in; used to recommend jobs. */
+  industries: string[];
   linkedin: string;
   github: string;
   portfolio: string;
@@ -32,7 +34,8 @@ export interface Session {
   user: AuthUser;
 }
 
-export interface ProfileInput extends CandidateProfile {
+/** Industries are kept separately, in the Complete your profile checklist. */
+export interface ProfileInput extends Omit<CandidateProfile, "industries"> {
   name: string;
 }
 

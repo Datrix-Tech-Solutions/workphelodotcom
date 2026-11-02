@@ -39,6 +39,10 @@ export interface Job {
   advertised?: boolean;
   /** The name of the person who posted an advert. */
   promotedBy?: string;
+  /** The industry an advert was posted under. */
+  industry?: string;
+  /** Set on the home page when the job is in an industry the candidate picked. */
+  recommended?: boolean;
 }
 
 export interface ListRequirement {

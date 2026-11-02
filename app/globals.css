@@ -228,6 +228,11 @@ main {
   font-weight: 600;
 }
 
+.badge--recommended {
+  background-color: #fff1e6;
+  color: #c2410c;
+}
+
 .input--dark {
   color: var(--color-text);
 }
@@ -4520,6 +4525,59 @@ button:focus-visible {
   .profile-form__row--three {
     grid-template-columns: 1fr;
   }
+}
+
+.profile-form__industries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.industry-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.industry-picker__option {
+  position: relative;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-white);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.industry-picker__option--active {
+  border-color: var(--color-brand);
+  background-color: var(--color-brand);
+  color: var(--color-white);
+}
+
+.industry-picker__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.industry-picker__option:has(:focus-visible) {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.profile-form__fields:disabled .industry-picker__option {
+  cursor: default;
 }
 
 .profile-form__socials {

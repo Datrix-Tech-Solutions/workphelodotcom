@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import {
   profileDocumentUrl,
   removeProfileDocument,
+  saveIndustries,
   saveProfileSection,
   uploadProfileDocument,
 } from "@/app/profile/actions";
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
 import FormField from "@/components/molecules/FormField";
+import { industries as allIndustries } from "@/lib/company";
 import {
   DOCUMENTS,
   DOCUMENT_EXTENSIONS,
@@ -23,9 +25,10 @@ import {
   type SectionKey,
 } from "@/lib/candidateDetailsConfig";
 
-type PanelKey = SectionKey | DocumentKind;
+type PanelKey = SectionKey | DocumentKind | "industries";
 
 const ORDER: PanelKey[] = [
+  "industries",
   "education",
   "career",
   "certificates",
@@ -34,6 +37,7 @@ const ORDER: PanelKey[] = [
 ];
 
 function titleOf(key: PanelKey): string {
+  if (key === "industries") return "Industries";
   return key in SECTIONS
     ? SECTIONS[key as SectionKey].title
     : DOCUMENTS[key as DocumentKind].title;
@@ -41,14 +45,19 @@ function titleOf(key: PanelKey): string {
 
 export default function CompleteProfile({
   initial,
+  industries: initialIndustries,
 }: {
   initial: CandidateDetails;
+  /** Industries the candidate picked; jobs in them are recommended first. */
+  industries: string[];
 }) {
   const router = useRouter();
   const [details, setDetails] = useState(initial);
   const [open, setOpen] = useState<PanelKey | null>(null);
+  const [picked, setPicked] = useState(initialIndustries);
 
   const complete: Record<PanelKey, boolean> = {
+    industries: picked.length > 0,
     education: details.education.length > 0,
     career: details.career.length > 0,
     certificates: details.certificates.length > 0,
@@ -111,7 +120,15 @@ export default function CompleteProfile({
               </button>
               {isOpen && (
                 <div className="complete__body">
-                  {key === "resume" || key === "cover_letter" ? (
+                  {key === "industries" ? (
+                    <IndustriesPanel
+                      picked={picked}
+                      onChange={(next) => {
+                        setPicked(next);
+                        router.refresh();
+                      }}
+                    />
+                  ) : key === "resume" || key === "cover_letter" ? (
                     <DocumentPanel
                       kind={key}
                       file={
@@ -143,6 +160,87 @@ export default function CompleteProfile({
         })}
       </ul>
     </section>
+  );
+}
+
+/* Industries ----------------------------------------------------------------- */
+
+function IndustriesPanel({
+  picked,
+  onChange,
+}: {
+  picked: string[];
+  onChange: (industries: string[]) => void;
+}) {
+  const [draft, setDraft] = useState(picked);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  function toggle(industry: string) {
+    setDraft((d) =>
+      d.includes(industry) ? d.filter((i) => i !== industry) : [...d, industry],
+    );
+    setSaved(false);
+  }
+
+  async function save() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await saveIndustries(draft);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      setSaved(true);
+      onChange(draft);
+    } catch {
+      setError("Couldn't save. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="profile-form__industries">
+      <p className="form-field__hint">
+        Pick all the industries you want jobs in. Jobs in these industries are
+        recommended to you first.
+      </p>
+      <div className="industry-picker">
+        {allIndustries.map((industry) => (
+          <label
+            key={industry}
+            className={`industry-picker__option${draft.includes(industry) ? " industry-picker__option--active" : ""}`}
+          >
+            <input
+              type="checkbox"
+              className="industry-picker__input"
+              checked={draft.includes(industry)}
+              onChange={() => toggle(industry)}
+            />
+            {industry}
+          </label>
+        ))}
+      </div>
+      {error && (
+        <p className="form-field__error" role="alert">
+          {error}
+        </p>
+      )}
+      {saved && (
+        <p className="account__saved" role="status">
+          Industries saved.
+        </p>
+      )}
+      <div className="profile-form__actions">
+        <Button type="button" variant="solid" onClick={save} disabled={busy}>
+          {busy ? "Saving…" : "Save industries"}
+        </Button>
+      </div>
+    </div>
   );
 }
 

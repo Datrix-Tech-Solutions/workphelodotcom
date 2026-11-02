@@ -13,6 +13,7 @@ interface AdvertRow {
   id: string;
   advertiser_name: string;
   promoted_by: string | null;
+  industry: string | null;
   title: string;
   location: string;
   city: string | null;
@@ -44,7 +45,7 @@ export interface MyAdvert {
 }
 
 const COLUMNS =
-  "id, advertiser_name, promoted_by, title, location, city, job_type, work_mode, description, responsibilities, requirements, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at";
+  "id, advertiser_name, promoted_by, industry, title, location, city, job_type, work_mode, description, responsibilities, requirements, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at";
 
 /** Maps a row onto the shape the job board already renders. */
 function toAdvertJob(row: AdvertRow): Job {
@@ -73,6 +74,7 @@ function toAdvertJob(row: AdvertRow): Job {
     ...job,
     advertised: true,
     promotedBy: row.promoted_by || undefined,
+    industry: row.industry || undefined,
   };
 }
 
@@ -177,6 +179,7 @@ export async function createAdvert(
   advertiserName: string,
   owner: AdvertOwner = { kind: "advertiser" },
   promotedBy?: string,
+  industry?: string,
 ): Promise<{ error?: string }> {
   if (!isAvailable(owner)) return { error: UNAVAILABLE };
   const supabase = await clientFor(owner);
@@ -187,6 +190,7 @@ export async function createAdvert(
       : {}),
     advertiser_name: advertiserName,
     promoted_by: promotedBy ?? null,
+    industry: industry ?? null,
     title: job.title.trim(),
     location: job.location.trim(),
     city: job.city ?? null,
@@ -225,7 +229,7 @@ export async function setAdvertStatus(
 export async function getMyAdvert(
   id: string,
   owner: AdvertOwner = { kind: "advertiser" },
-): Promise<{ companyName: string; job: NewJob } | null> {
+): Promise<{ companyName: string; industry: string; job: NewJob } | null> {
   if (!isAvailable(owner)) return null;
   const supabase = await clientFor(owner);
   let query = supabase
@@ -247,6 +251,7 @@ export async function getMyAdvert(
   };
   return {
     companyName: r.advertiser_name,
+    industry: r.industry ?? "",
     job: {
       title: r.title,
       location: r.location,
@@ -273,6 +278,7 @@ export async function updateAdvert(
   job: NewJob,
   advertiserName: string,
   owner: AdvertOwner = { kind: "advertiser" },
+  industry?: string,
 ): Promise<{ error?: string }> {
   if (!isAvailable(owner)) return { error: UNAVAILABLE };
   const supabase = await clientFor(owner);
@@ -280,6 +286,7 @@ export async function updateAdvert(
     .from("advertiser_jobs")
     .update({
       advertiser_name: advertiserName,
+      industry: industry ?? null,
       title: job.title.trim(),
       location: job.location.trim(),
       city: job.city ?? null,

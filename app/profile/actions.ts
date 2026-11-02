@@ -1,5 +1,7 @@
 "use server";
 
+import { getSession } from "@/lib/auth";
+import { updateCandidateIndustries } from "@/lib/auth/candidate";
 import {
   documentUrl,
   removeDocument,
@@ -41,4 +43,13 @@ export async function profileDocumentUrl(
   kind: DocumentKind,
 ): Promise<{ url?: string; error?: string }> {
   return documentUrl(kind);
+}
+
+/** Saves the industries the signed-in candidate picked; they drive recommended jobs. */
+export async function saveIndustries(
+  industries: string[],
+): Promise<DetailsResult> {
+  const session = await getSession();
+  if (session?.role !== "candidate") return { error: "Please sign in again." };
+  return updateCandidateIndustries(industries);
 }
