@@ -7,6 +7,7 @@ import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import { WhitePanel } from "@/components/atoms/GlassPanel";
 import Input from "@/components/atoms/Input";
+import CheckEmailDialog from "@/components/molecules/CheckEmailDialog";
 import PasswordField from "@/components/molecules/PasswordField";
 import { signUp } from "@/app/auth/actions";
 import type { PickerRole } from "@/components/organisms/SignInForm";
@@ -50,7 +51,7 @@ export default function SignUpForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState(false);
   const router = useRouter();
   const mismatch = confirmPassword !== "" && confirmPassword !== password;
 
@@ -59,7 +60,6 @@ export default function SignUpForm({
     if (loading || password !== confirmPassword) return;
     setLoading(true);
     setError("");
-    setNotice("");
     try {
       const result = await signUp(
         role === "recruiter"
@@ -81,7 +81,7 @@ export default function SignUpForm({
         return;
       }
       if (result.needsConfirmation) {
-        setNotice("Check your email to confirm your account, then sign in.");
+        setConfirmEmail(true);
         return;
       }
       resetSavedJobs();
@@ -284,11 +284,6 @@ export default function SignUpForm({
             {error}
           </p>
         )}
-        {notice && (
-          <p className="sign-in__notice sign-in__message" role="status">
-            {notice}
-          </p>
-        )}
         <Button type="submit" variant="primary" disabled={loading}>
           {loading ? (
             <>
@@ -315,6 +310,13 @@ export default function SignUpForm({
           </Link>
         )}
       </p>
+      <CheckEmailDialog
+        open={confirmEmail}
+        onClose={() => setConfirmEmail(false)}
+        email={email}
+        onSignIn={onSwitch}
+        signInHref={role === "candidate" ? "/sign-in" : "/recruiter/sign-in"}
+      />
     </WhitePanel>
   );
 }

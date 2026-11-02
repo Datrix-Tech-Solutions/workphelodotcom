@@ -1373,6 +1373,32 @@ fieldset.form-field .form-field__hint {
   box-shadow: 0 0 0 3px rgb(10 36 114 / 0.12);
 }
 
+/* Country dropdown on the post-job form: always fills its column. */
+.country-select {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.625rem 2.25rem 0.625rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: var(--color-white);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9375rem;
+  appearance: none;
+}
+
+.country-select:focus {
+  border-color: var(--color-brand);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgb(10 36 114 / 0.12);
+}
+
 .field-control--select {
   appearance: none;
   padding-right: 2.25rem;

@@ -7,6 +7,7 @@ import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
 import FormField from "@/components/molecules/FormField";
 import { currencies } from "@/lib/apply";
+import { countries } from "@/lib/countries";
 import type { NewJob } from "@/lib/recruiterApi";
 
 const JOB_TYPES: { value: NewJob["jobType"]; label: string }[] = [
@@ -123,16 +124,22 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
         </FormField>
 
         <div className="profile-form__row">
-          <FormField id="job-location" label="Location" required>
-            <input
+          <FormField id="job-location" label="Country" required>
+            <select
               id="job-location"
-              type="text"
               required
-              maxLength={160}
-              placeholder="Accra, Ghana"
-              className="field-control"
+              className="country-select"
               {...bind("location")}
-            />
+            >
+              <option value="" disabled>
+                Select a country
+              </option>
+              {countries.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </FormField>
           <FormField id="job-city" label="City">
             <input

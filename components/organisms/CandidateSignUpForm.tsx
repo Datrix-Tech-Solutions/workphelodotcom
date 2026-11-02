@@ -6,6 +6,7 @@ import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import { WhitePanel } from "@/components/atoms/GlassPanel";
 import Input from "@/components/atoms/Input";
+import CheckEmailDialog from "@/components/molecules/CheckEmailDialog";
 import PasswordField from "@/components/molecules/PasswordField";
 import { signUp } from "@/app/auth/actions";
 import { resetSavedJobs } from "@/lib/useSavedJobs";
@@ -27,7 +28,7 @@ export default function CandidateSignUpForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState(false);
   const router = useRouter();
   const mismatch = confirmPassword !== "" && confirmPassword !== password;
 
@@ -36,7 +37,6 @@ export default function CandidateSignUpForm({
     if (loading || password !== confirmPassword) return;
     setLoading(true);
     setError("");
-    setNotice("");
     try {
       const result = await signUp({ role: "candidate", name, email, password });
       if (result.error) {
@@ -44,7 +44,7 @@ export default function CandidateSignUpForm({
         return;
       }
       if (result.needsConfirmation) {
-        setNotice("Check your email to confirm your account, then sign in.");
+        setConfirmEmail(true);
         return;
       }
       resetSavedJobs();
@@ -124,11 +124,6 @@ export default function CandidateSignUpForm({
             {error}
           </p>
         )}
-        {notice && (
-          <p className="sign-in__notice sign-in__message" role="status">
-            {notice}
-          </p>
-        )}
         <Button type="submit" variant="primary" disabled={loading}>
           {loading ? (
             <>
@@ -152,6 +147,13 @@ export default function CandidateSignUpForm({
           </Link>
         )}
       </p>
+      <CheckEmailDialog
+        open={confirmEmail}
+        onClose={() => setConfirmEmail(false)}
+        email={email}
+        onSignIn={onSwitch}
+        signInHref={"/sign-in"}
+      />
     </WhitePanel>
   );
 }
