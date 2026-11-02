@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
 import JobStatusButton from "@/components/molecules/JobStatusButton";
+import ShareJobButton from "@/components/molecules/ShareJobButton";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import AdvertiserDashboard from "@/components/organisms/AdvertiserDashboard";
@@ -11,6 +12,7 @@ import Navbar from "@/components/organisms/Navbar";
 import { getSession } from "@/lib/auth";
 import AdvertTable from "@/components/molecules/AdvertTable";
 import { listMyAdverts } from "@/lib/advertiserJobs";
+import { toJobId } from "@/lib/jobs";
 import { listMyJobs } from "@/lib/recruiterApi";
 
 export const metadata: Metadata = {
@@ -144,6 +146,13 @@ export default async function DashboardPage() {
                       </span>
                     </span>
                     <span className="recruiter-table__action" role="cell">
+                      {job.status === "OPEN" && (
+                        <ShareJobButton
+                          id={toJobId(job.tenantId, job.id)}
+                          title={job.title || "Untitled job"}
+                          variant="icon"
+                        />
+                      )}
                       {job.status === "DRAFT" ? (
                         <JobStatusButton id={job.id} open={false} draft />
                       ) : (

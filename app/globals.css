@@ -836,6 +836,119 @@ main {
   background-color: var(--color-border);
 }
 
+.dialog__panel:has(.share-dialog) {
+  max-width: 26rem;
+}
+
+.share-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-field);
+  background-color: var(--color-white);
+  box-shadow: 0 20px 50px rgb(3 15 35 / 0.25);
+}
+
+.share-dialog__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.share-dialog__job {
+  margin: -0.5rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.share-dialog__targets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.share-dialog__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  color: var(--color-white);
+}
+
+.share-dialog__target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.share-dialog__target:hover {
+  background-color: var(--color-surface);
+}
+
+.share-dialog__copy {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* .field-control is flex: none at 100% wide, which pushed the button out of the card. */
+.share-dialog__copy .field-control {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+
+.share-dialog__copy .button {
+  flex-shrink: 0;
+}
+
+.share-job-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border: 0;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.share-job-button:hover {
+  background-color: var(--color-border);
+}
+
+.share-job-button--pill {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+}
+
+.share-job-button--icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: var(--color-white);
+}
+
 .job-details__back-icon,
 .job-details__back-label {
   display: none;
@@ -4773,7 +4886,9 @@ textarea.field-control {
 
 .recruiter-table__action {
   display: flex;
+  align-items: flex-start;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .recruiter-table__main {

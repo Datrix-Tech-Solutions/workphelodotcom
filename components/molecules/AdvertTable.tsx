@@ -1,4 +1,5 @@
 import JobStatusButton from "@/components/molecules/JobStatusButton";
+import ShareJobButton from "@/components/molecules/ShareJobButton";
 import type { MyAdvert } from "@/lib/advertiserJobs";
 
 const formatDate = (iso: string) =>
@@ -46,6 +47,7 @@ export default function AdvertTable({ jobs }: { jobs: MyAdvert[] }) {
             </span>
           </span>
           <span className="recruiter-table__action" role="cell">
+            <ShareJobButton id={job.id} title={job.title} variant="icon" />
             <JobStatusButton id={job.id} open={job.status === "OPEN"} advert />
           </span>
         </div>

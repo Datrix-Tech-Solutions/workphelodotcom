@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import JobStatusButton from "@/components/molecules/JobStatusButton";
+import ShareJobButton from "@/components/molecules/ShareJobButton";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
@@ -63,6 +64,12 @@ export default async function JobApplicantsPage({
               ← All jobs
             </Link>
             <span className="recruiter-table__actions">
+              {job.data.status === "OPEN" && (
+                <ShareJobButton
+                  id={toJobId(job.data.tenantId, job.data.id)}
+                  title={job.data.title || "Untitled job"}
+                />
+              )}
               {job.data.status === "OPEN" && (
                 <Link
                   href={`/jobs/${toJobId(job.data.tenantId, job.data.id)}`}

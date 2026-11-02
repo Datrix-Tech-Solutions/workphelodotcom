@@ -6,6 +6,7 @@ import Icon from "@/components/atoms/Icon";
 import Badge from "@/components/atoms/Badge";
 import ApplyButton from "@/components/molecules/ApplyButton";
 import SaveJobButton from "@/components/molecules/SaveJobButton";
+import ShareJobButton from "@/components/molecules/ShareJobButton";
 import type { Job } from "@/lib/jobs";
 
 interface JobDetailsProps {
@@ -46,6 +47,7 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
               />
             </>
           )}
+          <ShareJobButton id={job.id} title={job.title} />
           <Link
             href={closeHref}
             scroll={false}

@@ -35,6 +35,7 @@ const toNumber = (value: string) => (value.trim() ? Number(value) : undefined);
 export default function PostJobForm({ advert = false }: { advert?: boolean }) {
   const router = useRouter();
   const [values, setValues] = useState({
+    companyName: "",
     title: "",
     location: "",
     city: "",
@@ -72,7 +73,7 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
     setLoading(true);
     setError("");
     try {
-      const result = await (advert ? postAdvert : postJob)({
+      const payload: NewJob = {
         title: values.title,
         location: values.location,
         city: values.city.trim() || undefined,
@@ -89,7 +90,10 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
         salaryMin: toNumber(values.salaryMin),
         salaryMax: toNumber(values.salaryMax),
         salaryCurrency: values.salaryCurrency.trim().toUpperCase() || undefined,
-      });
+      };
+      const result = advert
+        ? await postAdvert(payload, values.companyName)
+        : await postJob(payload);
       if (result.error) {
         setError(result.error);
         return;
@@ -112,6 +116,21 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
     >
       <h2 className="profile-card__title">Job details</h2>
       <div className="profile-form__fields">
+        {advert && (
+          <FormField id="job-company" label="Company name" required>
+            <input
+              id="job-company"
+              type="text"
+              required
+              minLength={2}
+              maxLength={160}
+              placeholder="The company advertising this job"
+              className="field-control"
+              {...bind("companyName")}
+            />
+          </FormField>
+        )}
+
         <FormField id="job-title" label="Job title" required>
           <input
             id="job-title"
@@ -124,9 +143,9 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
         </FormField>
 
         <div className="profile-form__row">
-          <FormField id="job-location" label="Country" required>
+          <FormField id="job-country" label="Country" required>
             <select
-              id="job-location"
+              id="job-country"
               required
               className="country-select"
               {...bind("location")}

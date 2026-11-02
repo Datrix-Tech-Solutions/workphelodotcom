@@ -105,13 +105,21 @@ async function advertActor() {
 }
 
 /** Posts an advert; advertisers and recruiters can both do this. */
-export async function postAdvert(job: NewJob): Promise<ActionResult> {
+export async function postAdvert(
+  job: NewJob,
+  companyName?: string,
+): Promise<ActionResult> {
   const actor = await advertActor();
   if (!actor) return { error: "Please sign in again." };
   const invalid = validate(job);
   if (invalid) return { error: invalid };
 
-  const result = await createAdvert(job, actor.name, actor.owner);
+  // The company named on the form is the one advertised; fall back to the account.
+  const result = await createAdvert(
+    job,
+    companyName?.trim() || actor.name,
+    actor.owner,
+  );
   if (result.error) return result;
   revalidatePath("/dashboard");
   revalidatePath("/jobs");
