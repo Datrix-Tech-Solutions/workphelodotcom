@@ -21,7 +21,9 @@ export default function JobCard({ job, href, selected }: JobCardProps) {
       <div className="job-card__header">
         <CompanyAvatar name={job.company} size="lg" />
         <div className="job-card__heading">
-          <h3 className="job-card__title">{job.title}</h3>
+          <h3 className="job-card__title" title={job.title}>
+            {job.title}
+          </h3>
           <p className="job-card__company">
             <VerifiedName name={job.company} verified={job.companyVerified} />
           </p>

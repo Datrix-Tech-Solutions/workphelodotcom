@@ -451,10 +451,17 @@ main {
 }
 
 .job-card__title {
+  display: -webkit-box;
   margin: 0;
+  overflow: hidden;
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.3;
+  /* Two lines at most, then an ellipsis. */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 .job-card__company {
