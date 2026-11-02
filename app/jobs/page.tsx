@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import JobListings from "@/components/organisms/JobListings";
@@ -18,6 +19,23 @@ interface JobsPageProps {
 
 const first = (value?: string | string[]) =>
   Array.isArray(value) ? value[0] : value;
+
+/** A shared job link previews as that job (LinkedIn, WhatsApp and others read these tags). */
+export async function generateMetadata({
+  searchParams,
+}: JobsPageProps): Promise<Metadata> {
+  const id = first((await searchParams).job);
+  const job = id ? await fetchJob(id) : null;
+  if (!job) return {};
+  const title = `${job.title} at ${job.company} | Workphelo`;
+  const description =
+    job.description.slice(0, 160) || `${job.title} at ${job.company}`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+  };
+}
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {
   const params = await searchParams;

@@ -918,6 +918,13 @@ main {
   background-color: var(--color-surface);
 }
 
+.share-dialog__note {
+  margin: -0.5rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
 .share-dialog__message {
   resize: vertical;
   line-height: 1.5;
