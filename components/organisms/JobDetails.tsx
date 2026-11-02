@@ -26,7 +26,7 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
             <VerifiedName name={employer} verified={job.companyVerified} />
           </p>
           <h2 id="job-details-title" className="job-details__title">
-            {job.title} at {employer}
+            {job.title} at {job.company}
           </h2>
           <p className="job-details__meta">
             <span>{job.location}</span>
