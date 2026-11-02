@@ -26,7 +26,7 @@ export default function JobCard({ job, href, selected }: JobCardProps) {
             <VerifiedName name={job.company} verified={job.companyVerified} />
           </p>
           {job.promotedBy && (
-            <p className="job-card__promoted">
+            <p className="job-card__promoted" title={`Promoted by ${job.promotedBy}`}>
               Promoted by <strong>{job.promotedBy}</strong>
             </p>
           )}

@@ -8,10 +8,16 @@ export default function VerifiedName({
   name: string;
   verified: boolean;
 }) {
-  if (!verified) return <>{name}</>;
+  // A long name is cut with an ellipsis; hovering shows it in full.
+  const text = (
+    <span className="verified-name__text" title={name}>
+      {name}
+    </span>
+  );
+  if (!verified) return text;
   return (
     <span className="verified-name" tabIndex={0}>
-      {name}
+      {text}
       <VerifiedMark />
       <span className="verified-name__tip" role="tooltip">
         Verified by Workphelo

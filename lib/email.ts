@@ -1,15 +1,24 @@
 /**
- * Sends mail through Resend, the same service the WorkPhelo platform uses
- * (its notification service posts to the same endpoint), so the order emails
- * come from the same verified sender.
+ * Sends transactional mail through Brevo's API. The sender address
+ * (EMAIL_FROM) must be a verified sender in the Brevo account.
  */
-const RESEND_URL = "https://api.resend.com/emails";
+const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
 export function isEmailConfigured(): boolean {
-  return !!(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL);
+  return !!(process.env.BREVO_API_KEY && process.env.EMAIL_FROM);
 }
 
-/** True when Resend accepted the message. Never throws, so one failed email can't hide another. */
+/** Accepts "Name <a@b.com>" or a bare "a@b.com". */
+function parseAddress(value: string): { name?: string; email: string } {
+  const match = value.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  if (match) {
+    const name = match[1].replace(/^"|"$/g, "");
+    return name ? { name, email: match[2] } : { email: match[2] };
+  }
+  return { email: value.trim() };
+}
+
+/** True when Brevo accepted the message. Never throws, so one failed email can't hide another. */
 export async function sendEmail({
   to,
   subject,
@@ -21,34 +30,36 @@ export async function sendEmail({
   html: string;
   replyTo?: string;
 }): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL;
+  const apiKey = process.env.BREVO_API_KEY;
+  const from = process.env.EMAIL_FROM;
   if (!apiKey || !from) {
-    console.error(
-      "Email is not configured: set RESEND_API_KEY and RESEND_FROM_EMAIL.",
-    );
+    console.error("Email is not configured: set BREVO_API_KEY and EMAIL_FROM.");
     return false;
   }
 
   try {
-    const res = await fetch(RESEND_URL, {
+    const recipients = (Array.isArray(to) ? to : [to]).map((email) => ({
+      email,
+    }));
+    const res = await fetch(BREVO_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        "api-key": apiKey,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({
-        from,
-        to,
+        sender: parseAddress(from),
+        to: recipients,
         subject,
-        html,
-        ...(replyTo ? { reply_to: replyTo } : {}),
+        htmlContent: html,
+        ...(replyTo ? { replyTo: { email: replyTo } } : {}),
       }),
       cache: "no-store",
     });
     if (!res.ok) {
       console.error(
-        `Resend refused an email (${res.status}):`,
+        `Brevo refused an email (${res.status}):`,
         await res.text(),
       );
       return false;
