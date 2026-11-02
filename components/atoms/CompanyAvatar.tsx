@@ -1,6 +1,6 @@
 interface CompanyAvatarProps {
   name: string;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 }
 
 const PALETTE = [

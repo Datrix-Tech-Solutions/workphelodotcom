@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CompanyAvatar from "@/components/atoms/CompanyAvatar";
-import VerifiedMark from "@/components/atoms/VerifiedMark";
+import VerifiedName from "@/components/atoms/VerifiedName";
 import Icon from "@/components/atoms/Icon";
 import CandidateAuthDialog from "@/components/organisms/CandidateAuthDialog";
 import type { SavedJob } from "@/lib/savedJobs";
@@ -43,8 +43,7 @@ export default function CompactJobCard({ job, href }: CompactJobCardProps) {
         <span className="compact-job__text">
           <span className="compact-job__title">{job.title}</span>
           <span className="compact-job__company">
-            {job.company}
-            {job.companyVerified && <VerifiedMark />}
+            <VerifiedName name={job.company} verified={!!job.companyVerified} />
           </span>
         </span>
       </Link>

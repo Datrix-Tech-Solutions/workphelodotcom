@@ -98,12 +98,14 @@ async function advertActor() {
     return {
       owner: { kind: "advertiser" } as const,
       name: session.user.name,
+      person: session.user.name,
     };
   }
   if (session?.role === "recruiter") {
     return {
       owner: { kind: "recruiter", id: session.user.id } as const,
       name: session.user.company || session.user.name,
+      person: session.user.name,
     };
   }
   return null;
@@ -124,6 +126,7 @@ export async function postAdvert(
     job,
     companyName?.trim() || actor.name,
     actor.owner,
+    actor.person,
   );
   if (result.error) return result;
   revalidatePath("/dashboard");

@@ -37,6 +37,8 @@ export interface Job {
   apply: ApplyRequirements;
   /** An advert from an advertiser: it can be viewed but not applied to or saved. */
   advertised?: boolean;
+  /** The name of the person who posted an advert. */
+  promotedBy?: string;
 }
 
 export interface ListRequirement {

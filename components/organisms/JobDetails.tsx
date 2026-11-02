@@ -1,6 +1,6 @@
 import Link from "next/link";
 import CompanyAvatar from "@/components/atoms/CompanyAvatar";
-import VerifiedMark from "@/components/atoms/VerifiedMark";
+import VerifiedName from "@/components/atoms/VerifiedName";
 import Divider from "@/components/atoms/Divider";
 import Icon from "@/components/atoms/Icon";
 import Badge from "@/components/atoms/Badge";
@@ -15,17 +15,18 @@ interface JobDetailsProps {
 }
 
 export default function JobDetails({ job, closeHref }: JobDetailsProps) {
+  // An advert's details name the advertiser; the company they entered is for the card.
+  const employer = job.advertised ? job.promotedBy || job.company : job.company;
   return (
     <article className="job-details" aria-labelledby="job-details-title">
       <header className="job-details__header">
         <div className="job-details__heading">
           <p className="job-details__employer">
-            <CompanyAvatar name={job.company} size="sm" />
-            {job.company}
-            {job.companyVerified && <VerifiedMark />}
+            <CompanyAvatar name={employer} size="sm" />
+            <VerifiedName name={employer} verified={job.companyVerified} />
           </p>
           <h2 id="job-details-title" className="job-details__title">
-            {job.title} at {job.company}
+            {job.title} at {employer}
           </h2>
           <p className="job-details__meta">
             <span>{job.location}</span>

@@ -12,6 +12,7 @@ export type AdvertStatus = "OPEN" | "CLOSED";
 interface AdvertRow {
   id: string;
   advertiser_name: string;
+  promoted_by: string | null;
   title: string;
   location: string;
   city: string | null;
@@ -40,7 +41,7 @@ export interface MyAdvert {
 }
 
 const COLUMNS =
-  "id, advertiser_name, title, location, city, job_type, work_mode, description, responsibilities, requirements, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at";
+  "id, advertiser_name, promoted_by, title, location, city, job_type, work_mode, description, responsibilities, requirements, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at";
 
 /** Maps a row onto the shape the job board already renders. */
 function toAdvertJob(row: AdvertRow): Job {
@@ -65,7 +66,11 @@ function toAdvertJob(row: AdvertRow): Job {
     createdAt: row.created_at,
     questions: [],
   });
-  return { ...job, advertised: true };
+  return {
+    ...job,
+    advertised: true,
+    promotedBy: row.promoted_by || undefined,
+  };
 }
 
 /** Open adverts, newest first. Returns [] when Supabase is unavailable. */
@@ -163,6 +168,7 @@ export async function createAdvert(
   job: NewJob,
   advertiserName: string,
   owner: AdvertOwner = { kind: "advertiser" },
+  promotedBy?: string,
 ): Promise<{ error?: string }> {
   if (!isAvailable(owner)) return { error: UNAVAILABLE };
   const supabase = await clientFor(owner);
@@ -172,6 +178,7 @@ export async function createAdvert(
       ? { user_id: null, recruiter_id: owner.id }
       : {}),
     advertiser_name: advertiserName,
+    promoted_by: promotedBy ?? null,
     title: job.title.trim(),
     location: job.location.trim(),
     city: job.city ?? null,
