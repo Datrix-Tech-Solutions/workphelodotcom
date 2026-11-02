@@ -2,7 +2,7 @@ import Link from "next/link";
 import CompanyAvatar from "@/components/atoms/CompanyAvatar";
 import Badge from "@/components/atoms/Badge";
 import VerifiedName from "@/components/atoms/VerifiedName";
-import type { Job } from "@/lib/jobs";
+import { closingLabel, type Job } from "@/lib/jobs";
 
 interface JobCardProps {
   job: Job;
@@ -44,6 +44,7 @@ export default function JobCard({ job, href, selected }: JobCardProps) {
           </Badge>
         )}
         {job.salary && <Badge>{job.salary}</Badge>}
+        <Badge>{closingLabel(job.closingDate)}</Badge>
       </div>
       <p className="job-card__meta">
         <span>{job.location}</span>

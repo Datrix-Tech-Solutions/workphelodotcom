@@ -7,7 +7,7 @@ import Badge from "@/components/atoms/Badge";
 import ApplyButton from "@/components/molecules/ApplyButton";
 import SaveJobButton from "@/components/molecules/SaveJobButton";
 import ShareJobButton from "@/components/molecules/ShareJobButton";
-import type { Job } from "@/lib/jobs";
+import { closingLabel, type Job } from "@/lib/jobs";
 
 interface JobDetailsProps {
   job: Job;
@@ -32,6 +32,8 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
             <span>{job.location}</span>
             <span aria-hidden="true">&bull;</span>
             <span>{job.posted}</span>
+            <span aria-hidden="true">&bull;</span>
+            <span>{closingLabel(job.closingDate)}</span>
           </p>
           <div className="job-details__tags">
             <Badge>{job.salary}</Badge>

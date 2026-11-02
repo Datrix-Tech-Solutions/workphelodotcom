@@ -30,6 +30,7 @@ interface AdvertRow {
   salary_currency: string | null;
   status: AdvertStatus;
   created_at: string;
+  closing_date: string | null;
 }
 
 /** An advert as its owner sees it on the dashboard. */
@@ -45,7 +46,7 @@ export interface MyAdvert {
 }
 
 const COLUMNS =
-  "id, advertiser_name, promoted_by, industry, title, location, city, job_type, work_mode, description, responsibilities, requirements, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at";
+  "id, advertiser_name, promoted_by, industry, title, location, city, job_type, work_mode, description, responsibilities, requirements, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at, closing_date";
 
 /** Maps a row onto the shape the job board already renders. */
 function toAdvertJob(row: AdvertRow): Job {
@@ -68,6 +69,7 @@ function toAdvertJob(row: AdvertRow): Job {
     salaryMax: row.salary_max,
     salaryCurrency: row.salary_currency,
     createdAt: row.created_at,
+    closingDate: row.closing_date,
     questions: [],
   });
   return {
@@ -234,7 +236,7 @@ export async function getMyAdvert(
   const supabase = await clientFor(owner);
   let query = supabase
     .from("advertiser_jobs")
-    .select(`${COLUMNS}, vacancies, closing_date, user_id`)
+    .select(`${COLUMNS}, vacancies, user_id`)
     .eq("id", id);
   if (owner.kind === "recruiter") {
     query = query.eq("recruiter_id", owner.id);
@@ -247,7 +249,6 @@ export async function getMyAdvert(
   if (!data) return null;
   const r = data as unknown as AdvertRow & {
     vacancies: number | null;
-    closing_date: string | null;
   };
   return {
     companyName: r.advertiser_name,

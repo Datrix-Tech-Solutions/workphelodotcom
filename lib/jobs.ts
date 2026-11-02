@@ -43,6 +43,8 @@ export interface Job {
   industry?: string;
   /** Set on the home page when the job is in an industry the candidate picked. */
   recommended?: boolean;
+  /** Last day to apply (ISO date); absent when the job is open-ended. */
+  closingDate?: string;
 }
 
 export interface ListRequirement {
@@ -81,6 +83,7 @@ export interface ApiVacancy {
   salaryMax: number | null;
   salaryCurrency: string | null;
   createdAt: string;
+  closingDate?: string | null;
   details?: {
     experience?: { minYears?: number; maxYears?: number; required: boolean };
     education?: { levels: string[]; required: boolean };
@@ -168,6 +171,19 @@ function formatPosted(iso: string): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
+/** "Closes 14 Nov 2026", or "Open" when there is no end date. */
+export function closingLabel(closingDate?: string): string {
+  if (!closingDate) return "Open";
+  const d = new Date(closingDate.length === 10 ? `${closingDate}T00:00:00` : closingDate);
+  if (Number.isNaN(d.getTime())) return "Open";
+  const date = d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  return `Closes ${date}`;
+}
+
 /** The API stores these as plain text, one item per line. */
 export function toList(text: string | null): string[] {
   if (!text) return [];
@@ -228,6 +244,7 @@ export function toJob(v: ApiVacancy): Job {
     type: v.jobType ? JOB_TYPES[v.jobType] : "",
     posted: formatPosted(v.createdAt),
     createdAt: v.createdAt,
+    closingDate: v.closingDate || undefined,
     description: v.description ?? "",
     responsibilities: toList(v.responsibilities),
     requirements: toList(v.requirements),
