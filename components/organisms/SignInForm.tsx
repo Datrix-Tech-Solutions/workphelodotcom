@@ -17,15 +17,15 @@ type Role = "candidate" | "recruiter";
 /** Advertisers sign in like recruiters but have no account type yet. */
 export type PickerRole = Role | "advertiser";
 
-const ROLES: { value: PickerRole; label: string }[] = [
+const ROLES: { value: PickerRole; label: string; tag?: string }[] = [
   { value: "candidate", label: "Candidate" },
   { value: "recruiter", label: "Recruiter" },
 ];
 
 /** The picker options for the Post job pages. */
-export const POSTER_ROLES: { value: PickerRole; label: string }[] = [
-  { value: "recruiter", label: "Recruiter" },
-  { value: "advertiser", label: "Advertiser" },
+export const POSTER_ROLES: { value: PickerRole; label: string; tag?: string }[] = [
+  { value: "advertiser", label: "Advertiser", tag: "Advertise for free" },
+  { value: "recruiter", label: "Recruiter", tag: "Recruit for $0.5" },
 ];
 
 export default function SignInForm({
@@ -42,7 +42,7 @@ export default function SignInForm({
   /** Fixes the account type and hides the picker. */
   lockedRole?: Role;
   /** The account types offered by the picker. */
-  roles?: { value: PickerRole; label: string }[];
+  roles?: { value: PickerRole; label: string; tag?: string }[];
   /** Swaps to the sign-up form in place instead of linking to its page. */
   onSwitch?: () => void;
 }) {
@@ -100,7 +100,7 @@ export default function SignInForm({
       >
         {!lockedRole && (
           <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
-            {roles.map(({ value, label }) => (
+            {roles.map(({ value, label, tag }) => (
               <label
                 key={value}
                 className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
@@ -114,6 +114,7 @@ export default function SignInForm({
                   className="sign-in__role-input"
                 />
                 {label}
+                {tag && <span className="sign-in__role-tag">{tag}</span>}
               </label>
             ))}
           </div>

@@ -18,7 +18,7 @@ import { countries } from "@/lib/countries";
 
 type Role = "candidate" | "recruiter";
 
-const ROLES: { value: PickerRole; label: string }[] = [
+const ROLES: { value: PickerRole; label: string; tag?: string }[] = [
   { value: "candidate", label: "Candidate" },
   { value: "recruiter", label: "Recruiter" },
 ];
@@ -32,7 +32,7 @@ export default function SignUpForm({
   /** Fixes the account type and hides the picker. */
   lockedRole?: Role;
   /** The account types offered by the picker. */
-  roles?: { value: PickerRole; label: string }[];
+  roles?: { value: PickerRole; label: string; tag?: string }[];
   /** Swaps to the sign-in form in place instead of linking to its page. */
   onSwitch?: () => void;
   /** Where to go once the account is created. */
@@ -113,7 +113,7 @@ export default function SignUpForm({
       >
         {!lockedRole && (
           <div className="sign-in__roles" role="radiogroup" aria-label="I am a">
-            {roles.map(({ value, label }) => (
+            {roles.map(({ value, label, tag }) => (
               <label
                 key={value}
                 className={`sign-in__role${role === value ? " sign-in__role--active" : ""}`}
@@ -127,6 +127,7 @@ export default function SignUpForm({
                   className="sign-in__role-input"
                 />
                 {label}
+                {tag && <span className="sign-in__role-tag">{tag}</span>}
               </label>
             ))}
           </div>
