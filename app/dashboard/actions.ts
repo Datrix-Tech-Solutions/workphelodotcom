@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
-import { createAdvert, setAdvertStatus } from "@/lib/advertiserJobs";
+import {
+  createAdvert,
+  deleteAdvert,
+  setAdvertStatus,
+  updateAdvert,
+} from "@/lib/advertiserJobs";
 import type { OpeningPayload } from "@/lib/jobOpening";
 import {
   closeJob,
@@ -120,6 +125,39 @@ export async function postAdvert(
     companyName?.trim() || actor.name,
     actor.owner,
   );
+  if (result.error) return result;
+  revalidatePath("/dashboard");
+  revalidatePath("/jobs");
+  return {};
+}
+
+/** Saves changes to one of the owner's adverts. */
+export async function editAdvert(
+  id: string,
+  job: NewJob,
+  companyName?: string,
+): Promise<ActionResult> {
+  const actor = await advertActor();
+  if (!actor) return { error: "Please sign in again." };
+  const invalid = validate(job);
+  if (invalid) return { error: invalid };
+
+  const result = await updateAdvert(
+    id,
+    job,
+    companyName?.trim() || actor.name,
+    actor.owner,
+  );
+  if (result.error) return result;
+  revalidatePath("/dashboard");
+  revalidatePath("/jobs");
+  return {};
+}
+
+export async function removeAdvert(id: string): Promise<ActionResult> {
+  const actor = await advertActor();
+  if (!actor) return { error: "Please sign in again." };
+  const result = await deleteAdvert(id, actor.owner);
   if (result.error) return result;
   revalidatePath("/dashboard");
   revalidatePath("/jobs");

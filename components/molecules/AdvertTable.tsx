@@ -1,3 +1,6 @@
+import Link from "next/link";
+import Icon from "@/components/atoms/Icon";
+import DeleteAdvertButton from "@/components/molecules/DeleteAdvertButton";
 import JobStatusButton from "@/components/molecules/JobStatusButton";
 import ShareJobButton from "@/components/molecules/ShareJobButton";
 import type { MyAdvert } from "@/lib/advertiserJobs";
@@ -48,6 +51,15 @@ export default function AdvertTable({ jobs }: { jobs: MyAdvert[] }) {
           </span>
           <span className="recruiter-table__action" role="cell">
             <ShareJobButton id={job.id} title={job.title} variant="icon" />
+            <Link
+              href={`/dashboard/adverts/${job.id}/edit`}
+              className="share-job-button share-job-button--icon share-job-button--edit"
+              aria-label={`Edit ${job.title}`}
+              title="Edit"
+            >
+              <Icon name="pencil" size={16} />
+            </Link>
+            <DeleteAdvertButton id={job.id} title={job.title} />
             <JobStatusButton id={job.id} open={job.status === "OPEN"} advert />
           </span>
         </div>

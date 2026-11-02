@@ -85,7 +85,7 @@ export default function ShareJobButton({
       {variant === "icon" ? (
         <button
           type="button"
-          className="share-job-button share-job-button--icon"
+          className="share-job-button share-job-button--icon share-job-button--share"
           onClick={openDialog}
           aria-label={`Share ${title}`}
           title="Share"

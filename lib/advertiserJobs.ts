@@ -205,3 +205,97 @@ export async function setAdvertStatus(
   const { error } = await query;
   return error ? { error: "Couldn't update the job." } : {};
 }
+
+/** One of the owner's own adverts, in the shape the posting form edits. */
+export async function getMyAdvert(
+  id: string,
+  owner: AdvertOwner = { kind: "advertiser" },
+): Promise<{ companyName: string; job: NewJob } | null> {
+  if (!isAvailable(owner)) return null;
+  const supabase = await clientFor(owner);
+  let query = supabase
+    .from("advertiser_jobs")
+    .select(`${COLUMNS}, vacancies, closing_date, user_id`)
+    .eq("id", id);
+  if (owner.kind === "recruiter") {
+    query = query.eq("recruiter_id", owner.id);
+  } else {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return null;
+    query = query.eq("user_id", auth.user.id);
+  }
+  const { data } = await query.maybeSingle();
+  if (!data) return null;
+  const r = data as unknown as AdvertRow & {
+    vacancies: number | null;
+    closing_date: string | null;
+  };
+  return {
+    companyName: r.advertiser_name,
+    job: {
+      title: r.title,
+      location: r.location,
+      city: r.city ?? undefined,
+      jobType: r.job_type as NewJob["jobType"],
+      workMode: (r.work_mode ?? undefined) as NewJob["workMode"],
+      vacancies: r.vacancies ?? undefined,
+      closingDate: r.closing_date ?? undefined,
+      description: r.description,
+      responsibilities: r.responsibilities ?? undefined,
+      requirements: r.requirements ?? undefined,
+      perksAndBenefits: r.perks_and_benefits ?? undefined,
+      salaryType: r.salary_type as NewJob["salaryType"],
+      salaryAmount: r.salary_amount ?? undefined,
+      salaryMin: r.salary_min ?? undefined,
+      salaryMax: r.salary_max ?? undefined,
+      salaryCurrency: r.salary_currency ?? undefined,
+    },
+  };
+}
+
+export async function updateAdvert(
+  id: string,
+  job: NewJob,
+  advertiserName: string,
+  owner: AdvertOwner = { kind: "advertiser" },
+): Promise<{ error?: string }> {
+  if (!isAvailable(owner)) return { error: UNAVAILABLE };
+  const supabase = await clientFor(owner);
+  let query = supabase
+    .from("advertiser_jobs")
+    .update({
+      advertiser_name: advertiserName,
+      title: job.title.trim(),
+      location: job.location.trim(),
+      city: job.city ?? null,
+      job_type: job.jobType,
+      work_mode: job.workMode ?? null,
+      vacancies: job.vacancies ?? null,
+      closing_date: job.closingDate ?? null,
+      description: job.description.trim(),
+      responsibilities: job.responsibilities ?? null,
+      requirements: job.requirements ?? null,
+      perks_and_benefits: job.perksAndBenefits ?? null,
+      salary_type: job.salaryType,
+      salary_amount: job.salaryAmount ?? null,
+      salary_min: job.salaryMin ?? null,
+      salary_max: job.salaryMax ?? null,
+      salary_currency: job.salaryCurrency ?? null,
+    })
+    .eq("id", id);
+  if (owner.kind === "recruiter") query = query.eq("recruiter_id", owner.id);
+  const { error } = await query;
+  return error ? { error: "Couldn't save your changes." } : {};
+}
+
+export async function deleteAdvert(
+  id: string,
+  owner: AdvertOwner = { kind: "advertiser" },
+): Promise<{ error?: string }> {
+  if (!isAvailable(owner)) return { error: UNAVAILABLE };
+  const supabase = await clientFor(owner);
+  let query = supabase.from("advertiser_jobs").delete().eq("id", id);
+  if (owner.kind === "recruiter") query = query.eq("recruiter_id", owner.id);
+  const { error } = await query;
+  return error ? { error: "Couldn't delete the job." } : {};
+}

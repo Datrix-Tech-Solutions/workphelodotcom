@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { postAdvert, postJob } from "@/app/dashboard/actions";
+import { editAdvert, postAdvert, postJob } from "@/app/dashboard/actions";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
 import FormField from "@/components/molecules/FormField";
@@ -32,9 +32,38 @@ const SALARY_TYPES: { value: NewJob["salaryType"]; label: string }[] = [
 
 const toNumber = (value: string) => (value.trim() ? Number(value) : undefined);
 
-export default function PostJobForm({ advert = false }: { advert?: boolean }) {
+/** The form's fields as text, the shape an existing advert is loaded into. */
+export interface AdvertFormValues {
+  companyName: string;
+  title: string;
+  location: string;
+  city: string;
+  jobType: string;
+  workMode: string;
+  vacancies: string;
+  closingDate: string;
+  description: string;
+  responsibilities: string;
+  requirements: string;
+  perksAndBenefits: string;
+  salaryType: string;
+  salaryAmount: string;
+  salaryMin: string;
+  salaryMax: string;
+  salaryCurrency: string;
+}
+
+export default function PostJobForm({
+  advert = false,
+  editing,
+}: {
+  advert?: boolean;
+  /** Edits this existing advert instead of posting a new one. */
+  editing?: { id: string; values: AdvertFormValues };
+}) {
   const router = useRouter();
-  const [values, setValues] = useState({
+  const [values, setValues] = useState<AdvertFormValues>(
+    editing?.values ?? {
     companyName: "",
     title: "",
     location: "",
@@ -52,7 +81,8 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
     salaryMin: "",
     salaryMax: "",
     salaryCurrency: "GHS",
-  });
+    },
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -91,9 +121,11 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
         salaryMax: toNumber(values.salaryMax),
         salaryCurrency: values.salaryCurrency.trim().toUpperCase() || undefined,
       };
-      const result = advert
-        ? await postAdvert(payload, values.companyName)
-        : await postJob(payload);
+      const result = editing
+        ? await editAdvert(editing.id, payload, values.companyName)
+        : advert
+          ? await postAdvert(payload, values.companyName)
+          : await postJob(payload);
       if (result.error) {
         setError(result.error);
         return;
@@ -114,7 +146,9 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
       onSubmit={handleSubmit}
       aria-busy={loading}
     >
-      <h2 className="profile-card__title">Job details</h2>
+      <h2 className="profile-card__title">
+        {editing ? "Edit job" : "Job details"}
+      </h2>
       <div className="profile-form__fields">
         {advert && (
           <FormField id="job-company" label="Company name" required>
@@ -321,7 +355,13 @@ export default function PostJobForm({ advert = false }: { advert?: boolean }) {
       )}
       <div className="profile-form__actions">
         <Button type="submit" variant="solid" disabled={loading}>
-          {loading ? "Posting…" : "Post job"}
+          {loading
+            ? editing
+              ? "Saving…"
+              : "Posting…"
+            : editing
+              ? "Save changes"
+              : "Post job"}
         </Button>
         <Button href="/dashboard" variant="outline">
           Cancel

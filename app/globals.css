@@ -940,6 +940,32 @@ main {
   border-radius: var(--radius-pill);
 }
 
+.share-job-button.share-job-button--edit {
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.share-job-button.share-job-button--edit:hover {
+  background-color: #dbeafe;
+}
+
+.share-job-button.share-job-button--share {
+  border-color: #bbf7d0;
+  background-color: #f0fdf4;
+  color: #15803d;
+}
+
+.share-job-button.share-job-button--share:hover {
+  background-color: #dcfce7;
+}
+
+.share-job-button.share-job-button--danger:hover {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
 .share-job-button--icon {
   flex-shrink: 0;
   width: 2.5rem;
@@ -4836,7 +4862,7 @@ textarea.field-control {
 
 .recruiter-table__row {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) 6rem 8rem 8rem;
+  grid-template-columns: minmax(0, 2fr) 6rem 8rem 11rem;
   align-items: center;
   gap: 1rem;
   padding: 1.125rem 0.75rem;
@@ -4866,7 +4892,7 @@ textarea.field-control {
 }
 
 .recruiter-table__row--advert {
-  grid-template-columns: minmax(0, 2fr) 6rem 8rem;
+  grid-template-columns: minmax(0, 2fr) 6rem 17rem;
 }
 
 .recruiter-table__row--head + .recruiter-table__row {
