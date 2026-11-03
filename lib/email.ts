@@ -4,8 +4,24 @@
  */
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
+/** Who an email is sent as, and the key to send it with. */
+export interface MailCredentials {
+  apiKey?: string;
+  /** "Name <address>" or a bare address; must be a verified sender in Brevo. */
+  from?: string;
+}
+
+/** The credentials the order (pricing) emails use. */
+function orderCredentials(): MailCredentials {
+  return {
+    apiKey: process.env.BREVO_API_KEY,
+    from: process.env.EMAIL_FROM,
+  };
+}
+
 export function isEmailConfigured(): boolean {
-  return !!(process.env.BREVO_API_KEY && process.env.EMAIL_FROM);
+  const { apiKey, from } = orderCredentials();
+  return !!(apiKey && from);
 }
 
 /** Accepts "Name <a@b.com>" or a bare "a@b.com". */
@@ -24,16 +40,21 @@ export async function sendEmail({
   subject,
   html,
   replyTo,
+  headers,
+  credentials = orderCredentials(),
 }: {
   to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
+  /** Extra mail headers, e.g. List-Unsubscribe. */
+  headers?: Record<string, string>;
+  /** Defaults to the order emails' credentials; other mailers pass their own. */
+  credentials?: MailCredentials;
 }): Promise<boolean> {
-  const apiKey = process.env.BREVO_API_KEY;
-  const from = process.env.EMAIL_FROM;
+  const { apiKey, from } = credentials;
   if (!apiKey || !from) {
-    console.error("Email is not configured: set BREVO_API_KEY and EMAIL_FROM.");
+    console.error("Email is not configured: the API key or sender is missing.");
     return false;
   }
 
@@ -54,6 +75,7 @@ export async function sendEmail({
         subject,
         htmlContent: html,
         ...(replyTo ? { replyTo: { email: replyTo } } : {}),
+        ...(headers ? { headers } : {}),
       }),
       cache: "no-store",
     });

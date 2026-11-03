@@ -16,12 +16,12 @@ export interface OrderDetails {
   total: number;
 }
 
-interface EmailOptions {
+export interface EmailOptions {
   /** Absolute URL of the header image. The image is left out when missing. */
   imageUrl?: string;
 }
 
-function escapeHtml(value: string) {
+export function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -95,7 +95,7 @@ function insurancePerk(order: OrderDetails) {
 `;
 }
 
-function layout(heading: string, body: string, { imageUrl }: EmailOptions) {
+export function layout(heading: string, body: string, { imageUrl }: EmailOptions) {
   const image = imageUrl ? `<img src="${imageUrl}" alt="" width="120" />` : "";
   return `<!DOCTYPE html>
 <html>

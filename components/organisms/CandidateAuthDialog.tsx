@@ -11,11 +11,14 @@ export default function CandidateAuthDialog({
   open,
   onClose,
   next,
+  onSignedIn,
 }: {
   open: boolean;
   onClose: () => void;
   /** Where to go once signed in or signed up; defaults to staying on this page. */
   next?: string;
+  /** Called after a successful sign in (not after sign up, which leaves the page). */
+  onSignedIn?: () => void;
 }) {
   const pathname = usePathname();
   const [view, setView] = useState<"sign-in" | "sign-up">("sign-in");
@@ -34,7 +37,10 @@ export default function CandidateAuthDialog({
       {view === "sign-in" ? (
         <CandidateSignInForm
           next={next}
-          onSuccess={onClose}
+          onSuccess={() => {
+            onClose();
+            onSignedIn?.();
+          }}
           onSwitch={() => setView("sign-up")}
         />
       ) : (
