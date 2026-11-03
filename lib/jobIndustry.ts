@@ -71,6 +71,54 @@ const KEYWORDS: Record<string, string[]> = {
     "government", "ministry", "public sector", "municipal", "civil service",
     "policy officer",
   ],
+  "Legal Services": [
+    "lawyer", "attorney", "legal", "paralegal", "solicitor", "barrister",
+    "law firm", "compliance", "litigation", "advocate",
+  ],
+  "Consulting & Professional Services": [
+    "consultant", "consulting", "advisory", "business analyst", "management consult",
+    "professional services",
+  ],
+  "Marketing & Advertising": [
+    "marketing", "advertising", "brand manager", "social media", "seo",
+    "copywriter", "public relations", "digital marketing", "campaign",
+  ],
+  "Human Resources & Recruitment": [
+    "human resources", "recruiter", "recruitment", "talent acquisition",
+    "hr manager", "hr officer", "payroll", "staffing", "headhunt",
+  ],
+  "Pharmaceuticals & Biotech": [
+    "pharmaceutical", "biotech", "biotechnology", "clinical research",
+    "drug", "regulatory affairs", "life sciences",
+  ],
+  "Food & Beverage": [
+    "food", "beverage", "brewery", "bakery", "food processing",
+    "food safety", "bottling", "confectionery",
+  ],
+  Automotive: [
+    "automotive", "mechanic", "vehicle", "car dealership", "auto parts",
+    "motor", "panel beater",
+  ],
+  "Aviation & Aerospace": [
+    "aviation", "aerospace", "pilot", "aircraft", "air traffic", "cabin crew",
+    "avionics", "airport",
+  ],
+  "Security & Defense": [
+    "security guard", "security officer", "defense", "defence", "military",
+    "surveillance", "armed response", "police",
+  ],
+  "Environment & Sustainability": [
+    "environmental", "sustainability", "climate", "conservation", "waste management",
+    "recycling", "ecolog", "esg",
+  ],
+  "Fashion & Textiles": [
+    "fashion", "textile", "garment", "apparel", "tailor", "clothing",
+    "fashion designer",
+  ],
+  "Sports & Fitness": [
+    "fitness", "personal trainer", "coach", "sports", "athlete", "gym",
+    "wellness",
+  ],
 };
 
 /** Whether a job is in any of the industries a candidate picked. */
