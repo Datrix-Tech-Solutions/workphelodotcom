@@ -32,7 +32,13 @@ const KEYWORDS: Record<string, string[]> = {
   ],
   "Energy & Utilities": [
     "energy", "oil", "gas", "solar", "power", "utilities", "electrical",
-    "renewable", "mining",
+    "renewable",
+  ],
+  "Mining & Minerals": [
+    "mining", "mine ", "miner", "mineral", "quarry", "gold", "bauxite",
+    "manganese", "geologist", "geology", "geotechnical", "metallurg",
+    "drill", "blast", "excavat", "ore ", "smelter", "exploration",
+    "mine planning", "mineral processing", "heavy equipment operator",
   ],
   Telecommunications: [
     "telecom", "network engineer", "mobile network", "fibre", "fiber",

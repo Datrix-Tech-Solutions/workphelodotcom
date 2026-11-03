@@ -15,6 +15,7 @@ export const industries = [
   "Retail & E-commerce",
   "Manufacturing",
   "Energy & Utilities",
+  "Mining & Minerals",
   "Telecommunications",
   "Media & Entertainment",
   "Hospitality & Travel",
