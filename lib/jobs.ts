@@ -59,7 +59,12 @@ export interface ApplyRequirements {
   skills: ListRequirement | null;
   languages: ListRequirement | null;
   certificates: ListRequirement | null;
-  documents: { portfolio: boolean; github: boolean; coverLetter: boolean };
+  documents: {
+    portfolio: boolean;
+    github: boolean;
+    coverLetter: boolean;
+    reference: boolean;
+  };
 }
 
 /** A vacancy as the hr-service public endpoints return it. */
@@ -95,6 +100,7 @@ export interface ApiVacancy {
       coverLetter: boolean;
       portfolio: boolean;
       github: boolean;
+      reference?: boolean;
     };
   } | null;
   questions: {
@@ -224,8 +230,9 @@ function toApplyRequirements(
           portfolio: details.documents.portfolio,
           github: details.documents.github,
           coverLetter: details.documents.coverLetter,
+          reference: details.documents.reference ?? false,
         }
-      : { portfolio: true, github: false, coverLetter: false },
+      : { portfolio: true, github: false, coverLetter: false, reference: false },
   };
 }
 

@@ -12,10 +12,16 @@ import {
 } from "@/lib/resume/extractText";
 
 const COVER_LETTER_MAX = 5000;
+const REFERENCE_MAX = 1000;
 
 interface LinksFormProps {
   defaultValues: FormValues;
-  documents: { portfolio: boolean; github: boolean; coverLetter: boolean };
+  documents: {
+    portfolio: boolean;
+    github: boolean;
+    coverLetter: boolean;
+    reference: boolean;
+  };
   onNext: (values: FormValues) => void;
   onBack: (values: FormValues) => void;
 }
@@ -65,6 +71,7 @@ export default function ResumeDocumentsForm({
       portfolio: data?.get("portfolio")?.toString() ?? "",
       github: data?.get("github")?.toString() ?? "",
       coverLetter: data?.get("coverLetter")?.toString() ?? "",
+      reference: data?.get("reference")?.toString() ?? "",
     };
   };
 
@@ -150,6 +157,20 @@ export default function ResumeDocumentsForm({
             className="field-control"
             placeholder="https://github.com/username"
             defaultValue={defaultValues.github}
+          />
+        </FormField>
+      )}
+
+      {documents.reference && (
+        <FormField id="reference" label="Reference">
+          <textarea
+            id="reference"
+            name="reference"
+            rows={4}
+            maxLength={REFERENCE_MAX}
+            className="input field-control"
+            placeholder="Name, relationship and contact details of someone who can vouch for you"
+            defaultValue={defaultValues.reference}
           />
         </FormField>
       )}

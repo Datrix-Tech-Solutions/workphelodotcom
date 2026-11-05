@@ -182,6 +182,9 @@ export default function PreviewForm({
             ...(requirements.documents.github
               ? [{ label: "GitHub profile", value: values.github }]
               : []),
+            ...(requirements.documents.reference
+              ? [{ label: "Reference", value: values.reference }]
+              : []),
           ]}
         />
       )}

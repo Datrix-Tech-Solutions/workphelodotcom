@@ -126,6 +126,7 @@ export async function POST(
     noticePeriod: str(values.notice),
     portfolioUrl: str(values.portfolio) || undefined,
     githubUrl: str(values.github) || undefined,
+    reference: str(values.reference) || undefined,
     languages: strings(profile?.languages),
     certificates: strings(profile?.certificates),
     educationHistory,

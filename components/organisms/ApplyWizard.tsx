@@ -43,8 +43,8 @@ export default function ApplyWizard({
   // Steps with nothing to ask for this job are left out.
   const steps = useMemo(() => {
     const keys: StepKey[] = ["basic", "professional"];
-    const { portfolio, github, coverLetter } = apply.documents;
-    if (portfolio || github || coverLetter) keys.push("links");
+    const { portfolio, github, coverLetter, reference } = apply.documents;
+    if (portfolio || github || coverLetter || reference) keys.push("links");
     if (questions.length > 0) keys.push("questions");
     keys.push("preview");
     return keys;
@@ -132,7 +132,11 @@ export default function ApplyWizard({
           answers={answers}
           profile={profile}
           questions={questions}
-          showLinks={apply.documents.portfolio || apply.documents.github}
+          showLinks={
+            apply.documents.portfolio ||
+            apply.documents.github ||
+            apply.documents.reference
+          }
           requirements={apply}
           onEdit={editStep}
           onBack={() => move(-1)}

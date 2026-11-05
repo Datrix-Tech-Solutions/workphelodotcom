@@ -51,6 +51,7 @@ export interface OpeningValues {
   requireCoverLetter: boolean;
   requestPortfolio: boolean;
   requestGithub: boolean;
+  requestReference: boolean;
   questions: QuestionRow[];
 }
 
@@ -94,6 +95,7 @@ export const EMPTY_OPENING: OpeningValues = {
   requireCoverLetter: false,
   requestPortfolio: false,
   requestGithub: false,
+  requestReference: false,
   questions: [],
 };
 
@@ -120,6 +122,7 @@ export interface OpeningPayload {
       coverLetter: boolean;
       portfolio: boolean;
       github: boolean;
+      reference: boolean;
     };
     education?: { levels: string[]; required: boolean };
     experience?: { minYears?: number; maxYears?: number; required: boolean };
@@ -161,6 +164,7 @@ export function toOpeningPayload(
       coverLetter: values.requireCoverLetter,
       portfolio: values.requestPortfolio,
       github: values.requestGithub,
+      reference: values.requestReference,
     },
   };
   if (included.education && values.educationLevels.length > 0) {

@@ -86,6 +86,11 @@ const DOCUMENT_REQUESTS = [
     label: "GitHub link",
     hint: "Ask applicants for a GitHub profile link.",
   },
+  {
+    key: "requestReference",
+    label: "Reference",
+    hint: "Ask applicants for a reference.",
+  },
 ] as const;
 
 type Errors = Partial<Record<keyof OpeningValues, string>>;
