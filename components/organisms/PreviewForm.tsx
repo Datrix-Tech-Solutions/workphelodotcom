@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import SummarySection from "@/components/molecules/SummarySection";
+import SignUpPromptDialog from "@/components/molecules/SignUpPromptDialog";
 import CandidateAuthDialog from "@/components/organisms/CandidateAuthDialog";
 import { useSession } from "@/lib/useSession";
 import {
@@ -45,6 +46,7 @@ export default function PreviewForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<SubmitError | null>(null);
+  const [promptOpen, setPromptOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const session = useSession();
 
@@ -63,8 +65,8 @@ export default function PreviewForm({
       });
       if (res.ok) {
         setSubmitted(true);
-        // Guests are invited to sign in or up to see this application on their profile.
-        if (session === null) setAuthOpen(true);
+        // Guests are asked whether they want an account to track this application.
+        if (session === null) setPromptOpen(true);
         return;
       }
       const body = (await res.json().catch(() => null)) as {
@@ -103,6 +105,14 @@ export default function PreviewForm({
             Browse more jobs
           </Button>
         </div>
+        <SignUpPromptDialog
+          open={promptOpen}
+          onClose={() => setPromptOpen(false)}
+          onAccept={() => {
+            setPromptOpen(false);
+            setAuthOpen(true);
+          }}
+        />
         <CandidateAuthDialog
           open={authOpen}
           onClose={() => setAuthOpen(false)}
