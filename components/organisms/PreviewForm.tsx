@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import SummarySection from "@/components/molecules/SummarySection";
+import CandidateAuthDialog from "@/components/organisms/CandidateAuthDialog";
+import { useSession } from "@/lib/useSession";
 import {
   periodLabel,
   type Answers,
@@ -43,6 +45,8 @@ export default function PreviewForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<SubmitError | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const session = useSession();
 
   const fullName = [values.firstName, values.lastName]
     .filter(Boolean)
@@ -59,6 +63,8 @@ export default function PreviewForm({
       });
       if (res.ok) {
         setSubmitted(true);
+        // Guests are invited to sign in or up to see this application on their profile.
+        if (session === null) setAuthOpen(true);
         return;
       }
       const body = (await res.json().catch(() => null)) as {
@@ -88,10 +94,20 @@ export default function PreviewForm({
           application and will be in touch.
         </p>
         <div className="apply-form__actions">
+          {session === null && (
+            <Button variant="outline" onClick={() => setAuthOpen(true)}>
+              Sign in to track your applications
+            </Button>
+          )}
           <Button href="/jobs" variant="solid">
             Browse more jobs
           </Button>
         </div>
+        <CandidateAuthDialog
+          open={authOpen}
+          onClose={() => setAuthOpen(false)}
+          next="/profile"
+        />
       </div>
     );
   }

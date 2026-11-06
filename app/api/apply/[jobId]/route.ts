@@ -184,11 +184,12 @@ export async function POST(
     );
   }
 
-  // Remember it against the signed-in candidate's account (if there is one).
+  // Remember it against the candidate's account, or their email if they're a guest.
   await recordApplication({
     id: jobId,
     title: vacancy.title ?? "",
     company: vacancy.companyName ?? "",
+    email: body.email,
   });
 
   return NextResponse.json({ ok: true });
