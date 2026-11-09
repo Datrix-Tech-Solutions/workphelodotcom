@@ -14,8 +14,17 @@ const orderSchema = z.object({
   company: z.string().trim().min(1, "Please enter your company").max(160),
   planName: z.string().trim().min(1).max(80),
   billing: z.enum(["month", "year"]),
-  users: z.number().int().min(1).max(100_000),
-  features: z.array(z.string().trim().max(120)).max(100),
+  groups: z
+    .array(
+      z.object({
+        title: z.string().trim().min(1).max(120),
+        users: z.number().int().min(1).max(100_000),
+        features: z.array(z.string().trim().max(120)).max(100),
+        subtotal: money,
+      }),
+    )
+    .min(1)
+    .max(20),
   oneTime: money,
   discount: money,
   discountRate: z.number().min(0).max(1),

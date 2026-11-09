@@ -117,12 +117,15 @@ export interface CustomFeature {
   oneTimeGroup?: string;
   required?: boolean;
   requires?: string[];
+  /** The plan group (see planGroups) the feature is sold in. */
+  group: string;
 }
 
 /** The modules a Custom plan can be built from. */
 export const customFeatures: CustomFeature[] = [
   {
     id: "employee-management",
+    group: "core-hr",
     label: "Employee management",
     icon: "users",
     // File storage is part of it, so it carries that price.
@@ -133,6 +136,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "recruitment",
+    group: "recruitment",
     label: "Recruitment",
     icon: "user-plus",
     monthly: 0.5,
@@ -140,6 +144,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "smart-scheduling",
+    group: "core-hr",
     label: "Smart scheduling",
     icon: "calendar",
     listPrice: { monthly: 0.3, yearly: 0.25 },
@@ -148,6 +153,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "payroll",
+    group: "core-hr",
     label: "Payroll management",
     icon: "wallet",
     monthly: 0.5,
@@ -157,6 +163,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "performance",
+    group: "core-hr",
     label: "Employee performance",
     icon: "trending-up",
     monthly: 0.5,
@@ -166,6 +173,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "projects",
+    group: "core-hr",
     label: "Project management",
     icon: "clipboard-check",
     monthly: 0.5,
@@ -175,6 +183,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "assets",
+    group: "core-hr",
     label: "Asset management",
     icon: "package",
     lockedDescription: "Included with Fleet management",
@@ -185,6 +194,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "marketing-crm",
+    group: "marketing",
     label: "Marketing CRM",
     icon: "target",
     monthly: 1,
@@ -192,6 +202,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "fleet",
+    group: "marketing",
     label: "Fleet management",
     icon: "truck",
     monthly: 1,
@@ -200,6 +211,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "campaigns",
+    group: "marketing",
     label: "Campaign management",
     description: "Bulk SMS and Emails to clients",
     icon: "megaphone",
@@ -209,6 +221,7 @@ export const customFeatures: CustomFeature[] = [
   },
   {
     id: "accounting",
+    group: "accounting",
     label: "Accounting",
     icon: "calculator",
     monthly: 3,
@@ -216,6 +229,47 @@ export const customFeatures: CustomFeature[] = [
     oneTime: 10,
   },
 ];
+
+export interface PlanGroup {
+  id: string;
+  title: string;
+  description: string;
+  icon: IconName;
+}
+
+/**
+ * The sections of the Custom plan builder. Each has its own user count, which
+ * can't go above the one for the core group, since everyone needs a record.
+ */
+export const planGroups: PlanGroup[] = [
+  {
+    id: "core-hr",
+    title: "Core HR & Operations",
+    description: "Manage people, pay, performance, projects and assets.",
+    icon: "users",
+  },
+  {
+    id: "recruitment",
+    title: "Recruitment",
+    description: "Manage job vacancies, applicants and hiring.",
+    icon: "user-plus",
+  },
+  {
+    id: "marketing",
+    title: "Marketing & Operations",
+    description: "Grow and manage your customer relationships and operations.",
+    icon: "megaphone",
+  },
+  {
+    id: "accounting",
+    title: "Accounting",
+    description: "Handle your organisation's finances and reporting.",
+    icon: "calculator",
+  },
+];
+
+/** The group every other group's users are capped by. */
+export const CORE_GROUP_ID = "core-hr";
 
 const MONTHS_PER_YEAR = 12;
 

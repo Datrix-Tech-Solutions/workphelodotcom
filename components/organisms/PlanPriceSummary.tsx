@@ -15,26 +15,27 @@ import {
   type Billing,
 } from "@/lib/pricing";
 
-export interface PriceLine {
+/** One section of a plan, billed on its own number of users. */
+export interface PriceGroup {
   id: string;
   icon: IconName;
   label: string;
+  users: number;
   /** Price per user for the billing period. */
-  price: number;
-  /** Shown instead of the formatted price, e.g. "$0.00" rather than "Free". */
-  priceText?: string;
+  perUser: number;
+  /** Per-user monthly price, which decides the discount and perk tiers. */
+  monthlyPerUser: number;
+  /** The features chosen in the group, listed under it. */
+  features: string[];
 }
 
 interface PlanPriceSummaryProps {
   ariaLabel: string;
   billing: Billing;
-  users: number;
-  onUsersChange: (users: number) => void;
-  lines: PriceLine[];
-  /** Per-user price for the billing period. */
-  perUser: number;
-  /** Per-user monthly price, which decides the discount and perk tiers. */
-  monthlyPerUser: number;
+  groups: PriceGroup[];
+  /** Shows a stepper above the groups, for plans with one user count. */
+  users?: number;
+  onUsersChange?: (users: number) => void;
   oneTime: number;
   emptyText: string;
   ctaLabel: string;
@@ -46,11 +47,9 @@ interface PlanPriceSummaryProps {
 export default function PlanPriceSummary({
   ariaLabel,
   billing,
+  groups,
   users,
   onUsersChange,
-  lines,
-  perUser,
-  monthlyPerUser,
   oneTime,
   emptyText,
   ctaLabel,
@@ -68,11 +67,12 @@ export default function PlanPriceSummary({
     setStep("order");
     setError("");
   }, []);
-  const subtotal = perUser * users;
+  const subtotal = groups.reduce((sum, g) => sum + g.perUser * g.users, 0);
   // The one time set-up payment is part of the total, so it counts towards
   // the volume discount and the perks too.
   const billable = subtotal + oneTime;
-  const qualifying = monthlyPerUser * users + oneTime;
+  const qualifying =
+    groups.reduce((sum, g) => sum + g.monthlyPerUser * g.users, 0) + oneTime;
   const discountRate = volumeDiscountRate(qualifying);
   const insuranceCover = healthInsuranceCover(qualifying);
   const discount = Math.round(billable * discountRate * 100) / 100;
@@ -95,8 +95,12 @@ export default function PlanPriceSummary({
           company,
           planName,
           billing,
-          users,
-          features: lines.map((line) => line.label),
+          groups: groups.map((g) => ({
+            title: g.label,
+            users: g.users,
+            features: g.features,
+            subtotal: Math.round(g.perUser * g.users * 100) / 100,
+          })),
           oneTime,
           discount,
           discountRate,
@@ -123,18 +127,45 @@ export default function PlanPriceSummary({
 
   return (
     <aside className="plan-aside pricing-widget" aria-label={ariaLabel}>
-      <UserStepper users={users} onChange={onUsersChange} />
+      <header className="pricing-widget__header">
+        <h2 className="pricing-widget__title">Plan summary</h2>
+        {groups.length > 0 && (
+          <span className="pricing-widget__count">
+            {groups.length} {groups.length === 1 ? "Module" : "Modules"}
+          </span>
+        )}
+      </header>
 
-      {lines.length > 0 ? (
+      {users !== undefined && onUsersChange && (
+        <UserStepper users={users} onChange={onUsersChange} />
+      )}
+
+      {groups.length > 0 ? (
         <ul className="pricing-widget__lines">
-          {lines.map((line) => (
-            <li key={line.id} className="pricing-widget__line">
+          {groups.map((group) => (
+            <li
+              key={group.id}
+              className="pricing-widget__line pricing-widget__line--group"
+            >
               <span className="pricing-widget__line-icon">
-                <Icon name={line.icon} size={16} />
+                <Icon name={group.icon} size={16} />
               </span>
-              <span className="pricing-widget__line-name">{line.label}</span>
+              <span className="pricing-widget__line-name">
+                {group.label}
+                <span className="pricing-widget__line-note">
+                  {group.users} {group.users === 1 ? "user" : "users"} &times;{" "}
+                  {formatPrice(group.perUser)}
+                </span>
+                {group.features.length > 0 && (
+                  <ul className="pricing-widget__features">
+                    {group.features.map((feature) => (
+                      <li key={feature}>{feature}</li>
+                    ))}
+                  </ul>
+                )}
+              </span>
               <span className="pricing-widget__line-price">
-                {line.priceText ?? formatPrice(line.price)}
+                {formatPrice(group.perUser * group.users)}
               </span>
             </li>
           ))}
@@ -166,12 +197,11 @@ export default function PlanPriceSummary({
 
       <div className="pricing-widget__total">
         <span className="pricing-widget__total-label">Total</span>
-        {perUser > 0 ? (
+        {subtotal > 0 ? (
           <>
             <Money amount={recurring} unit={`/ ${period}`} />
             <span className="pricing-widget__total-sub">
-              {formatPrice(total)} first {period} for {users}{" "}
-              {users === 1 ? "user" : "users"}
+              {formatPrice(total)} first {period}, including set-up
             </span>
           </>
         ) : (
@@ -190,7 +220,7 @@ export default function PlanPriceSummary({
       )}
 
       <div className="pricing-widget__cta">
-        {lines.length > 0 ? (
+        {groups.length > 0 ? (
           <Button type="button" variant="solid" onClick={() => setOpen(true)}>
             {ctaLabel}
           </Button>
@@ -226,20 +256,24 @@ export default function PlanPriceSummary({
             aria-label="Order details"
           >
             <h2 className="order-confirm__title">Order summary</h2>
-            {lines.length > 0 && (
-              <div className="order-confirm__features">
-                <p className="order-confirm__features-title">
-                  Included features ({lines.length})
-                </p>
-                <ul className="order-confirm__features-list">
-                  {lines.map((line) => (
-                    <li key={line.id}>
-                      <Icon name="check" size={12} />
-                      {line.label}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {groups.map(
+              (group) =>
+                group.features.length > 0 && (
+                  <div key={group.id} className="order-confirm__features">
+                    <p className="order-confirm__features-title">
+                      {group.label} ({group.users}{" "}
+                      {group.users === 1 ? "user" : "users"})
+                    </p>
+                    <ul className="order-confirm__features-list">
+                      {group.features.map((feature) => (
+                        <li key={feature}>
+                          <Icon name="check" size={12} />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ),
             )}
             <dl className="order-confirm__rows">
               <div>
@@ -250,10 +284,12 @@ export default function PlanPriceSummary({
                 <dt>Billing cycle</dt>
                 <dd>{billing === "year" ? "Yearly" : "Monthly"}</dd>
               </div>
-              <div>
-                <dt>Users</dt>
-                <dd>{users}</dd>
-              </div>
+              {groups.map((group) => (
+                <div key={group.id}>
+                  <dt>{group.label} users</dt>
+                  <dd>{group.users}</dd>
+                </div>
+              ))}
               {oneTime > 0 && (
                 <div>
                   <dt>One time set-up payment (billed once today)</dt>

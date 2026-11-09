@@ -1,13 +1,20 @@
 import { formatPrice } from "@/lib/pricing";
 
+export interface OrderGroup {
+  title: string;
+  users: number;
+  features: string[];
+  subtotal: number;
+}
+
 export interface OrderDetails {
   name: string;
   email: string;
   company: string;
   planName: string;
   billing: "month" | "year";
-  users: number;
-  features: string[];
+  /** The sections of the plan, each billed on its own number of users. */
+  groups: OrderGroup[];
   oneTime: number;
   discount: number;
   discountRate: number;
@@ -42,7 +49,12 @@ function orderRows(order: OrderDetails) {
   const rows = [
     row("Plan", escapeHtml(order.planName)),
     row("Billing", order.billing === "year" ? "Yearly" : "Monthly"),
-    row("Users", String(order.users)),
+    ...order.groups.map((group) =>
+      row(
+        `${escapeHtml(group.title)} users`,
+        `${group.users} &times; ${formatPrice(group.subtotal / group.users)} = ${formatPrice(group.subtotal)}`,
+      ),
+    ),
   ];
   if (order.oneTime > 0) {
     rows.push(row("One time set-up payment", formatPrice(order.oneTime)));
@@ -62,23 +74,28 @@ function orderRows(order: OrderDetails) {
 }
 
 function featureList(order: OrderDetails) {
-  if (order.features.length < 2) return "";
+  const sections = order.groups.filter((group) => group.features.length > 0);
+  if (sections.length === 0) return "";
   const cell = (feature?: string) =>
     feature
       ? `<td width="50%" valign="top" style="padding:4px 0; color:#555; font-size:14px;"><span style="color:#ff6a00; font-weight:bold;">&#10003;</span>&nbsp; ${escapeHtml(feature)}</td>`
       : `<td width="50%"></td>`;
-  const rows: string[] = [];
-  for (let i = 0; i < order.features.length; i += 2) {
-    rows.push(
-      `<tr>${cell(order.features[i])}${cell(order.features[i + 1])}</tr>`,
-    );
-  }
-  return `
-        <p style="color:#555; margin-bottom:8px;">Included features (${order.features.length}):</p>
+  return sections
+    .map((group) => {
+      const rows: string[] = [];
+      for (let i = 0; i < group.features.length; i += 2) {
+        rows.push(
+          `<tr>${cell(group.features[i])}${cell(group.features[i + 1])}</tr>`,
+        );
+      }
+      return `
+        <p style="color:#555; margin-bottom:8px;">${escapeHtml(group.title)} (${group.users} ${group.users === 1 ? "user" : "users"}):</p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f8fa; border-radius:6px; padding:8px 14px;">
           ${rows.join("\n          ")}
         </table>
 `;
+    })
+    .join("");
 }
 
 function insurancePerk(order: OrderDetails) {
