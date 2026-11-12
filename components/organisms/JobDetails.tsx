@@ -3,6 +3,7 @@ import CompanyAvatar from "@/components/atoms/CompanyAvatar";
 import VerifiedName from "@/components/atoms/VerifiedName";
 import Divider from "@/components/atoms/Divider";
 import Icon from "@/components/atoms/Icon";
+import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
 import ApplyButton from "@/components/molecules/ApplyButton";
 import SaveJobButton from "@/components/molecules/SaveJobButton";
@@ -12,9 +13,17 @@ import { closingLabel, type Job } from "@/lib/jobs";
 interface JobDetailsProps {
   job: Job;
   closeHref: string;
+  /** A recruiter or advertiser: no Apply or Save, only Edit on their own job. */
+  isEmployer?: boolean;
+  editHref?: string;
 }
 
-export default function JobDetails({ job, closeHref }: JobDetailsProps) {
+export default function JobDetails({
+  job,
+  closeHref,
+  isEmployer,
+  editHref,
+}: JobDetailsProps) {
   // An advert's details name the advertiser; the company they entered is for the card.
   const employer = job.advertised ? job.promotedBy || job.company : job.company;
   return (
@@ -42,7 +51,12 @@ export default function JobDetails({ job, closeHref }: JobDetailsProps) {
           </div>
         </div>
         <div className="job-details__actions">
-          {!job.advertised && (
+          {editHref && (
+            <Button href={editHref} variant="solid">
+              Edit
+            </Button>
+          )}
+          {!job.advertised && !isEmployer && (
             <>
               <ApplyButton href={`/jobs/${job.id}/apply`} />
               <SaveJobButton

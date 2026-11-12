@@ -64,10 +64,11 @@ export default function CustomPlanBuilder({ billing }: { billing: Billing }) {
   const isLocked = (id: string) => isRequired(id) || lockedBy.has(id);
 
   const select = (next: Set<string>, id: string) => {
+    if (next.has(id)) return;
     next.add(id);
     for (const required of customFeatures.find((f) => f.id === id)?.requires ??
       []) {
-      next.add(required);
+      select(next, required);
     }
   };
 

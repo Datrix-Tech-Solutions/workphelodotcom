@@ -75,6 +75,7 @@ function toAdvertJob(row: AdvertRow): Job {
   return {
     ...job,
     advertised: true,
+    cardLocation: row.location.includes(",") ? "Various" : undefined,
     promotedBy: row.promoted_by || undefined,
     industry: row.industry || undefined,
   };

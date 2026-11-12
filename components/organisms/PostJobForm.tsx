@@ -5,6 +5,7 @@ import { useState } from "react";
 import { editAdvert, postAdvert, postJob } from "@/app/dashboard/actions";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
+import MultiSelect from "@/components/molecules/MultiSelect";
 import FormField from "@/components/molecules/FormField";
 import { currencies } from "@/lib/apply";
 import { industries } from "@/lib/company";
@@ -102,6 +103,13 @@ export default function PostJobForm({
       ) => setValues((v) => ({ ...v, [field]: e.target.value })),
     };
   }
+
+  // An advert can name several countries; they are stored as one comma-separated location.
+  const selectedCountries = values.location
+    ? values.location.split(", ").filter(Boolean)
+    : [];
+  const setCountries = (list: string[]) =>
+    setValues((v) => ({ ...v, location: list.join(", ") }));
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -202,23 +210,39 @@ export default function PostJobForm({
         </div>
 
         <div className="profile-form__row">
-          <FormField id="job-country" label="Country" required>
-            <select
+          {advert ? (
+            <FormField
               id="job-country"
-              required
-              className="country-select"
-              {...bind("location")}
+              label="Countries"
+              required={selectedCountries.length === 0}
             >
-              <option value="" disabled>
-                Select a country
-              </option>
-              {countries.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              <MultiSelect
+                id="job-country"
+                options={countries}
+                value={selectedCountries}
+                onChange={setCountries}
+                placeholder="Select countries"
+              />
+            </FormField>
+          ) : (
+            <FormField id="job-country" label="Country" required>
+              <select
+                id="job-country"
+                required
+                className="country-select"
+                {...bind("location")}
+              >
+                <option value="" disabled>
+                  Select a country
                 </option>
-              ))}
-            </select>
-          </FormField>
+                {countries.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          )}
           <FormField id="job-city" label="City">
             <input
               id="job-city"

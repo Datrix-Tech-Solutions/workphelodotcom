@@ -128,9 +128,8 @@ export const customFeatures: CustomFeature[] = [
     group: "core-hr",
     label: "Employee management",
     icon: "users",
+    lockedDescription: "Included with HR features",
     // File storage is part of it, so it carries that price.
-    required: true,
-    description: "Included in every plan",
     monthly: 1,
     yearly: 0.5,
   },
@@ -145,6 +144,7 @@ export const customFeatures: CustomFeature[] = [
   {
     id: "smart-scheduling",
     group: "core-hr",
+    requires: ["employee-management"],
     label: "Smart scheduling",
     icon: "calendar",
     listPrice: { monthly: 0.3, yearly: 0.25 },
@@ -152,8 +152,19 @@ export const customFeatures: CustomFeature[] = [
     yearly: 0,
   },
   {
+    id: "time-clock",
+    group: "core-hr",
+    requires: ["employee-management"],
+    label: "Time clock",
+    icon: "clock",
+    listPrice: { monthly: 0.2, yearly: 0.2 },
+    monthly: 0,
+    yearly: 0,
+  },
+  {
     id: "payroll",
     group: "core-hr",
+    requires: ["employee-management"],
     label: "Payroll management",
     icon: "wallet",
     monthly: 0.5,
@@ -164,6 +175,7 @@ export const customFeatures: CustomFeature[] = [
   {
     id: "performance",
     group: "core-hr",
+    requires: ["employee-management"],
     label: "Employee performance",
     icon: "trending-up",
     monthly: 0.5,
@@ -174,6 +186,7 @@ export const customFeatures: CustomFeature[] = [
   {
     id: "projects",
     group: "core-hr",
+    requires: ["employee-management"],
     label: "Project management",
     icon: "clipboard-check",
     monthly: 0.5,
@@ -184,6 +197,7 @@ export const customFeatures: CustomFeature[] = [
   {
     id: "assets",
     group: "core-hr",
+    requires: ["employee-management"],
     label: "Asset management",
     icon: "package",
     lockedDescription: "Included with Fleet management",

@@ -15,6 +15,8 @@ interface JobListingsProps {
   selectedJob?: Job;
   closeHref: string;
   unavailable?: boolean;
+  isEmployer?: boolean;
+  editHref?: string;
 }
 
 export default function JobListings({
@@ -29,6 +31,8 @@ export default function JobListings({
   selectedJob,
   closeHref,
   unavailable,
+  isEmployer,
+  editHref,
 }: JobListingsProps) {
   const buildHref = (job: Job) =>
     jobHref(job.id, { query, location, type, posted, page });
@@ -126,7 +130,12 @@ export default function JobListings({
           />
         </div>
         <div className="panel job-split__details">
-          <JobDetails job={selectedJob} closeHref={closeHref} />
+          <JobDetails
+            job={selectedJob}
+            closeHref={closeHref}
+            isEmployer={isEmployer}
+            editHref={editHref}
+          />
         </div>
       </div>
     </section>

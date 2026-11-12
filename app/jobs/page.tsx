@@ -5,8 +5,14 @@ import JobListings from "@/components/organisms/JobListings";
 import Navbar from "@/components/organisms/Navbar";
 import { fetchJob, fetchJobs } from "@/lib/api";
 import { getSession } from "@/lib/auth";
+import { ADVERT_TENANT, getMyAdvert } from "@/lib/advertiserJobs";
 import { matchesIndustries } from "@/lib/jobIndustry";
-import { JOBS_PER_PAGE, postedRange, TYPE_FILTERS } from "@/lib/jobs";
+import {
+  JOBS_PER_PAGE,
+  parseJobId,
+  postedRange,
+  TYPE_FILTERS,
+} from "@/lib/jobs";
 
 interface JobsPageProps {
   searchParams: Promise<{
@@ -69,6 +75,21 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     recommended: matchesIndustries(job, picked),
   }));
 
+  // Recruiters and advertisers can't apply or save; they edit their own adverts.
+  const isEmployer =
+    session?.role === "recruiter" || session?.role === "advertiser";
+  let editHref: string | undefined;
+  const parsed = selectedJob ? parseJobId(selectedJob.id) : null;
+  if (session && isEmployer && parsed?.tenantId === ADVERT_TENANT) {
+    const own = await getMyAdvert(
+      parsed.vacancyId,
+      session.role === "recruiter"
+        ? { kind: "recruiter", id: session.user.id }
+        : { kind: "advertiser" },
+    );
+    if (own) editHref = `/dashboard/adverts/${parsed.vacancyId}/edit`;
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / JOBS_PER_PAGE));
 
   const closeParams = new URLSearchParams();
@@ -106,6 +127,8 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           selectedJob={selectedJob ?? undefined}
           closeHref={closeHref}
           unavailable={unavailable}
+          isEmployer={isEmployer}
+          editHref={editHref}
         />
       </main>
       <Footer />

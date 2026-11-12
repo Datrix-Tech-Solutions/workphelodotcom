@@ -47,7 +47,7 @@ export default function JobCard({ job, href, selected }: JobCardProps) {
         <Badge>{closingLabel(job.closingDate)}</Badge>
       </div>
       <p className="job-card__meta">
-        <span>{job.location}</span>
+        <span>{job.cardLocation ?? job.location}</span>
         <span>{job.posted}</span>
       </p>
     </Link>

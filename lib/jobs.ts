@@ -23,6 +23,8 @@ export interface Job {
   companyVerified: boolean;
   salary: string;
   location: string;
+  /** Shown on cards instead of `location` when a job spans several countries. */
+  cardLocation?: string;
   workMode: "Remote" | "Hybrid" | "On-site" | null;
   type: string;
   posted: string;
