@@ -8,6 +8,8 @@ interface PaginationProps {
   location?: string;
   type?: string;
   posted?: string;
+  /** The search param holding the page number. */
+  pageParam?: string;
 }
 
 export default function Pagination({
@@ -18,6 +20,7 @@ export default function Pagination({
   location,
   type,
   posted,
+  pageParam = "page",
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
@@ -27,7 +30,7 @@ export default function Pagination({
     if (location) params.set("location", location);
     if (type) params.set("type", type);
     if (posted) params.set("posted", posted);
-    if (target > 1) params.set("page", String(target));
+    if (target > 1) params.set(pageParam, String(target));
     const qs = params.toString();
     return qs ? `${basePath}?${qs}` : basePath;
   };

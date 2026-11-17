@@ -5,11 +5,28 @@ import Footer from "@/components/organisms/Footer";
 import Hero from "@/components/organisms/Hero";
 import Navbar from "@/components/organisms/Navbar";
 import { listMyAdverts } from "@/lib/advertiserJobs";
+import DashboardSearch from "@/components/molecules/DashboardSearch";
+import Pagination from "@/components/molecules/Pagination";
+import { matchesSearch, paginate } from "@/lib/jobs";
 
 /** The advertiser's dashboard: the jobs they advertise, from Supabase. */
-export default async function AdvertiserDashboard({ name }: { name: string }) {
+export default async function AdvertiserDashboard({
+  name,
+  query = "",
+  page = 1,
+}: {
+  name: string;
+  query?: string;
+  page?: number;
+}) {
   const result = await listMyAdverts();
   const jobs = result.ok ? result.data : [];
+  const shown = paginate(
+    jobs.filter((j) =>
+      matchesSearch([j.title, j.location, j.companyName], query),
+    ),
+    page,
+  );
   const open = jobs.filter((j) => j.status === "OPEN").length;
   const stats = [
     { label: "Open jobs", value: open, icon: "briefcase" as const },
@@ -57,6 +74,7 @@ export default async function AdvertiserDashboard({ name }: { name: string }) {
                   {jobs.length} {jobs.length === 1 ? "job" : "jobs"} advertised
                 </p>
               </div>
+              <DashboardSearch query={query} />
               <Button href="/post-job" variant="solid">
                 Advertise a job
               </Button>
@@ -73,7 +91,21 @@ export default async function AdvertiserDashboard({ name }: { name: string }) {
                 </Button>
               </div>
             ) : (
-              <AdvertTable jobs={jobs} />
+              <>
+                {shown.items.length === 0 ? (
+                  <p className="profile-card__empty">
+                    No jobs match your search.
+                  </p>
+                ) : (
+                  <AdvertTable jobs={shown.items} />
+                )}
+                <Pagination
+                  page={shown.page}
+                  totalPages={shown.totalPages}
+                  basePath="/dashboard"
+                  query={query}
+                />
+              </>
             )}
           </section>
         </section>

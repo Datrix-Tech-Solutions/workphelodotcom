@@ -12,7 +12,15 @@ import Navbar from "@/components/organisms/Navbar";
 import { getSession } from "@/lib/auth";
 import AdvertTable from "@/components/molecules/AdvertTable";
 import { listMyAdverts } from "@/lib/advertiserJobs";
-import { jobTypeLabel, toJobId } from "@/lib/jobs";
+import {
+  jobTypeLabel,
+  matchesSearch,
+  pageNumber,
+  paginate,
+  toJobId,
+} from "@/lib/jobs";
+import DashboardSearch from "@/components/molecules/DashboardSearch";
+import Pagination from "@/components/molecules/Pagination";
 import { listMyJobs } from "@/lib/recruiterApi";
 
 export const metadata: Metadata = {
@@ -28,13 +36,33 @@ const formatDate = (iso: string) =>
 
 const STATUS_LABELS = { OPEN: "Open", CLOSED: "Closed", DRAFT: "Draft" };
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{
+    q?: string | string[];
+    page?: string | string[];
+    apage?: string | string[];
+  }>;
+}
+
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
+  const params = await searchParams;
+  const rawQuery = params.q;
+  const query =
+    (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
   const session = await getSession();
   if (!session || session.role === "candidate") {
     redirect("/recruiter/sign-in?next=/dashboard");
   }
   if (session.role === "advertiser") {
-    return <AdvertiserDashboard name={session.user.name} />;
+    return (
+      <AdvertiserDashboard
+        name={session.user.name}
+        query={query}
+        page={pageNumber(params.page)}
+      />
+    );
   }
 
   const [result, adverts] = await Promise.all([
@@ -42,6 +70,20 @@ export default async function DashboardPage() {
     listMyAdverts({ kind: "recruiter", id: session.user.id }),
   ]);
   const jobs = result.ok ? result.data : [];
+  const shown = paginate(
+    jobs.filter((j) =>
+      matchesSearch([j.title, j.location, STATUS_LABELS[j.status]], query),
+    ),
+    pageNumber(params.page),
+  );
+  const matchingAdverts = paginate(
+    adverts.ok
+      ? adverts.data.filter((a) =>
+          matchesSearch([a.title, a.location, a.companyName], query),
+        )
+      : [],
+    pageNumber(params.apage),
+  );
   const open = jobs.filter((j) => j.status === "OPEN").length;
   const applicants = jobs.reduce((sum, j) => sum + j.applicantCount, 0);
   const drafts = jobs.filter((j) => j.status === "DRAFT").length;
@@ -86,6 +128,7 @@ export default async function DashboardPage() {
                   {jobs.length} {jobs.length === 1 ? "job" : "jobs"} posted
                 </p>
               </div>
+              <DashboardSearch query={query} />
               <Button href="/post-job" variant="solid">
                 Post a job
               </Button>
@@ -114,7 +157,7 @@ export default async function DashboardPage() {
                     <span className="sr-only">Actions</span>
                   </span>
                 </div>
-                {jobs.map((job) => (
+                {shown.items.map((job) => (
                   <div className="recruiter-table__row" role="row" key={job.id}>
                     <div className="recruiter-table__main" role="cell">
                       <Link
@@ -127,6 +170,8 @@ export default async function DashboardPage() {
                         {[
                           job.location,
                           `${job.status === "DRAFT" ? "Created" : "Posted"} ${formatDate(job.createdAt)}`,
+                          job.closingDate &&
+                            `Ends ${formatDate(job.closingDate)}`,
                         ]
                           .filter(Boolean)
                           .join(" · ")}
@@ -166,6 +211,17 @@ export default async function DashboardPage() {
                     </span>
                   </div>
                 ))}
+                {shown.items.length === 0 && (
+                  <p className="profile-card__empty">
+                    No jobs match your search.
+                  </p>
+                )}
+                <Pagination
+                  page={shown.page}
+                  totalPages={shown.totalPages}
+                  basePath="/dashboard"
+                  query={query}
+                />
               </div>
             )}
           </section>
@@ -182,7 +238,20 @@ export default async function DashboardPage() {
                   </p>
                 </div>
               </header>
-              <AdvertTable jobs={adverts.data} />
+              {matchingAdverts.items.length === 0 ? (
+                <p className="profile-card__empty">
+                  No adverts match your search.
+                </p>
+              ) : (
+                <AdvertTable jobs={matchingAdverts.items} />
+              )}
+              <Pagination
+                page={matchingAdverts.page}
+                totalPages={matchingAdverts.totalPages}
+                basePath="/dashboard"
+                query={query}
+                pageParam="apage"
+              />
             </section>
           )}
 

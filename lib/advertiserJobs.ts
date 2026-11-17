@@ -44,6 +44,7 @@ export interface MyAdvert {
   location: string;
   status: AdvertStatus;
   createdAt: string;
+  closingDate: string | null;
 }
 
 const COLUMNS =
@@ -191,6 +192,7 @@ export async function listMyAdverts(
         ? "CLOSED"
         : r.status) as AdvertStatus,
       createdAt: r.created_at,
+      closingDate: r.closing_date,
     })),
   };
 }

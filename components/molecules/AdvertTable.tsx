@@ -38,7 +38,11 @@ export default function AdvertTable({ jobs }: { jobs: MyAdvert[] }) {
           <div className="recruiter-table__main" role="cell">
             <span className="recruiter-table__title">{job.title}</span>
             <span className="recruiter-table__meta">
-              {[job.location, `Posted ${formatDate(job.createdAt)}`]
+              {[
+                job.location,
+                `Posted ${formatDate(job.createdAt)}`,
+                job.closingDate && `Ends ${formatDate(job.closingDate)}`,
+              ]
                 .filter(Boolean)
                 .join(" · ")}
             </span>

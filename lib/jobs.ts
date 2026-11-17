@@ -114,7 +114,44 @@ export interface ApiVacancy {
   }[];
 }
 
-export const JOBS_PER_PAGE = 10;
+export const JOBS_PER_PAGE = 15;
+
+/** One page of a list, with the page number clamped into range. */
+export function paginate<T>(
+  items: T[],
+  requested: number,
+  perPage = JOBS_PER_PAGE,
+) {
+  const totalPages = Math.max(1, Math.ceil(items.length / perPage));
+  const page = Math.min(Math.max(requested, 1), totalPages);
+  return {
+    page,
+    totalPages,
+    items: items.slice((page - 1) * perPage, page * perPage),
+  };
+}
+
+/** True when every word of the search appears in one of the fields. */
+export function matchesSearch(
+  fields: (string | null | undefined)[],
+  query: string,
+): boolean {
+  const haystack = fields.join(" ").toLowerCase();
+  return query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => haystack.includes(word));
+}
+
+/** Reads a `page` search param as a number of at least 1. */
+export function pageNumber(value?: string | string[]): number {
+  const n = Number.parseInt(
+    (Array.isArray(value) ? value[0] : value) ?? "1",
+    10,
+  );
+  return Number.isNaN(n) ? 1 : Math.max(n, 1);
+}
 
 const JOB_TYPES: Record<string, string> = {
   FULL_TIME: "Full-time",
@@ -182,7 +219,9 @@ function formatPosted(iso: string): string {
 /** "Closes 14 Nov 2026", or "Open" when there is no end date. */
 export function closingLabel(closingDate?: string): string {
   if (!closingDate) return "Open";
-  const d = new Date(closingDate.length === 10 ? `${closingDate}T00:00:00` : closingDate);
+  const d = new Date(
+    closingDate.length === 10 ? `${closingDate}T00:00:00` : closingDate,
+  );
   if (Number.isNaN(d.getTime())) return "Open";
   const date = d.toLocaleDateString("en-GB", {
     day: "numeric",
@@ -234,7 +273,12 @@ function toApplyRequirements(
           coverLetter: details.documents.coverLetter,
           reference: details.documents.reference ?? false,
         }
-      : { portfolio: true, github: false, coverLetter: false, reference: false },
+      : {
+          portfolio: true,
+          github: false,
+          coverLetter: false,
+          reference: false,
+        },
   };
 }
 
