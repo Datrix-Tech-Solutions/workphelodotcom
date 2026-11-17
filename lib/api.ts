@@ -40,26 +40,28 @@ export interface JobPage {
 const LOCATION_SCAN_LIMIT = 100;
 
 /**
- * The board: the HR API's jobs plus open adverts from Supabase. Adverts are
- * few, so they are filtered here and all join page 1, merged by date; later
- * pages are the API's alone.
+ * The board: the HR API's jobs plus open adverts from Supabase, merged by date
+ * and paginated here.
  */
 export async function fetchJobs(
   params: Parameters<typeof fetchApiJobs>[0],
 ): Promise<JobPage> {
+  const page = params.page ?? 1;
+  // Adverts and API jobs are merged by date before paginating, so each page
+  // holds exactly JOBS_PER_PAGE jobs. The API side is read in one batch.
   const [api, adverts] = await Promise.all([
-    fetchApiJobs(params),
+    fetchApiJobs({ ...params, page: 1, limit: LOCATION_SCAN_LIMIT }),
     fetchAdvertJobs(),
   ]);
-  const page = params.page ?? 1;
   const matching = adverts.filter((job) => matchesFilters(job, params));
-  if (page !== 1 || matching.length === 0) {
-    return { ...api, total: api.total + matching.length };
-  }
-  const jobs = [...api.jobs, ...matching].sort(
+  const all = [...api.jobs, ...matching].sort(
     (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
   );
-  return { ...api, jobs, total: api.total + matching.length };
+  return {
+    jobs: all.slice((page - 1) * JOBS_PER_PAGE, page * JOBS_PER_PAGE),
+    total: all.length,
+    unavailable: api.unavailable && matching.length === 0,
+  };
 }
 
 /** Applies the board's filters to an advert, which the API never sees. */

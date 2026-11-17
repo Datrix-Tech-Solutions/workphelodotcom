@@ -114,7 +114,7 @@ export interface ApiVacancy {
   }[];
 }
 
-export const JOBS_PER_PAGE = 15;
+export const JOBS_PER_PAGE = 10;
 
 const JOB_TYPES: Record<string, string> = {
   FULL_TIME: "Full-time",

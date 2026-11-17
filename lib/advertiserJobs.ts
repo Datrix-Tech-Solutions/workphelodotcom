@@ -81,6 +81,15 @@ function toAdvertJob(row: AdvertRow): Job {
   };
 }
 
+/** Today as YYYY-MM-DD (UTC). An advert is open through its closing date. */
+const today = () => new Date().toISOString().slice(0, 10);
+
+const isExpired = (closingDate: string | null) =>
+  !!closingDate && closingDate < today();
+
+/** Not past its closing date. The daily job also closes these; this covers the gap. */
+const NOT_EXPIRED = () => `closing_date.is.null,closing_date.gte.${today()}`;
+
 /** Open adverts, newest first. Returns [] when Supabase is unavailable. */
 export async function fetchAdvertJobs(): Promise<Job[]> {
   if (!isSupabaseConfigured()) return [];
@@ -90,6 +99,7 @@ export async function fetchAdvertJobs(): Promise<Job[]> {
       .from("advertiser_jobs")
       .select(COLUMNS)
       .eq("status", "OPEN")
+      .or(NOT_EXPIRED())
       .order("created_at", { ascending: false })
       .limit(100);
     if (error || !data) return [];
@@ -109,6 +119,7 @@ export async function fetchAdvertJob(id: string): Promise<Job | null> {
       .select(COLUMNS)
       .eq("id", id)
       .eq("status", "OPEN")
+      .or(NOT_EXPIRED())
       .maybeSingle();
     if (error || !data) return null;
     return toAdvertJob(data as AdvertRow);
@@ -148,7 +159,7 @@ export async function listMyAdverts(
   let query = supabase
     .from("advertiser_jobs")
     .select(
-      "id, title, advertiser_name, job_type, perks_and_benefits, location, status, created_at",
+      "id, title, advertiser_name, job_type, perks_and_benefits, location, status, created_at, closing_date",
     )
     .order("created_at", { ascending: false });
   if (owner.kind === "recruiter") {
@@ -171,7 +182,10 @@ export async function listMyAdverts(
       jobType: r.job_type,
       perks: toList(r.perks_and_benefits),
       location: r.location,
-      status: r.status as AdvertStatus,
+      // Past its closing date counts as closed even before the daily job flips it.
+      status: (r.status === "OPEN" && isExpired(r.closing_date)
+        ? "CLOSED"
+        : r.status) as AdvertStatus,
       createdAt: r.created_at,
     })),
   };
