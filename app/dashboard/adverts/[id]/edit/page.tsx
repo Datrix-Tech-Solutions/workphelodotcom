@@ -49,6 +49,7 @@ export default async function EditAdvertPage({
     description: job.description,
     responsibilities: job.responsibilities ?? "",
     requirements: job.requirements ?? "",
+    skills: job.skills ?? [],
     perksAndBenefits: job.perksAndBenefits ?? "",
     salaryType: job.salaryType,
     salaryAmount: text(job.salaryAmount),

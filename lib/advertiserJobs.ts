@@ -22,6 +22,7 @@ interface AdvertRow {
   description: string;
   responsibilities: string | null;
   requirements: string | null;
+  skills: string[] | null;
   perks_and_benefits: string | null;
   salary_type: ApiVacancy["salaryType"];
   salary_amount: number | null;
@@ -46,7 +47,7 @@ export interface MyAdvert {
 }
 
 const COLUMNS =
-  "id, advertiser_name, promoted_by, industry, title, location, city, job_type, work_mode, description, responsibilities, requirements, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at, closing_date";
+  "id, advertiser_name, promoted_by, industry, title, location, city, job_type, work_mode, description, responsibilities, requirements, skills, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at, closing_date";
 
 /** Maps a row onto the shape the job board already renders. */
 function toAdvertJob(row: AdvertRow): Job {
@@ -71,6 +72,9 @@ function toAdvertJob(row: AdvertRow): Job {
     createdAt: row.created_at,
     closingDate: row.closing_date,
     questions: [],
+    details: row.skills?.length
+      ? { skills: { items: row.skills, required: false } }
+      : null,
   });
   return {
     ...job,
@@ -218,6 +222,7 @@ export async function createAdvert(
     description: job.description.trim(),
     responsibilities: job.responsibilities ?? null,
     requirements: job.requirements ?? null,
+    skills: job.skills ?? [],
     perks_and_benefits: job.perksAndBenefits ?? null,
     salary_type: job.salaryType,
     salary_amount: job.salaryAmount ?? null,
@@ -279,6 +284,7 @@ export async function getMyAdvert(
       description: r.description,
       responsibilities: r.responsibilities ?? undefined,
       requirements: r.requirements ?? undefined,
+      skills: r.skills ?? [],
       perksAndBenefits: r.perks_and_benefits ?? undefined,
       salaryType: r.salary_type as NewJob["salaryType"],
       salaryAmount: r.salary_amount ?? undefined,
@@ -313,6 +319,7 @@ export async function updateAdvert(
       description: job.description.trim(),
       responsibilities: job.responsibilities ?? null,
       requirements: job.requirements ?? null,
+      skills: job.skills ?? [],
       perks_and_benefits: job.perksAndBenefits ?? null,
       salary_type: job.salaryType,
       salary_amount: job.salaryAmount ?? null,

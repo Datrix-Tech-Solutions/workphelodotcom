@@ -121,6 +121,17 @@ export default function JobDetails({
         </>
       )}
 
+      {job.apply.skills && (
+        <>
+          <h3 className="job-details__subheading">Skills Required</h3>
+          <ul className="job-details__list">
+            {job.apply.skills.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
       {job.perks.length > 0 && (
         <>
           <h3 className="job-details__subheading">Perks &amp; Benefits</h3>

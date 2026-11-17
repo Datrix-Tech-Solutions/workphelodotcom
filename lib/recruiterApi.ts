@@ -114,6 +114,8 @@ export interface NewJob {
   description: string;
   responsibilities?: string;
   requirements?: string;
+  /** Skills applicants should have. */
+  skills?: string[];
   perksAndBenefits?: string;
   salaryType: "NON_DISCLOSED" | "FIXED" | "RANGE";
   salaryAmount?: number;
@@ -124,9 +126,17 @@ export interface NewJob {
 
 /** Posts the job live straight away. */
 export function createJob(job: NewJob): Promise<ApiResult<MyJob>> {
+  // The HR API keeps skills under `details`, not as a top-level field.
+  const { skills, ...rest } = job;
   return call<MyJob>("/vacancies", {
     method: "POST",
-    body: { ...job, status: "OPEN" },
+    body: {
+      ...rest,
+      ...(skills?.length
+        ? { details: { skills: { items: skills, required: false } } }
+        : {}),
+      status: "OPEN",
+    },
   });
 }
 

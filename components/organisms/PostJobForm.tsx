@@ -5,11 +5,15 @@ import { useState } from "react";
 import { editAdvert, postAdvert, postJob } from "@/app/dashboard/actions";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
+import TagInput from "@/components/molecules/TagInput";
 import MultiSelect from "@/components/molecules/MultiSelect";
+import Dialog from "@/components/molecules/Dialog";
+import JobPreview from "@/components/organisms/JobPreview";
 import FormField from "@/components/molecules/FormField";
 import { currencies } from "@/lib/apply";
 import { industries } from "@/lib/company";
 import { countries } from "@/lib/countries";
+import { toJob } from "@/lib/jobs";
 import type { NewJob } from "@/lib/recruiterApi";
 
 const JOB_TYPES: { value: NewJob["jobType"]; label: string }[] = [
@@ -51,6 +55,7 @@ export interface AdvertFormValues {
   description: string;
   responsibilities: string;
   requirements: string;
+  skills: string[];
   perksAndBenefits: string;
   salaryType: string;
   salaryAmount: string;
@@ -70,28 +75,30 @@ export default function PostJobForm({
   const router = useRouter();
   const [values, setValues] = useState<AdvertFormValues>(
     editing?.values ?? {
-    companyName: "",
-    industry: "",
-    title: "",
-    location: "",
-    city: "",
-    jobType: "FULL_TIME",
-    workMode: "ONSITE",
-    vacancies: "1",
-    closingDate: "",
-    description: "",
-    responsibilities: "",
-    requirements: "",
-    perksAndBenefits: "",
-    salaryType: "NON_DISCLOSED",
-    salaryAmount: "",
-    salaryMin: "",
-    salaryMax: "",
-    salaryCurrency: "GHS",
+      companyName: "",
+      industry: "",
+      title: "",
+      location: "",
+      city: "",
+      jobType: "FULL_TIME",
+      workMode: "ONSITE",
+      vacancies: "1",
+      closingDate: "",
+      description: "",
+      responsibilities: "",
+      requirements: "",
+      skills: [],
+      perksAndBenefits: "",
+      salaryType: "NON_DISCLOSED",
+      salaryAmount: "",
+      salaryMin: "",
+      salaryMax: "",
+      salaryCurrency: "GHS",
     },
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [previewing, setPreviewing] = useState(false);
 
   function bind(field: keyof typeof values) {
     return {
@@ -111,30 +118,69 @@ export default function PostJobForm({
   const setCountries = (list: string[]) =>
     setValues((v) => ({ ...v, location: list.join(", ") }));
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
+    setPreviewing(true);
+  }
+
+  const toPayload = (): NewJob => ({
+    title: values.title,
+    location: values.location,
+    city: values.city.trim() || undefined,
+    jobType: values.jobType as NewJob["jobType"],
+    workMode: (values.workMode || undefined) as NewJob["workMode"],
+    vacancies: toNumber(values.vacancies),
+    closingDate: values.closingDate || undefined,
+    description: values.description,
+    responsibilities: values.responsibilities.trim() || undefined,
+    requirements: values.requirements.trim() || undefined,
+    skills: values.skills.length > 0 ? values.skills : undefined,
+    perksAndBenefits: values.perksAndBenefits.trim() || undefined,
+    salaryType: values.salaryType as NewJob["salaryType"],
+    salaryAmount: toNumber(values.salaryAmount),
+    salaryMin: toNumber(values.salaryMin),
+    salaryMax: toNumber(values.salaryMax),
+    salaryCurrency: values.salaryCurrency.trim().toUpperCase() || undefined,
+  });
+
+  /** The job as applicants would see it, for the preview. */
+  function previewJob() {
+    const p = toPayload();
+    return toJob({
+      id: "preview",
+      tenantId: "preview",
+      companyName: advert ? values.companyName || null : null,
+      companyVerified: false,
+      title: p.title,
+      location: p.location,
+      city: p.city ?? null,
+      jobType: p.jobType,
+      workMode: p.workMode ?? null,
+      description: p.description,
+      responsibilities: p.responsibilities ?? null,
+      requirements: p.requirements ?? null,
+      perksAndBenefits: p.perksAndBenefits ?? null,
+      salaryType: p.salaryType,
+      salaryAmount: p.salaryAmount ?? null,
+      salaryMin: p.salaryMin ?? null,
+      salaryMax: p.salaryMax ?? null,
+      salaryCurrency: p.salaryCurrency ?? null,
+      createdAt: new Date().toISOString(),
+      closingDate: p.closingDate ?? null,
+      details: p.skills?.length
+        ? { skills: { items: p.skills, required: false } }
+        : null,
+      questions: [],
+    });
+  }
+
+  async function confirmPost() {
     if (loading) return;
     setLoading(true);
     setError("");
     try {
-      const payload: NewJob = {
-        title: values.title,
-        location: values.location,
-        city: values.city.trim() || undefined,
-        jobType: values.jobType as NewJob["jobType"],
-        workMode: (values.workMode || undefined) as NewJob["workMode"],
-        vacancies: toNumber(values.vacancies),
-        closingDate: values.closingDate || undefined,
-        description: values.description,
-        responsibilities: values.responsibilities.trim() || undefined,
-        requirements: values.requirements.trim() || undefined,
-        perksAndBenefits: values.perksAndBenefits.trim() || undefined,
-        salaryType: values.salaryType as NewJob["salaryType"],
-        salaryAmount: toNumber(values.salaryAmount),
-        salaryMin: toNumber(values.salaryMin),
-        salaryMax: toNumber(values.salaryMax),
-        salaryCurrency: values.salaryCurrency.trim().toUpperCase() || undefined,
-      };
+      const payload = toPayload();
       const result = editing
         ? await editAdvert(
             editing.id,
@@ -324,6 +370,14 @@ export default function PostJobForm({
             {...bind("requirements")}
           />
         </FormField>
+        <FormField id="job-skills" label="Skills required">
+          <TagInput
+            id="job-skills"
+            value={values.skills}
+            onChange={(skills) => setValues((v) => ({ ...v, skills }))}
+            placeholder="Type a skill and press Enter"
+          />
+        </FormField>
         <FormField id="job-perks" label="Perks and benefits">
           <textarea
             id="job-perks"
@@ -334,83 +388,91 @@ export default function PostJobForm({
           />
         </FormField>
 
-        <FormField id="job-salary-type" label="Pay">
-          <Select id="job-salary-type" {...bind("salaryType")}>
-            {SALARY_TYPES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </Select>
-        </FormField>
-        {(showAmount || showRange) && (
-          <div className="salary-row">
-            <FormField id="job-currency" label="Currency">
-              <Select id="job-currency" {...bind("salaryCurrency")}>
-                {currencies.map((code) => (
-                  <option key={code} value={code}>
-                    {code}
-                  </option>
-                ))}
-              </Select>
-            </FormField>
-            {showAmount && (
-              <FormField id="job-salary" label="Amount" required>
-                <input
-                  id="job-salary"
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  required
-                  className="field-control"
-                  {...bind("salaryAmount")}
-                />
+        <div
+          className={`salary-row${showAmount || showRange ? "" : " salary-row--single"}`}
+        >
+          <FormField id="job-salary-type" label="Pay">
+            <Select id="job-salary-type" {...bind("salaryType")}>
+              {SALARY_TYPES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </Select>
+          </FormField>
+          {(showAmount || showRange) && (
+            <>
+              <FormField id="job-currency" label="Currency">
+                <Select id="job-currency" {...bind("salaryCurrency")}>
+                  {currencies.map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
+                </Select>
               </FormField>
-            )}
-            {showRange && (
-              <>
-                <FormField id="job-salary-min" label="Minimum" required>
+              {showAmount && (
+                <FormField id="job-salary" label="Amount" required>
                   <input
-                    id="job-salary-min"
+                    id="job-salary"
                     type="number"
                     min={0}
                     step="0.01"
                     required
                     className="field-control"
-                    {...bind("salaryMin")}
+                    {...bind("salaryAmount")}
                   />
                 </FormField>
-                <FormField id="job-salary-max" label="Maximum" required>
-                  <input
-                    id="job-salary-max"
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    required
-                    className="field-control"
-                    {...bind("salaryMax")}
-                  />
-                </FormField>
-              </>
-            )}
-          </div>
-        )}
+              )}
+              {showRange && (
+                <>
+                  <FormField id="job-salary-min" label="Minimum" required>
+                    <input
+                      id="job-salary-min"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      required
+                      className="field-control"
+                      {...bind("salaryMin")}
+                    />
+                  </FormField>
+                  <FormField id="job-salary-max" label="Maximum" required>
+                    <input
+                      id="job-salary-max"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      required
+                      className="field-control"
+                      {...bind("salaryMax")}
+                    />
+                  </FormField>
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
-      {error && (
-        <p className="form-field__error" role="alert">
-          {error}
-        </p>
-      )}
+      <Dialog
+        open={previewing}
+        onClose={() => !loading && setPreviewing(false)}
+        label="Job preview"
+      >
+        {previewing && (
+          <JobPreview
+            job={previewJob()}
+            onPost={confirmPost}
+            onEdit={() => setPreviewing(false)}
+            posting={loading}
+            error={error}
+          />
+        )}
+      </Dialog>
       <div className="profile-form__actions">
-        <Button type="submit" variant="solid" disabled={loading}>
-          {loading
-            ? editing
-              ? "Saving…"
-              : "Posting…"
-            : editing
-              ? "Save changes"
-              : "Post job"}
+        <Button type="submit" variant="solid">
+          {editing ? "Save changes" : "Post job"}
         </Button>
         <Button href="/dashboard" variant="outline">
           Cancel
