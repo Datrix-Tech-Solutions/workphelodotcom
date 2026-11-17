@@ -73,7 +73,7 @@ function defaultMessage({
   const verb = company ? "is" : "";
   const basis = type ? ` on a ${type} basis` : "";
   const lines = [
-    "Hello Team,",
+    "We are hiring,",
     "",
     `${[who, verb].filter(Boolean).join(" ")} inviting applications for the position of ${title}${basis}.`,
   ];
@@ -82,7 +82,7 @@ function defaultMessage({
   }
   lines.push(
     "",
-    "Interested candidates can find more details and submit their applications using the link below:",
+    "Interested candidates can find more details or submit their applications using the link below:",
   );
   return lines.join("\n");
 }
