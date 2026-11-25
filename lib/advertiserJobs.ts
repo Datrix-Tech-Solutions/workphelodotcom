@@ -24,6 +24,7 @@ interface AdvertRow {
   requirements: string | null;
   skills: string[] | null;
   perks_and_benefits: string | null;
+  how_to_apply: string | null;
   salary_type: ApiVacancy["salaryType"];
   salary_amount: number | null;
   salary_min: number | null;
@@ -48,7 +49,7 @@ export interface MyAdvert {
 }
 
 const COLUMNS =
-  "id, advertiser_name, promoted_by, industry, title, location, city, job_type, work_mode, description, responsibilities, requirements, skills, perks_and_benefits, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at, closing_date";
+  "id, advertiser_name, promoted_by, industry, title, location, city, job_type, work_mode, description, responsibilities, requirements, skills, perks_and_benefits, how_to_apply, salary_type, salary_amount, salary_min, salary_max, salary_currency, status, created_at, closing_date";
 
 /** Maps a row onto the shape the job board already renders. */
 function toAdvertJob(row: AdvertRow): Job {
@@ -65,6 +66,7 @@ function toAdvertJob(row: AdvertRow): Job {
     responsibilities: row.responsibilities,
     requirements: row.requirements,
     perksAndBenefits: row.perks_and_benefits,
+    howToApply: row.how_to_apply,
     salaryType: row.salary_type,
     salaryAmount: row.salary_amount,
     salaryMin: row.salary_min,
@@ -226,6 +228,7 @@ export async function createAdvert(
     requirements: job.requirements ?? null,
     skills: job.skills ?? [],
     perks_and_benefits: job.perksAndBenefits ?? null,
+    how_to_apply: job.howToApply ?? null,
     salary_type: job.salaryType,
     salary_amount: job.salaryAmount ?? null,
     salary_min: job.salaryMin ?? null,
@@ -288,6 +291,7 @@ export async function getMyAdvert(
       requirements: r.requirements ?? undefined,
       skills: r.skills ?? [],
       perksAndBenefits: r.perks_and_benefits ?? undefined,
+      howToApply: r.how_to_apply ?? undefined,
       salaryType: r.salary_type as NewJob["salaryType"],
       salaryAmount: r.salary_amount ?? undefined,
       salaryMin: r.salary_min ?? undefined,
@@ -323,6 +327,7 @@ export async function updateAdvert(
       requirements: job.requirements ?? null,
       skills: job.skills ?? [],
       perks_and_benefits: job.perksAndBenefits ?? null,
+      how_to_apply: job.howToApply ?? null,
       salary_type: job.salaryType,
       salary_amount: job.salaryAmount ?? null,
       salary_min: job.salaryMin ?? null,

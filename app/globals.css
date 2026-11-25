@@ -1114,6 +1114,12 @@ main {
   line-height: 1.7;
 }
 
+/* Keeps the writer's line breaks, and wraps long links and emails. */
+.job-details__text--lines {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
 .job-details__list {
   margin: 0;
   padding-left: 1.25rem;

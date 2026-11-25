@@ -5,7 +5,6 @@ import { useState } from "react";
 import { editAdvert, postAdvert, postJob } from "@/app/dashboard/actions";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
-import TagInput from "@/components/molecules/TagInput";
 import MultiSelect from "@/components/molecules/MultiSelect";
 import Dialog from "@/components/molecules/Dialog";
 import JobPreview from "@/components/organisms/JobPreview";
@@ -13,7 +12,7 @@ import FormField from "@/components/molecules/FormField";
 import { currencies } from "@/lib/apply";
 import { industries } from "@/lib/company";
 import { countries } from "@/lib/countries";
-import { toJob } from "@/lib/jobs";
+import { toJob, toList } from "@/lib/jobs";
 import type { NewJob } from "@/lib/recruiterApi";
 
 const JOB_TYPES: { value: NewJob["jobType"]; label: string }[] = [
@@ -55,8 +54,9 @@ export interface AdvertFormValues {
   description: string;
   responsibilities: string;
   requirements: string;
-  skills: string[];
+  skills: string;
   perksAndBenefits: string;
+  howToApply: string;
   salaryType: string;
   salaryAmount: string;
   salaryMin: string;
@@ -87,8 +87,9 @@ export default function PostJobForm({
       description: "",
       responsibilities: "",
       requirements: "",
-      skills: [],
+      skills: "",
       perksAndBenefits: "",
+      howToApply: "",
       salaryType: "NON_DISCLOSED",
       salaryAmount: "",
       salaryMin: "",
@@ -124,30 +125,37 @@ export default function PostJobForm({
     setPreviewing(true);
   }
 
-  const toPayload = (): NewJob => ({
-    title: values.title,
-    location: values.location,
-    city: values.city.trim() || undefined,
-    jobType: values.jobType as NewJob["jobType"],
-    workMode: (values.workMode || undefined) as NewJob["workMode"],
-    vacancies: toNumber(values.vacancies),
-    closingDate: values.closingDate || undefined,
-    description: values.description,
-    responsibilities: values.responsibilities.trim() || undefined,
-    requirements: values.requirements.trim() || undefined,
-    skills: values.skills.length > 0 ? values.skills : undefined,
-    perksAndBenefits: values.perksAndBenefits.trim() || undefined,
-    salaryType: values.salaryType as NewJob["salaryType"],
-    salaryAmount: toNumber(values.salaryAmount),
-    salaryMin: toNumber(values.salaryMin),
-    salaryMax: toNumber(values.salaryMax),
-    salaryCurrency: values.salaryCurrency.trim().toUpperCase() || undefined,
-  });
+  const toPayload = (): NewJob => {
+    // One skill per line, like requirements; repeats are dropped.
+    const skills = [...new Set(toList(values.skills))];
+    return {
+      title: values.title,
+      location: values.location,
+      city: values.city.trim() || undefined,
+      jobType: values.jobType as NewJob["jobType"],
+      workMode: (values.workMode || undefined) as NewJob["workMode"],
+      vacancies: toNumber(values.vacancies),
+      closingDate: values.closingDate || undefined,
+      description: values.description,
+      responsibilities: values.responsibilities.trim() || undefined,
+      requirements: values.requirements.trim() || undefined,
+      skills: skills.length > 0 ? skills : undefined,
+      perksAndBenefits: values.perksAndBenefits.trim() || undefined,
+      // Only adverts take this; the HR API has no such field.
+      howToApply: advert ? values.howToApply.trim() || undefined : undefined,
+      salaryType: values.salaryType as NewJob["salaryType"],
+      salaryAmount: toNumber(values.salaryAmount),
+      salaryMin: toNumber(values.salaryMin),
+      salaryMax: toNumber(values.salaryMax),
+      salaryCurrency: values.salaryCurrency.trim().toUpperCase() || undefined,
+    };
+  };
 
   /** The job as applicants would see it, for the preview. */
   function previewJob() {
     const p = toPayload();
     return toJob({
+      howToApply: p.howToApply ?? null,
       id: "preview",
       tenantId: "preview",
       companyName: advert ? values.companyName || null : null,
@@ -259,7 +267,7 @@ export default function PostJobForm({
           {advert ? (
             <FormField
               id="job-country"
-              label="Countries"
+              label="Country(s)"
               required={selectedCountries.length === 0}
             >
               <MultiSelect
@@ -371,11 +379,12 @@ export default function PostJobForm({
           />
         </FormField>
         <FormField id="job-skills" label="Skills required">
-          <TagInput
+          <textarea
             id="job-skills"
-            value={values.skills}
-            onChange={(skills) => setValues((v) => ({ ...v, skills }))}
-            placeholder="Type a skill and press Enter"
+            rows={4}
+            maxLength={8000}
+            className="field-control"
+            {...bind("skills")}
           />
         </FormField>
         <FormField id="job-perks" label="Perks and benefits">
@@ -453,6 +462,19 @@ export default function PostJobForm({
             </>
           )}
         </div>
+
+        {advert && (
+          <FormField id="job-how-to-apply" label="How to apply">
+            <textarea
+              id="job-how-to-apply"
+              rows={3}
+              maxLength={2000}
+              placeholder="e.g. Send your CV to jobs@company.com with the job title as the subject"
+              className="field-control"
+              {...bind("howToApply")}
+            />
+          </FormField>
+        )}
       </div>
 
       <Dialog

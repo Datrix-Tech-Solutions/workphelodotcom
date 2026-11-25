@@ -117,6 +117,8 @@ export interface NewJob {
   /** Skills applicants should have. */
   skills?: string[];
   perksAndBenefits?: string;
+  /** Adverts only: how applicants should apply. */
+  howToApply?: string;
   salaryType: "NON_DISCLOSED" | "FIXED" | "RANGE";
   salaryAmount?: number;
   salaryMin?: number;

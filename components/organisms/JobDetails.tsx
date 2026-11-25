@@ -93,7 +93,9 @@ export default function JobDetails({
       {job.description && (
         <>
           <h3 className="job-details__subheading">Job Overview</h3>
-          <p className="job-details__text">{job.description}</p>
+          <p className="job-details__text job-details__text--lines">
+            {job.description}
+          </p>
         </>
       )}
 
@@ -140,6 +142,15 @@ export default function JobDetails({
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </>
+      )}
+
+      {job.howToApply && (
+        <>
+          <h3 className="job-details__subheading">How to Apply</h3>
+          <p className="job-details__text job-details__text--lines">
+            {job.howToApply}
+          </p>
         </>
       )}
     </article>

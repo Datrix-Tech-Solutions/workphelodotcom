@@ -34,6 +34,8 @@ export interface Job {
   responsibilities: string[];
   requirements: string[];
   perks: string[];
+  /** An advert's instructions for applying, as free text. */
+  howToApply?: string;
   questions: JobQuestion[];
   /** What the employer's setup asks applicants for. */
   apply: ApplyRequirements;
@@ -84,6 +86,7 @@ export interface ApiVacancy {
   responsibilities: string | null;
   perksAndBenefits: string | null;
   requirements: string | null;
+  howToApply?: string | null;
   salaryType: "FIXED" | "RANGE" | "NON_DISCLOSED";
   salaryAmount: number | null;
   salaryMin: number | null;
@@ -302,6 +305,7 @@ export function toJob(v: ApiVacancy): Job {
     responsibilities: toList(v.responsibilities),
     requirements: toList(v.requirements),
     perks: toList(v.perksAndBenefits),
+    howToApply: v.howToApply || undefined,
     questions: v.questions,
     apply: toApplyRequirements(v.details),
   };
