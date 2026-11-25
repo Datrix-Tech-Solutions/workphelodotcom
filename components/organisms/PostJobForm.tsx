@@ -267,7 +267,7 @@ export default function PostJobForm({
           {advert ? (
             <FormField
               id="job-country"
-              label="Country(s)"
+              label="Country(ies)"
               required={selectedCountries.length === 0}
             >
               <MultiSelect
