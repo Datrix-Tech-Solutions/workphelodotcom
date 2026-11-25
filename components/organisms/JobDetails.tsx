@@ -103,8 +103,8 @@ export default function JobDetails({
         <>
           <h3 className="job-details__subheading">Key Responsibilities</h3>
           <ul className="job-details__list">
-            {job.responsibilities.map((item) => (
-              <li key={item}>{item}</li>
+            {job.responsibilities.map((item, index) => (
+              <li key={index}>{item}</li>
             ))}
           </ul>
         </>
@@ -116,8 +116,8 @@ export default function JobDetails({
             Requirements &amp; Qualifications
           </h3>
           <ul className="job-details__list">
-            {job.requirements.map((item) => (
-              <li key={item}>{item}</li>
+            {job.requirements.map((item, index) => (
+              <li key={index}>{item}</li>
             ))}
           </ul>
         </>
@@ -127,8 +127,8 @@ export default function JobDetails({
         <>
           <h3 className="job-details__subheading">Skills Required</h3>
           <ul className="job-details__list">
-            {job.apply.skills.items.map((item) => (
-              <li key={item}>{item}</li>
+            {job.apply.skills.items.map((item, index) => (
+              <li key={index}>{item}</li>
             ))}
           </ul>
         </>
@@ -138,8 +138,8 @@ export default function JobDetails({
         <>
           <h3 className="job-details__subheading">Perks &amp; Benefits</h3>
           <ul className="job-details__list">
-            {job.perks.map((item) => (
-              <li key={item}>{item}</li>
+            {job.perks.map((item, index) => (
+              <li key={index}>{item}</li>
             ))}
           </ul>
         </>

@@ -56,8 +56,8 @@ export default function JobPreview({
               <section key={heading}>
                 <h3 className="job-details__subheading">{heading}</h3>
                 <ul className="job-details__list">
-                  {items.map((item) => (
-                    <li key={item}>{item}</li>
+                  {items.map((item, index) => (
+                    <li key={index}>{item}</li>
                   ))}
                 </ul>
               </section>
